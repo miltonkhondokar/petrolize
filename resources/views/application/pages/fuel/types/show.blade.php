@@ -18,7 +18,7 @@
                                 Fuel Type Details
                             </h3>
                             <div>
-                                <a href="{{ route('fuel.edit', $fuel) }}" class="btn btn-sm btn-warning me-2">
+                                <a href="{{ route('fuel.edit', $fuel->uuid) }}" class="btn btn-sm btn-warning me-2">
                                     <i class="ki-duotone ki-pencil fs-3 me-2"></i>Edit
                                 </a>
                                 <a href="{{ route('fuel.index') }}" class="btn btn-sm btn-primary">

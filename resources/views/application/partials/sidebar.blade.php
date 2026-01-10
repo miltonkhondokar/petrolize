@@ -15,8 +15,8 @@
             </span>
 
             <!-- Minimized Logo (When sidebar is collapsed) -->
-            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}" class="app-sidebar-logo-minimize"
-                style="height: 30px;" />
+            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}"
+                class="app-sidebar-logo-minimize" style="height: 30px;" />
         </a>
 
         <!-- Sidebar Toggle Button -->
@@ -46,8 +46,7 @@
 
                     <!-- Dashboard -->
                     <div class="menu-item">
-                        <a class="menu-link {{ active_menu('dashboard', null, 'link') }}"
-                            href="{{ route('/') }}">
+                        <a class="menu-link {{ active_menu('dashboard', null, 'link') }}" href="{{ route('/') }}">
                             <span class="menu-icon">
                                 <i class="ki-solid ki-home-3 fs-1 text-primary"></i>
                             </span>
@@ -143,8 +142,8 @@
                         </div>
                     </div>
 
-                    <!-- REFENCES DATA -->
-                    <div class="menu-item menu-accordion {{ active_menu(['fuel.index'], null, 'menu') }}"
+                    <!-- REFERENCE DATA -->
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -153,63 +152,66 @@
                             <span class="menu-title">Reference Data</span>
                             <span class="menu-arrow"></span>
                         </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['fuel.index'], null, 'menu') }}">
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}">
 
-                            <!-- Fuel Categories -->
+                            <!-- Fuel Types -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('fuel.index', null, 'link') }}"
+                                <a class="menu-link {{ active_menu('fuel.*', null, 'link') }}"
                                     href="{{ route('fuel.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Fuel Types</span>
                                 </a>
                             </div>
 
-                            <!-- Fuel Stations -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Fuel Stations</span>
-                                </a>
-                            </div>
-
-                            <!-- Fuel Prices -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Fuel Prices</span>
-                                </a>
-                            </div>
-
-                            <!-- Cost Categories -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Cost Categories</span>
-                                </a>
-                            </div>
-
                             <!-- Fuel Units -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
+                                <a class="menu-link {{ active_menu('fuel-unit.*', null, 'link') }}"
+                                    href="{{ route('fuel-unit.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Fuel Units</span>
                                 </a>
                             </div>
 
-                            <!-- Complaint Categories -->
+                            <!-- Fuel Stations -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
+                                <a class="menu-link {{ active_menu('fuel-station.*', null, 'link') }}"
+                                    href="{{ route('fuel-station.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Complaint Categories</span>
+                                    <span class="menu-title">Fuel Stations</span>
                                 </a>
                             </div>
+
+                            <!-- Station Wise Fuel Prices -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('fuel-unit-price.*', null, 'link') }}"
+                                    href="{{ route('fuel-unit-price.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Station Wise Prices</span>
+                                </a>
+                            </div>
+
+                            <!-- Cost Categories -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('cost-category.*', null, 'link') }}"
+                                    href="{{ route('cost-category.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Cost Categories</span>
+                                </a>
+                            </div>
+
+                            <!-- Pump Complaints -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('complaint-category.*', null, 'link') }}"
+                                    href="{{ route('complaint-category.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Pump Complaints</span>
+                                </a>
+                            </div>
+
                         </div>
                     </div>
+
 
 
                     <!-- REPORTS -->

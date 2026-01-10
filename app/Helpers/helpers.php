@@ -14,25 +14,35 @@ if (!function_exists('active_menu')) {
         $currentRoute = Request::route()->getName();
         $isActive = false;
 
-        if (is_array($routes)) {
-            foreach ($routes as $route) {
-                if ($currentRoute === $route || ($subRoute && Str::startsWith($currentRoute, $subRoute))) {
-                    $isActive = true;
-                    break;
-                }
-            }
-        } else {
-            if ($currentRoute === $routes || ($subRoute && Str::startsWith($currentRoute, $subRoute))) {
+        if (!is_array($routes)) {
+            $routes = [$routes];
+        }
+
+        foreach ($routes as $route) {
+            $pattern = preg_quote($route, '/'); // escape regex special characters
+            $pattern = str_replace('\*', '.*', $pattern); // replace wildcard * with regex
+
+
+            if (preg_match('/^' . $pattern . '$/', $currentRoute)) {
                 $isActive = true;
+                break;
+            }
+
+            // Optional: also check if current route starts with $subRoute
+            if ($subRoute && Str::startsWith($currentRoute, $subRoute)) {
+                $isActive = true;
+                break;
             }
         }
 
-        if (!$isActive) return '';
+        if (!$isActive) {
+            return '';
+        }
 
         return match ($type) {
             'menu'    => 'menu-item-active menu-item-open active hover show',   // For parent menu
-            'submenu' => 'show',                              // For submenus
-            'link'    => 'active here',                       // For active links
+            'submenu' => 'show',                                                // For submenus
+            'link'    => 'active here',                                         // For active links
             default   => 'active'
         };
     }
