@@ -19,3 +19,6 @@ require __DIR__.'/application/admin-module/application.php';
 
 // Audit Management Routes
 require __DIR__ . '/application/audit/audit.php';
+
+// Fuel Management Routes
+require __DIR__.'/application/fuel/fuel.php';

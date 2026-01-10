@@ -42,7 +42,7 @@ class UserMasterDataController extends Controller
                 $query->where('gender', $filters['gender']);
             })
             ->latest()
-            ->paginate(11)
+            ->paginate(20)
             ->withQueryString();
 
         $breadcrumb = [

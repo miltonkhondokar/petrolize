@@ -17,6 +17,7 @@ return new class () extends Migration {
             $table->string('name');
             $table->string('abbreviation')->nullable()->comment('Units: L, mL, gal, imp gal, bbl, m³, pt, qt, fl oz, dL, ft³, in³');
             $table->text('description')->nullable();
+            $table->boolean('is_active')->index()->default(true);
             $table->timestamps();
         });
     }

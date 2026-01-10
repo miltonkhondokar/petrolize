@@ -62,83 +62,7 @@
                         </div>
                     </div>
 
-                    <!-- My ITM -->
-                    <div class="menu-item menu-accordion {{ active_menu(['farmers', 'register-farmer', 'edit-farmer', 'farmer-profiles'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">My ITM</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['farmers', 'register-farmer', 'edit-farmer', 'farmer-profile'], null, 'submenu') }}">
-
-                            <!-- Assigned Assets -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('farmers', null, 'link') }}" href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Assigned Assets</span>
-                                </a>
-                            </div>
-
-                            <!-- Downstream Assets -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('farmer-profiles', null, 'link') }}" href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Downstream Assets</span>
-                                </a>
-                            </div>
-
-                            <!-- Trouble Tickets -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('farmer-profiles', null, 'link') }}" href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Trouble Tickets</span>
-                                </a>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Assets -->
-                    <div class="menu-item menu-accordion {{ active_menu(['assets'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Assets</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['assets'], null, 'menu') }}">
-
-                            <!-- Assign Asset -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('assign-asset', null, 'link') }}" href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Assign Asset</span>
-                                </a>
-                            </div>
-
-                            <!-- Registered Assets -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('all-assets', null, 'link') }}" href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Registered Assets</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stock Management -->
+                    <!-- Fuel Management -->
                     <div class="menu-item menu-accordion {{ active_menu(['inventories'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
@@ -148,7 +72,7 @@
                                     <span class="path2"></span>
                                 </i>
                             </span>
-                            <span class="menu-title">Stock</span>
+                            <span class="menu-title">Fuel</span>
                             <span class="menu-arrow"></span>
                         </span>
                         <div
@@ -163,157 +87,11 @@
                                 <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
                                     href="#">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Available Stock</span>
+                                    <span class="menu-title">Sale Entry</span>
                                 </a>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Requisition Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['inventories'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Requisitions</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['inventories', 'request-for-stock.index', 'request-for-stock.create'], null, 'menu') }}">
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Requisitions</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Purchase Requests</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Service & Warranty Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['inventories'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Service & Warranty</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['inventories', 'request-for-stock.index', 'request-for-stock.create'], null, 'menu') }}">
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Service Claims</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Warranty Claims</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Disposal Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['inventories'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Disposal</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['inventories', 'request-for-stock.index', 'request-for-stock.create'], null, 'menu') }}">
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Disposed Assets</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Damaged Assets</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Lost / Stolen Assets</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Obsolete Assets </span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Lifecycle Actions -->
-                    <div class="menu-item menu-accordion {{ active_menu(['lifecycle'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Lifecycle Actions</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['lifecycle'], null, 'menu') }}">
-
-                            <!-- Asset Disposal / Decommissioning -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('asset-disposal.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Decommissioning</span>
-                                </a>
-                            </div>
-
-                            <!-- Lifecycle History -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Lifecycle History</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
 
                     <!-- MASTER DATA -->
                     <div class="menu-item pt-5">
@@ -366,7 +144,7 @@
                     </div>
 
                     <!-- REFENCES DATA -->
-                    <div class="menu-item menu-accordion {{ active_menu(['lifecycle'], null, 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel.index'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -375,41 +153,59 @@
                             <span class="menu-title">Reference Data</span>
                             <span class="menu-arrow"></span>
                         </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['lifecycle'], null, 'menu') }}">
+                        <div class="menu-sub menu-sub-accordion {{ active_menu(['fuel.index'], null, 'menu') }}">
 
-                            <!-- TT Issue Types -->
+                            <!-- Fuel Categories -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('asset-disposal.index', null, 'link') }}"
-                                    href="#">
+                                <a class="menu-link {{ active_menu('fuel.index', null, 'link') }}"
+                                    href="{{ route('fuel.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">TT Issue Types</span>
+                                    <span class="menu-title">Fuel Types</span>
                                 </a>
                             </div>
 
-                            <!-- Device Categories -->
+                            <!-- Fuel Stations -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
                                     href="#">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Device Categories</span>
+                                    <span class="menu-title">Fuel Stations</span>
                                 </a>
                             </div>
 
-                            <!-- Device Models & Brands -->
+                            <!-- Fuel Prices -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
                                     href="#">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Device Models & Brands</span>
+                                    <span class="menu-title">Fuel Prices</span>
                                 </a>
                             </div>
 
-                            <!-- Technical Specifications -->
+                            <!-- Cost Categories -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
                                     href="#">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Technical Specifications</span>
+                                    <span class="menu-title">Cost Categories</span>
+                                </a>
+                            </div>
+
+                            <!-- Fuel Units -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
+                                    href="#">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Fuel Units</span>
+                                </a>
+                            </div>
+
+                            <!-- Complaint Categories -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
+                                    href="#">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Complaint Categories</span>
                                 </a>
                             </div>
                         </div>
@@ -475,8 +271,6 @@
                         </div>
                     </div>
 
-
-
                     <!-- Audit -->
                     <div class="menu-item menu-accordion {{ active_menu(['audit.user', 'audit.folder', 'audit.password', 'audit.other'], 'audit.', 'menu') }}"
                         data-kt-menu-trigger="click">
@@ -538,18 +332,6 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Clear Cache -->
-                    <div class="menu-item">
-                        <a class="menu-link" href="{{ route('optimize-clear') }}">
-                            <span class="menu-icon">
-                                <i class="fas fa-broom fs-1" style="color:#ff5722;"></i>
-                                <span class="path1"></span><span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Clear Cache</span>
-                        </a>
                     </div>
 
                     <!-- Help Section Title -->

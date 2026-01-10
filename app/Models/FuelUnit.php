@@ -12,7 +12,7 @@ class FuelUnit extends Model
 
     protected $table = 'fuel_units';
 
-    protected $fillable = ['uuid', 'name', 'abbreviation', 'description'];
+    protected $fillable = ['uuid', 'name', 'abbreviation', 'description', 'is_active'];
 
     protected static function boot()
     {
