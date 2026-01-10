@@ -108,7 +108,7 @@
 
                 <!-- App Logo and Name (Top-Left) -->
                 <div class="position-absolute top-0 start-0 m-10 d-flex align-items-center gap-3">
-                    <img src="{{ asset('assets/media/logos/itm-white.png') }}" alt="Logo" style="height: 40px;">
+                    <img src="{{ asset('assets/media/logos/gas-station.png') }}" alt="Logo" style="height: 40px;">
                     <span class="text-white fs-2 fw-bold">{{ config('app.name') }}</span>
                 </div>
 

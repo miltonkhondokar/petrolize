@@ -3,7 +3,7 @@
     <div class="app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack py-3">
         <!--begin::Copyright-->
         <div class="text-dark order-2 order-md-1">
-            <span class="text-muted fw-semibold me-1">2025&copy;</span>
+            <span class="text-muted fw-semibold me-1">2026&copy;</span>
             <a href="#" target="_blank" class="text-gray-800 text-hover-primary">Fuel Flow</a>
         </div>
         <!--end::Copyright-->

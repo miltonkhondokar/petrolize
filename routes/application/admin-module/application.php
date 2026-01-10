@@ -4,9 +4,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\CustomAuthController;
 use App\Http\Controllers\Command\OptimizeController;
-use App\Http\Controllers\UserDashboardController;
-use App\Services\RouteService;
-use Illuminate\Support\Facades\App;
+use App\Http\Controllers\UserMasterDataController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return Auth::check()
@@ -21,7 +20,17 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', 'auth.check'])->group(function () {
 
-    Route::get('/', [UserDashboardController::class, 'index'])->name('/');
+    //dashboard
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('/');
+
+
+    //fetch all users
+    Route::get('user-master-data', [UserMasterDataController::class, 'index'])->name('user-master-data');
+
+    //create user
+    Route::get('user-master-data-create', [UserMasterDataController::class, 'create'])->name('user-master-data-create');
+    Route::post('user-master-data-store', [UserMasterDataController::class, 'store'])->name('user-master-data-store');
+
 
     // Your existing routes
     Route::post('logout', [CustomAuthController::class, 'logout'])->name('logout');

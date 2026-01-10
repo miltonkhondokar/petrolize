@@ -11,7 +11,6 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::create('cost_categories', function (Blueprint $table) {
-
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
             $table->string('name');

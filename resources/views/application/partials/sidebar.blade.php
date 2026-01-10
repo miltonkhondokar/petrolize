@@ -6,7 +6,7 @@
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
         <a href="{{ route('/') }}" class="d-flex align-items-center gap-2">
             <!-- Main Logo (Default View) -->
-            <img alt="Logo" src="{{ asset('assets/media/logos/field-01.png') }}" class="app-sidebar-logo-default"
+            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}" class="app-sidebar-logo-default"
                 style="height: 40px;" />
 
             <!-- App Name -->
@@ -15,7 +15,7 @@
             </span>
 
             <!-- Minimized Logo (When sidebar is collapsed) -->
-            <img alt="Logo" src="{{ asset('assets/media/logos/field-01.png') }}" class="app-sidebar-logo-minimize"
+            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}" class="app-sidebar-logo-minimize"
                 style="height: 30px;" />
         </a>
 
@@ -323,38 +323,14 @@
                     </div>
 
                     <!-- User Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['lifecycle'], null, 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
+                    <div class="menu-item">
+                        <a class="menu-link {{ active_menu(['user-master-data', 'user-master-data-create'], null, 'link') }}"
+                            href="{{ route('user-master-data') }}">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="ki-solid ki-profile-user fs-1 text-primary"></i>
                             </span>
                             <span class="menu-title">User Management</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['lifecycle'], null, 'menu') }}">
-
-                            <!-- Active Users -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('asset-disposal.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Active Users</span>
-                                </a>
-                            </div>
-
-                            <!-- Device Assignments -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('lifecycle-history.index', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Device Assignments</span>
-                                </a>
-                            </div>
-                        </div>
+                        </a>
                     </div>
 
                     <!-- Vendor Management -->
@@ -362,10 +338,7 @@
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="ki-solid ki-user-tick  fs-1 text-success"></i>
                             </span>
                             <span class="menu-title">Vendor Management</span>
                             <span class="menu-arrow"></span>
@@ -397,10 +370,7 @@
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="ki-solid ki-data fs-1 text-warning"></i>
                             </span>
                             <span class="menu-title">Reference Data</span>
                             <span class="menu-arrow"></span>
@@ -465,15 +435,6 @@
                         </span>
 
                         <div class="menu-sub menu-sub-accordion {{ active_menu([], null, 'menu') }}">
-
-                            <!-- Asset Reports -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/asset-lifecycle', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Asset Lifecycle</span>
-                                </a>
-                            </div>
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('reports/stock-status', null, 'link') }}"
                                     href="#">
@@ -481,30 +442,6 @@
                                     <span class="menu-title">Stock Status</span>
                                 </a>
                             </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/warranty-expiry', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Warranty & Service</span>
-                                </a>
-                            </div>
-
-                            <!-- Support / Tickets -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/tt-metrics', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">TT Metrics</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/it-performance', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">IT Team Performance</span>
-                                </a>
-                            </div>
-
                             <!-- Vendor & Procurement -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('reports/vendor-performance', null, 'link') }}"
@@ -513,30 +450,6 @@
                                     <span class="menu-title">Vendor Performance</span>
                                 </a>
                             </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/procurement', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Petty Cash</span>
-                                </a>
-                            </div>
-
-                            <!-- HR & Lifecycle Actions -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/device-allocations', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Device Allocations</span>
-                                </a>
-                            </div>
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('reports/disposals', null, 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Transfers & Disposals</span>
-                                </a>
-                            </div>
-
                             <!-- Finance & Compliance -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('reports/financials', null, 'link') }}"
@@ -551,7 +464,6 @@
                                     <span class="menu-title">Audit & Compliance</span>
                                 </a>
                             </div>
-
                         </div>
                     </div>
 
@@ -560,6 +472,31 @@
                     <div class="menu-item pt-5">
                         <div class="menu-content">
                             <span class="menu-heading fw-bold text-uppercase fs-7">System Settings</span>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Audit -->
+                    <div class="menu-item menu-accordion {{ active_menu(['audit.user', 'audit.folder', 'audit.password', 'audit.other'], 'audit.', 'menu') }}"
+                        data-kt-menu-trigger="click">
+                        <span class="menu-link {{ active_menu('audit.user', 'audit.', 'menu') }}">
+                            <span class="menu-icon">
+                                <i class="fas fa-shield-alt fs-5" style="color:#ff4081;"></i>
+                            </span>
+                            <span class="menu-title">Audit</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['audit.user', 'audit.folder', 'audit.password', 'audit.other'], 'audit.', 'submenu') }}">
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('audit.user', 'audit.user', 'link') }}"
+                                    href="{{ route('audit.user.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Activity</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 

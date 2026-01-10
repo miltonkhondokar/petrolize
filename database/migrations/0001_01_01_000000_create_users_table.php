@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 use App\Constants\Gender;
 use App\Constants\UserStatus;
 use App\Constants\UserEmailVerificationStatus;
+use App\Constants\UserType;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -28,6 +28,10 @@ return new class extends Migration
             $table->string('password');
             $table->unsignedTinyInteger('gender')
                 ->default(Gender::MALE)
+                ->comment('1=Male, 2=Female')
+                ->index();
+            $table->string('user_type')
+                ->default(UserType::EXECUTIVE)
                 ->comment('1=Male, 2=Female')
                 ->index();
             $table->unsignedTinyInteger('email_verification_status')
