@@ -37,3 +37,6 @@ require __DIR__.'/application/cost-category/cost_category.php';
 
 //complaint Management Routes
 require __DIR__.'/application/complaint-category/complaint_category.php';
+
+// Vendor Management Routes
+require __DIR__.'/application/vendor/vendor.php';

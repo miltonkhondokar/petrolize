@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
             //Pump fuel prices
             PumpFuelPriceSeeder::class,
 
+            // Vendors
+            VendorSeeder::class,
+
             //Pump fuel stocks
             PumpFuelStockSeeder::class,
 

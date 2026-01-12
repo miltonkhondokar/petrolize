@@ -14,6 +14,7 @@ return new class () extends Migration {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
             $table->uuid('pump_uuid')->index();
+            $table->uuid('vendor_uuid')->index()->nullable()->comment('Vendor supplying the fuel stock');
             $table->uuid('fuel_type_uuid')->index();
             $table->decimal('quantity', 12, 3);
             $table->uuid('fuel_unit_uuid')->index()->nullable()->comment('Fuel unit reference');

@@ -111,7 +111,7 @@
                     </div>
 
                     <!-- Vendor Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['lifecycle'], null, 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['vendors.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -120,12 +120,12 @@
                             <span class="menu-title">Vendor Management</span>
                             <span class="menu-arrow"></span>
                         </span>
-                        <div class="menu-sub menu-sub-accordion {{ active_menu(['lifecycle'], null, 'menu') }}">
+                        <div class="menu-sub menu-sub-accordion {{ active_menu(['vendors.*'], null, 'menu') }}">
 
                             <!-- Active Users -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('asset-disposal.index', null, 'link') }}"
-                                    href="#">
+                                <a class="menu-link {{ active_menu(['vendors.*'], null, 'link') }}"
+                                    href="{{ route("vendors.index") }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Vendors</span>
                                 </a>
