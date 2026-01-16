@@ -27,21 +27,21 @@
                                 <!-- Station Name -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Station Name:</span>
-                                    <span class="fw-bold fs-5 text-dark">{{ $pump->name }}</span>
+                                    <span class="fw-bold fs-5 text-dark">{{ $fuelStation->name }}</span>
                                 </div>
 
                                 <!-- Location -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Location:</span>
-                                    <span class="fw-bold fs-5 text-dark">{{ $pump->location ?? 'Not specified' }}</span>
+                                    <span class="fw-bold fs-5 text-dark">{{ $fuelStation->location ?? 'Not specified' }}</span>
                                 </div>
 
                                 <!-- Manager -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Manager:</span>
-                                    @if($pump->manager)
-                                        <span class="fw-bold fs-5 text-dark">{{ $pump->manager->name }}</span>
-                                        <span class="text-muted ms-2">({{ $pump->manager->email }})</span>
+                                    @if($fuelStation->manager)
+                                        <span class="fw-bold fs-5 text-dark">{{ $fuelStation->manager->name }}</span>
+                                        <span class="text-muted ms-2">({{ $fuelStation->manager->email }})</span>
                                     @else
                                         <span class="badge badge-light-warning fs-5">Not Assigned</span>
                                     @endif
@@ -50,30 +50,30 @@
                                 <!-- Status -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Status:</span>
-                                    <span class="badge badge-light-{{ $pump->is_active ? 'success' : 'danger' }} fs-5">
-                                        <i class="ki-duotone {{ $pump->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-4 me-1"></i>
-                                        {{ $pump->is_active ? 'Active' : 'Inactive' }}
+                                    <span class="badge badge-light-{{ $fuelStation->is_active ? 'success' : 'danger' }} fs-5">
+                                        <i class="ki-duotone {{ $fuelStation->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-4 me-1"></i>
+                                        {{ $fuelStation->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </div>
 
                                 <!-- UUID -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Station ID:</span>
-                                    <span class="text-muted fs-5">{{ $pump->uuid }}</span>
+                                    <span class="text-muted fs-5">{{ $fuelStation->uuid }}</span>
                                 </div>
 
                                 <!-- Created At -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Created:</span>
-                                    <span class="text-muted fs-5">{{ $pump->created_at->format('d M Y, h:i A') }}</span>
-                                    <span class="text-muted ms-2">({{ $pump->created_at->diffForHumans() }})</span>
+                                    <span class="text-muted fs-5">{{ $fuelStation->created_at->format('d M Y, h:i A') }}</span>
+                                    <span class="text-muted ms-2">({{ $fuelStation->created_at->diffForHumans() }})</span>
                                 </div>
 
                                 <!-- Last Updated -->
                                 <div class="d-flex align-items-center">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Last Updated:</span>
-                                    <span class="text-muted fs-5">{{ $pump->updated_at->format('d M Y, h:i A') }}</span>
-                                    <span class="text-muted ms-2">({{ $pump->updated_at->diffForHumans() }})</span>
+                                    <span class="text-muted fs-5">{{ $fuelStation->updated_at->format('d M Y, h:i A') }}</span>
+                                    <span class="text-muted ms-2">({{ $fuelStation->updated_at->diffForHumans() }})</span>
                                 </div>
                             </div>
                         </div>
@@ -90,16 +90,16 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-flex flex-column gap-3">
-                                        <a href="{{ route('fuel-station.edit', $pump->uuid) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('fuel-station.edit', $fuelStation->uuid) }}" class="btn btn-warning btn-sm">
                                             <i class="ki-duotone ki-pencil fs-3 me-2">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
                                             Edit Station
                                         </a>
                                         
-                                        @if($pump->is_active)
+                                        @if($fuelStation->is_active)
                                             <a href="javascript:void(0)"
-                                                onclick="changeStatus('{{ route('fuel-station-status-update', $pump->uuid) }}', 'inactive')"
+                                                onclick="changeStatus('{{ route('fuel-station-status-update', $fuelStation->uuid) }}', 'inactive')"
                                                 class="btn btn-danger btn-sm">
                                                 <i class="ki-duotone ki-cross-circle fs-3 me-2">
                                                     <i class="path1"></i><i class="path2"></i>
@@ -108,7 +108,7 @@
                                             </a>
                                         @else
                                             <a href="javascript:void(0)"
-                                                onclick="changeStatus('{{ route('fuel-station-status-update', $pump->uuid) }}', 'active')"
+                                                onclick="changeStatus('{{ route('fuel-station-status-update', $fuelStation->uuid) }}', 'active')"
                                                 class="btn btn-success btn-sm">
                                                 <i class="ki-duotone ki-check-circle fs-3 me-2">
                                                     <i class="path1"></i><i class="path2"></i>

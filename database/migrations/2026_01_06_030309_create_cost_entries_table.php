@@ -13,7 +13,7 @@ return new class () extends Migration {
         Schema::create('cost_entries', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
-            $table->uuid('pump_uuid')->index();
+            $table->uuid('fuel_station_uuid')->index();
             $table->uuid('cost_category_uuid')->index();
             $table->decimal('amount', 12, 2);
             $table->date('expense_date')->index();

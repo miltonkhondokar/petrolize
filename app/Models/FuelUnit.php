@@ -32,6 +32,6 @@ class FuelUnit extends Model
 
     public function pumpFuelStocks()
     {
-        return $this->hasMany(PumpFuelStock::class, 'fuel_unit_uuid', 'uuid');
+        return $this->hasMany(FuelStationStock::class, 'fuel_unit_uuid', 'uuid');
     }
 }

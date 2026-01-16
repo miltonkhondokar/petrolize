@@ -20,21 +20,27 @@ class DatabaseSeeder extends Seeder
             //Users
             UsersTableSeeder::class,
 
+            //Geo-Location (Regions → Governorates → Centers → Cities)
+            RegionSeeder::class,
+            GovernorateSeeder::class,
+            CenterSeeder::class,
+            CitySeeder::class,
+
             //fuel units
             FuelUnitSeeder::class,
 
             //Fuel types and Pumps
             FuelTypeSeeder::class,
-            PumpSeeder::class,
+            FuelStationSeeder::class,
 
-            //Pump fuel prices
-            PumpFuelPriceSeeder::class,
+            //Fuel Station fuel prices
+            FuelStationPriceSeeder::class,
 
             // Vendors
             VendorSeeder::class,
 
-            //Pump fuel stocks
-            PumpFuelStockSeeder::class,
+            //Fuel Station fuel stocks
+            FuelStationStockSeeder::class,
 
             //Cost categories
             CostCategorySeeder::class,
@@ -42,11 +48,11 @@ class DatabaseSeeder extends Seeder
             //Cost entries
             CostEntrySeeder::class,
 
-            //Pump complaints
-            PumpComplaintSeeder::class,
+            //Fuel Station complaints
+            FuelStationComplaintSeeder::class,
 
-            //Pump fuel readings
-            PumpFuelReadingSeeder::class,
+            //Fuel Station fuel readings
+            FuelStationReadingSeeder::class,
         ]);
     }
 }

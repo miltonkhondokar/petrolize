@@ -14,7 +14,7 @@ class CostEntry extends Model
 
     protected $fillable = [
         'uuid',
-        'pump_uuid',
+        'fuel_station_uuid',
         'cost_category_uuid',
         'amount',
         'expense_date',
@@ -38,9 +38,9 @@ class CostEntry extends Model
     }
 
     // Relations
-    public function pump()
+    public function fuelStation()
     {
-        return $this->belongsTo(Pump::class, 'pump_uuid', 'uuid');
+        return $this->belongsTo(FuelStation::class, 'fuel_station_uuid', 'uuid');
     }
 
     public function category()

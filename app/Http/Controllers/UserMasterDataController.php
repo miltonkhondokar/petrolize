@@ -323,11 +323,11 @@ class UserMasterDataController extends Controller
         $user = User::where('uuid', $uuid)->firstOrFail();
 
         // Check if user has any associated data
-        $hasPumps = \App\Models\Pump::where('user_uuid', $uuid)->exists();
+        $hasPumps = \App\Models\FuelStation::where('user_uuid', $uuid)->exists();
 
         if ($hasPumps) {
             return redirect()->route('user-master-data')
-                ->with('error', 'Cannot delete user. User is assigned as pump manager.');
+                ->with('error', 'Cannot delete user. User is assigned as fuel station manager.');
         }
 
         $user->delete();

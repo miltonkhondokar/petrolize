@@ -26,10 +26,10 @@ class UsersTableSeeder extends Seeder
                 'role' => UserType::EXECUTIVE,
             ],
             [
-                'name' => 'Pump Manager User',
+                'name' => 'Fuel Station Manager User',
                 'email' => 'manager@fuel-flow.test',
                 'phone' => '8801000000003',
-                'role' => UserType::PUMP_MANAGER,
+                'role' => UserType::FUEL_STATION_MANAGER,
             ],
         ];
 

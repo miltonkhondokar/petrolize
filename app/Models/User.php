@@ -72,7 +72,7 @@ class User extends Authenticatable
     // Example: complaints relationship
     public function complaints()
     {
-        return $this->hasMany(\App\Models\PumpComplaint::class, 'user_uuid', 'uuid');
+        return $this->hasMany(\App\Models\FuelStationComplaint::class, 'user_uuid', 'uuid');
     }
 
     /* -----------------------------------------------------------------
@@ -80,34 +80,19 @@ class User extends Authenticatable
      |----------------------------------------------------------------- */
 
     // User type scopes
-    public function scopeSuperAdministrators($query)
+    public function scopeAdministrators($query)
     {
-        return $query->where('user_type', UserType::SUPER_ADMINISTRATOR);
+        return $query->where('user_type', UserType::ADMIN);
     }
 
-    public function scopeSystemAdministrators($query)
+    public function scopeExecutives($query)
     {
-        return $query->where('user_type', UserType::SYSTEM_ADMINISTRATOR);
+        return $query->where('user_type', UserType::EXECUTIVE);
     }
 
-    public function scopeSeniorSpecialists($query)
+    public function scopePumpManagers($query)
     {
-        return $query->where('user_type', UserType::IT_SENIOR_SPECIALIST);
-    }
-
-    public function scopeSpecialists($query)
-    {
-        return $query->where('user_type', UserType::IT_SPECIALIST);
-    }
-
-    public function scopeAssociates($query)
-    {
-        return $query->where('user_type', UserType::IT_ASSOCIATE);
-    }
-
-    public function scopeStandardUsers($query)
-    {
-        return $query->where('user_type', UserType::STANDARD_USER);
+        return $query->where('user_type', UserType::FUEL_STATION_MANAGER);
     }
 
     // Status scopes

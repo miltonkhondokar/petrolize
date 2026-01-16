@@ -41,6 +41,6 @@ class Vendor extends Model
     // If vendors supply fuel stock
     public function fuelStocks()
     {
-        return $this->hasMany(\App\Models\PumpFuelStock::class, 'vendor_uuid', 'uuid');
+        return $this->hasMany(\App\Models\FuelStationStock::class, 'vendor_uuid', 'uuid');
     }
 }

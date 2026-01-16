@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Complaint;
 
 use App\Http\Controllers\Controller;
-use App\Models\PumpComplaint;
-use App\Models\Pump;
+use App\Models\FuelStationComplaint;
+use App\Models\FuelStation;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,10 +19,10 @@ class ComplaintController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['pump_uuid', 'category', 'status', 'is_active']);
+        $filters = $request->only(['fuel_station_uuid', 'category', 'status', 'is_active']);
 
-        $complaints = PumpComplaint::with('pump')
-            ->when($filters['pump_uuid'] ?? null, fn ($q, $pump) => $q->where('pump_uuid', $pump))
+        $complaints = FuelStationComplaint::with('fuelStation')
+            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $fuelStation) => $q->where('fuel_station_uuid', $fuelStation))
             ->when($filters['category'] ?? null, fn ($q, $category) => $q->where('category', $category))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
@@ -30,20 +30,20 @@ class ComplaintController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $pumps = Pump::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $categories = ['fuel_shortage', 'nozzle_issue', 'power_failure'];
 
         $breadcrumb = [
-            "page_header" => "Pump Complaints",
+            "page_header" => "Fuel Station Complaints",
             "first_item_name" => "Dashboard",
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
-            "second_item_name" => "Pump Complaints",
+            "second_item_name" => "Fuel Station Complaints",
             "second_item_link" => "#",
             "second_item_icon" => "fa-exclamation-triangle",
         ];
 
-        return view('application.pages.complaint-category.index', compact('complaints', 'filters', 'pumps', 'categories', 'breadcrumb'));
+        return view('application.pages.complaint-category.index', compact('complaints', 'filters', 'fuelStations', 'categories', 'breadcrumb'));
     }
 
     /**
@@ -51,15 +51,15 @@ class ComplaintController extends Controller
      */
     public function create()
     {
-        $pumps = Pump::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $categories = ['fuel_shortage', 'nozzle_issue', 'power_failure'];
 
         $breadcrumb = [
-            "page_header" => "Create Pump Complaint",
+            "page_header" => "Create Fuel Station Complaint",
             "first_item_name" => "Dashboard",
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
-            "second_item_name" => "Pump Complaints",
+            "second_item_name" => "Fuel Station Complaints",
             "second_item_link" => route('complaint-category.index'),
             "second_item_icon" => "fa-exclamation-triangle",
             "third_item_name" => "Create",
@@ -67,7 +67,7 @@ class ComplaintController extends Controller
             "third_item_icon" => "fa-plus",
         ];
 
-        return view('application.pages.complaint-category.create', compact('pumps', 'categories', 'breadcrumb'));
+        return view('application.pages.complaint-category.create', compact('fuelStations', 'categories', 'breadcrumb'));
     }
 
     /**
@@ -76,7 +76,7 @@ class ComplaintController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'pump_uuid' => 'required|exists:pumps,uuid',
+            'fuel_station_uuid' => 'required|exists:fuel_stations,uuid',
             'category' => 'nullable|string|max:100',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -88,11 +88,11 @@ class ComplaintController extends Controller
 
         DB::beginTransaction();
         try {
-            $complaint = PumpComplaint::create($validated);
+            $complaint = FuelStationComplaint::create($validated);
 
             AuditLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'Created Pump Complaint',
+                'action' => 'Created Fuel Station Complaint',
                 'type' => 'create',
                 'item_id' => $complaint->id,
                 'ip_address' => $request->ip(),
@@ -100,7 +100,7 @@ class ComplaintController extends Controller
             ]);
 
             DB::commit();
-            Alert::success('Success', 'Pump complaint created successfully.');
+            Alert::success('Success', 'Fuel station complaint created successfully.');
             return redirect()->route('complaint-category.index');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -109,7 +109,7 @@ class ComplaintController extends Controller
                 'data' => $request->all(),
             ]);
 
-            Alert::error('Error', 'Failed to create pump complaint.');
+            Alert::error('Error', 'Failed to create fuel station complaint.');
             return back()->withInput();
         }
     }
@@ -119,14 +119,14 @@ class ComplaintController extends Controller
      */
     public function show($uuid)
     {
-        $complaint = PumpComplaint::with('pump')->where('uuid', $uuid)->firstOrFail();
+        $complaint = FuelStationComplaint::with('fuelStation')->where('uuid', $uuid)->firstOrFail();
 
         $breadcrumb = [
-            "page_header" => "Pump Complaint Details",
+            "page_header" => "Fuel Station Complaint Details",
             "first_item_name" => "Dashboard",
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
-            "second_item_name" => "Pump Complaints",
+            "second_item_name" => "Fuel Station Complaints",
             "second_item_link" => route('complaint-category.index'),
             "second_item_icon" => "fa-exclamation-triangle",
             "third_item_name" => "Details",
@@ -142,16 +142,16 @@ class ComplaintController extends Controller
      */
     public function edit($uuid)
     {
-        $complaint = PumpComplaint::where('uuid', $uuid)->firstOrFail();
-        $pumps = Pump::where('is_active', true)->get();
+        $complaint = FuelStationComplaint::where('uuid', $uuid)->firstOrFail();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $categories = ['fuel_shortage', 'nozzle_issue', 'power_failure'];
 
         $breadcrumb = [
-            "page_header" => "Edit Pump Complaint",
+            "page_header" => "Edit Fuel Station Complaint",
             "first_item_name" => "Dashboard",
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
-            "second_item_name" => "Pump Complaints",
+            "second_item_name" => "Fuel Station Complaints",
             "second_item_link" => route('complaint-category.index'),
             "second_item_icon" => "fa-exclamation-triangle",
             "third_item_name" => "Edit",
@@ -159,7 +159,7 @@ class ComplaintController extends Controller
             "third_item_icon" => "fa-edit",
         ];
 
-        return view('application.pages.complaint-category.edit', compact('complaint', 'pumps', 'categories', 'breadcrumb'));
+        return view('application.pages.complaint-category.edit', compact('complaint', 'fuelStations', 'categories', 'breadcrumb'));
     }
 
     /**
@@ -167,10 +167,10 @@ class ComplaintController extends Controller
      */
     public function update(Request $request, $uuid)
     {
-        $complaint = PumpComplaint::where('uuid', $uuid)->firstOrFail();
+        $complaint = FuelStationComplaint::where('uuid', $uuid)->firstOrFail();
 
         $validated = $request->validate([
-            'pump_uuid' => 'required|exists:pumps,uuid',
+            'fuel_station_uuid' => 'required|exists:fuel_stations,uuid',
             'category' => 'nullable|string|max:100',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -186,7 +186,7 @@ class ComplaintController extends Controller
 
             AuditLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'Updated Pump Complaint',
+                'action' => 'Updated Fuel Station Complaint',
                 'type' => 'update',
                 'item_id' => $complaint->id,
                 'ip_address' => $request->ip(),
@@ -194,7 +194,7 @@ class ComplaintController extends Controller
             ]);
 
             DB::commit();
-            Alert::success('Success', 'Pump complaint updated successfully.');
+            Alert::success('Success', 'Fuel station complaint updated successfully.');
             return redirect()->route('complaint-category.index');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -203,7 +203,7 @@ class ComplaintController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            Alert::error('Error', 'Failed to update pump complaint.');
+            Alert::error('Error', 'Failed to update fuel station complaint.');
             return back()->withInput();
         }
     }
@@ -213,7 +213,7 @@ class ComplaintController extends Controller
      */
     public function destroy($uuid)
     {
-        $complaint = PumpComplaint::where('uuid', $uuid)->firstOrFail();
+        $complaint = FuelStationComplaint::where('uuid', $uuid)->firstOrFail();
 
         try {
             DB::transaction(function () use ($complaint) {
@@ -221,7 +221,7 @@ class ComplaintController extends Controller
 
                 AuditLog::create([
                     'user_id' => Auth::id(),
-                    'action' => 'Deleted Pump Complaint',
+                    'action' => 'Deleted Fuel Station Complaint',
                     'type' => 'delete',
                     'item_id' => $complaint->id,
                     'ip_address' => request()->ip(),
@@ -229,7 +229,7 @@ class ComplaintController extends Controller
                 ]);
             });
 
-            Alert::success('Success', 'Pump complaint deleted successfully.');
+            Alert::success('Success', 'Fuel station complaint deleted successfully.');
             return redirect()->route('complaint-category.index');
         } catch (\Exception $e) {
             Log::error('PumpComplaint delete failed', [
@@ -237,7 +237,7 @@ class ComplaintController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            Alert::error('Error', 'Failed to delete pump complaint.');
+            Alert::error('Error', 'Failed to delete fuel station complaint.');
             return back();
         }
     }
@@ -251,7 +251,7 @@ class ComplaintController extends Controller
             'status' => 'required|string|in:open,in_progress,resolved',
         ]);
 
-        $complaint = PumpComplaint::where('uuid', $uuid)->firstOrFail();
+        $complaint = FuelStationComplaint::where('uuid', $uuid)->firstOrFail();
 
         try {
             $complaint->update([
@@ -260,14 +260,14 @@ class ComplaintController extends Controller
 
             AuditLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'Updated Pump Complaint Status',
+                'action' => 'Updated Fuel Station Complaint Status',
                 'type' => 'update',
                 'item_id' => $complaint->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
 
-            Alert::success('Success', 'Pump complaint status updated successfully.');
+            Alert::success('Success', 'Fuel station complaint status updated successfully.');
             return back();
         } catch (\Exception $e) {
             Log::error('PumpComplaint status update failed', [
@@ -275,7 +275,7 @@ class ComplaintController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            Alert::error('Error', 'Failed to update pump complaint status.');
+            Alert::error('Error', 'Failed to update fuel station complaint status.');
             return back();
         }
     }

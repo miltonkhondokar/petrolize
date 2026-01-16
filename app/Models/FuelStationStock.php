@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PumpFuelStock extends Model
+class FuelStationStock extends Model
 {
     use HasFactory;
 
-    protected $table = 'pump_fuel_stocks';
+    protected $table = 'fuel_station_stocks';
 
     protected $fillable = [
         'uuid',
-        'pump_uuid',
+        'fuel_station_uuid',
         'fuel_type_uuid',
         'fuel_unit_uuid',
         'quantity',
@@ -46,9 +46,9 @@ class PumpFuelStock extends Model
     }
 
     // Relations
-    public function pump()
+    public function fuelStation()
     {
-        return $this->belongsTo(Pump::class, 'pump_uuid', 'uuid');
+        return $this->belongsTo(FuelStation::class, 'fuel_station_uuid', 'uuid');
     }
 
     public function fuelType()

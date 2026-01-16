@@ -10,10 +10,10 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('pump_complaints', function (Blueprint $table) {
+        Schema::create('fuel_station_complaints', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
-            $table->uuid('pump_uuid')->index();
+            $table->uuid('fuel_station_uuid')->index();
             $table->string('category')->nullable(); // e.g., fuel_shortage, nozzle_issue, power_failure
             $table->string('title');
             $table->text('description')->nullable();
@@ -30,6 +30,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('pump_complaints');
+        Schema::dropIfExists('fuel_station_complaints');
     }
 };

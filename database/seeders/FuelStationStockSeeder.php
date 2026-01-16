@@ -6,10 +6,10 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Models\Pump;
+use App\Models\FuelStation;
 use App\Models\FuelType;
 
-class PumpFuelStockSeeder extends Seeder
+class FuelStationStockSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -17,15 +17,15 @@ class PumpFuelStockSeeder extends Seeder
     public function run(): void
     {
 
-        //fetch a pump and fuel type uuid for seeding
-        $pump = Pump::first();
+        //fetch a Fuel Station and fuel type uuid for seeding
+        $fuelStation = FuelStation::first();
         $fuelType = FuelType::first();
 
 
-        DB::table('pump_fuel_stocks')->insert([
+        DB::table('fuel_station_stocks')->insert([
             [
                 'uuid' => Str::uuid(),
-                'pump_uuid' => $pump->uuid,
+                'fuel_station_uuid' => $fuelStation->uuid,
                 'fuel_type_uuid' => $fuelType->uuid,
                 'quantity' => 5000.000,
                 'purchase_price' => 95.50,

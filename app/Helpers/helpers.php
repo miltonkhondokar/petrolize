@@ -59,7 +59,7 @@ if (!function_exists('getRandomQuote')) {
             'Efficiency isn’t optional — it’s in every drop of fuel.',
             'Accurate readings, optimal flow, no surprises.',
             'Keep your tanks full and your operations flowing.',
-            'Fuel management is the heart of a successful pump.',
+            'Fuel management is the heart of a successful fuel station.',
             'Every drop of fuel tells a story of precision and care.',
             'The nozzle doesn’t lie — track it, control it, optimize it.',
             'From tanks to pumps, every number matters.',
@@ -78,7 +78,7 @@ if (!function_exists('getRandomQuote')) {
             'Preventive care saves more than just fuel.',
 
             // 🏆 Motivation / Teamwork
-            'A well-run pump is the product of a well-informed team.',
+            'A well-run fuel station is the product of a well-informed team.',
             'Managing fuel is easy when your system works for you.',
             'Every nozzle reading is a step towards operational excellence.',
             'Fuel Flow: turning data into efficiency, one drop at a time.',

@@ -121,37 +121,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($pumps as $index => $pump)
+                                @forelse ($fuelStations as $index => $fuelStation)
                                     <tr>
-                                        <td>{{ $pumps->firstItem() + $index }}</td>
+                                        <td>{{ $fuelStations->firstItem() + $index }}</td>
                                         <td class="text-dark fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    {{ $pump->name }}
+                                                    {{ $fuelStation->name }}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-muted">{{ $pump->location ?? '-' }}</span>
+                                            <span class="text-muted">{{ $fuelStation->location ?? '-' }}</span>
                                         </td>
                                         <td>
-                                            @if($pump->manager)
-                                                <span class="badge badge-light-info">{{ $pump->manager->name }}</span>
+                                            @if($fuelStation->manager)
+                                                <span class="badge badge-light-info">{{ $fuelStation->manager->name }}</span>
                                             @else
                                                 <span class="badge badge-light-warning">Not Assigned</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-{{ $pump->is_active ? 'success' : 'danger' }}">
+                                            <span class="badge badge-light-{{ $fuelStation->is_active ? 'success' : 'danger' }}">
                                                 <i
-                                                    class="ki-duotone {{ $pump->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
-                                                {{ $pump->is_active ? 'Active' : 'Inactive' }}
+                                                    class="ki-duotone {{ $fuelStation->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
+                                                {{ $fuelStation->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td>
                                             <span class="text-muted"
-                                                title="{{ $pump->created_at->format('d M Y, h:i A') }}">
-                                                {{ $pump->created_at->diffForHumans() }}
+                                                title="{{ $fuelStation->created_at->format('d M Y, h:i A') }}">
+                                                {{ $fuelStation->created_at->diffForHumans() }}
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -162,7 +162,7 @@
                                                 </a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="{{ route('fuel-station.show', $pump->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('fuel-station.show', $fuelStation->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-eye fs-2 me-2 text-info">
                                                                 <span class="path1"></span>
                                                                 <span class="path2"></span>
@@ -172,7 +172,7 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('fuel-station.edit', $pump->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('fuel-station.edit', $fuelStation->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-pencil fs-2 me-2 text-warning">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>
@@ -180,9 +180,9 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        @if ($pump->is_active)
+                                                        @if ($fuelStation->is_active)
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('fuel-station-status-update', $pump->uuid) }}', 'inactive')"
+                                                                onclick="changeStatus('{{ route('fuel-station-status-update', $fuelStation->uuid) }}', 'inactive')"
                                                                 class="dropdown-item">
                                                                 <i
                                                                     class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
@@ -192,7 +192,7 @@
                                                             </a>
                                                         @else
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('fuel-station-status-update', $pump->uuid) }}', 'active')"
+                                                                onclick="changeStatus('{{ route('fuel-station-status-update', $fuelStation->uuid) }}', 'active')"
                                                                 class="dropdown-item">
                                                                 <i
                                                                     class="ki-duotone ki-check-circle fs-2 me-2 text-success">
@@ -218,7 +218,7 @@
                         </table>
                         <!-- Pagination -->
                         <div class="mt-4">
-                            {{ $pumps->appends($filters)->links('pagination::bootstrap-5') }}
+                            {{ $fuelStations->appends($filters)->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>

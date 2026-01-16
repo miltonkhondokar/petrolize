@@ -24,12 +24,12 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="d-flex flex-column">
-                                <!-- Pump Information -->
+                                <!-- Fuel Station Information -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Fuel Station:</span>
-                                    <span class="fw-bold fs-5 text-dark">{{ $price->pump->name ?? 'N/A' }}</span>
-                                    @if($price->pump->location)
-                                        <span class="text-muted ms-2">({{ $price->pump->location }})</span>
+                                    <span class="fw-bold fs-5 text-dark">{{ $price->fuelStation->name ?? 'N/A' }}</span>
+                                    @if($price->fuelStation->location)
+                                        <span class="text-muted ms-2">({{ $price->fuelStation->location }})</span>
                                     @endif
                                 </div>
 

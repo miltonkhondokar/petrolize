@@ -1,48 +1,50 @@
-# ⛽ Fuel Flow – Pump Fuel Management System
+# ⛽ Fuel Flow – Fuel Station Fuel Management System
 
-Fuel Flow is a pump-centric fuel management system designed to manage fuel pricing, stock, readings, costs, and complaints across multiple fuel pumps.  
-The system is built using Laravel, PostgreSQL, and UUID-based soft relations without hard foreign keys.
+Fuel Flow is a fuel-station-centric fuel management system designed to manage fuel pricing, stock, meter readings, expenses, and complaints across multiple fuel stations.
+
+The system is built using Laravel and PostgreSQL with UUID-based soft relations and no database-level foreign keys to ensure scalability, flexibility, and historical data preservation.
 
 ---
 
-## 📌 Core Design Principles
+## 📌 Core Architecture Principles
 
-- UUID-based relationships (no hard foreign keys)
-- PostgreSQL compatible
-- Scalable multi-pump architecture
+- Fuel station centric (not pump machine level)
+- UUID-based relationships (application-level integrity)
+- PostgreSQL-first
+- No ENUM columns (string-based statuses)
 - Historical data preserved (prices, stocks, readings)
-- Application-level relational integrity
-- No ENUM columns (flexible string/status fields)
+- BigInt ID for internal use, UUID for business logic
+- Seeder-safe and environment-safe architecture
 
 ---
 
 ## 🧱 Tech Stack
 
-| Layer       | Technology                             |
-| ----------- | -------------------------------------- |
-| Backend     | Laravel                                |
-| Database    | PostgreSQL                             |
-| Auth        | Laravel Auth + Spatie Roles            |
-| Identifiers | UUID (business) + bigint ID (internal) |
-| ORM         | Eloquent                               |
-| Seeding     | Environment-safe seeders               |
+| Layer | Technology |
+|-----|-----------|
+| Backend | Laravel |
+| Database | PostgreSQL |
+| Auth | Laravel Auth + Spatie Roles |
+| ORM | Eloquent |
+| Identifiers | UUID (business) + bigint (internal) |
+| Seeding | Ordered, dependency-safe |
 
 ---
 
 ## 📂 Domain Modules
 
-### 1. User & Audit
+### 1. Users & Audit
 - Users
 - Roles & Permissions
 - Audit Logs
 
-### 2. Pump Management
-- Pumps
-- Pump Managers (Users)
+### 2. Fuel Station Management
+- Fuel Stations
+- Station Managers
 
-### 3. Fuel Management
+### 3. Fuel Operations
+- Fuel Units
 - Fuel Types
-- Fuel Units (International)
 - Fuel Prices
 - Fuel Stocks
 - Fuel Meter Readings
@@ -51,52 +53,52 @@ The system is built using Laravel, PostgreSQL, and UUID-based soft relations wit
 - Cost Categories
 - Cost Entries
 
-### 5. Operations
-- Pump Complaints
+### 5. Operations & Support
+- Fuel Station Complaints
 
 ---
 
-## 🗄️ Database Structure
+## 🗄️ Database Schema
 
 ### users
 
-| Column      | Type    |
-| ----------- | ------- |
-| id          | bigint  |
-| uuid        | uuid    |
-| name        | string  |
-| email       | string  |
-| phone       | string  |
-| password    | string  |
-| gender      | tinyint |
+| Column | Type |
+|------|------|
+| id | bigint |
+| uuid | uuid |
+| name | string |
+| email | string |
+| phone | string |
+| password | string |
+| gender | tinyint |
 | user_status | tinyint |
-| timestamps  |         |
+| timestamps | |
 
 ---
 
 ### audit_logs
 
-| Column     | Type      |
-| ---------- | --------- |
-| uuid       | uuid      |
-| user_id    | bigint    |
-| action     | string    |
-| type       | string    |
-| item_id    | bigint    |
-| ip_address | string    |
-| user_agent | text      |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| user_id | bigint |
+| action | string |
+| type | string |
+| item_id | bigint |
+| ip_address | string |
+| user_agent | text |
 | created_at | timestamp |
 
 ---
 
 ### fuel_units
 
-| Column       | Type   |
-| ------------ | ------ |
-| uuid         | uuid   |
-| name         | string |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| name | string |
 | abbreviation | string |
-| description  | text   |
+| description | text |
 
 Examples: `L`, `mL`, `gal`, `imp gal`, `bbl`, `m³`
 
@@ -104,191 +106,204 @@ Examples: `L`, `mL`, `gal`, `imp gal`, `bbl`, `m³`
 
 ### fuel_types
 
-| Column         | Type    |
-| -------------- | ------- |
-| uuid           | uuid    |
-| name           | string  |
-| code           | string  |
-| rating_value   | integer |
-| fuel_unit_uuid | uuid    |
-| is_active      | boolean |
-| timestamps     |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| name | string |
+| code | string |
+| rating_value | integer |
+| fuel_unit_uuid | uuid |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
-### pumps
+### fuel_stations
 
-| Column     | Type    |
-| ---------- | ------- |
-| uuid       | uuid    |
-| user_uuid  | uuid    |
-| name       | string  |
-| location   | string  |
-| is_active  | boolean |
-| timestamps |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| user_uuid | uuid |
+| name | string |
+| location | string |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
-### pump_fuel_prices
+### fuel_station_fuel_prices
 
-| Column         | Type    |
-| -------------- | ------- |
-| uuid           | uuid    |
-| pump_uuid      | uuid    |
-| fuel_type_uuid | uuid    |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| fuel_station_uuid | uuid |
+| fuel_type_uuid | uuid |
 | price_per_unit | decimal |
-| is_active      | boolean |
-| timestamps     |         |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
-### pump_fuel_stocks
+### fuel_station_fuel_stocks
 
-| Column           | Type    |
-| ---------------- | ------- |
-| uuid             | uuid    |
-| pump_uuid        | uuid    |
-| fuel_type_uuid   | uuid    |
-| fuel_unit_uuid   | uuid    |
-| quantity         | decimal |
-| purchase_price   | decimal |
-| total_cost       | decimal |
-| stock_date       | date    |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| fuel_station_uuid | uuid |
+| fuel_type_uuid | uuid |
+| fuel_unit_uuid | uuid |
+| quantity | decimal |
+| purchase_price | decimal |
+| total_cost | decimal |
+| stock_date | date |
 | is_initial_stock | boolean |
-| is_active        | boolean |
-| timestamps       |         |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
-### pump_fuel_readings
+### fuel_station_fuel_readings
 
-| Column         | Type    |
-| -------------- | ------- |
-| uuid           | uuid    |
-| pump_uuid      | uuid    |
-| fuel_type_uuid | uuid    |
-| nozzle_number  | int     |
-| reading        | decimal |
-| reading_date   | date    |
-| is_active      | boolean |
-| timestamps     |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| fuel_station_uuid | uuid |
+| fuel_type_uuid | uuid |
+| nozzle_number | integer |
+| reading | decimal |
+| reading_date | date |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
 ### cost_categories
 
-| Column      | Type    |
-| ----------- | ------- |
-| uuid        | uuid    |
-| name        | string  |
-| description | text    |
-| is_active   | boolean |
-| timestamps  |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| name | string |
+| description | text |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
 ### cost_entries
 
-| Column             | Type    |
-| ------------------ | ------- |
-| uuid               | uuid    |
-| pump_uuid          | uuid    |
-| cost_category_uuid | uuid    |
-| amount             | decimal |
-| expense_date       | date    |
-| reference_no       | string  |
-| note               | text    |
-| is_active          | boolean |
-| timestamps         |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| fuel_station_uuid | uuid |
+| cost_category_uuid | uuid |
+| amount | decimal |
+| expense_date | date |
+| reference_no | string |
+| note | text |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
-### pump_complaints
+### fuel_station_complaints
 
-| Column         | Type    |
-| -------------- | ------- |
-| uuid           | uuid    |
-| pump_uuid      | uuid    |
-| category       | string  |
-| title          | string  |
-| description    | text    |
-| status         | string  |
-| complaint_date | date    |
-| resolved_date  | date    |
-| is_active      | boolean |
-| timestamps     |         |
+| Column | Type |
+|------|------|
+| uuid | uuid |
+| fuel_station_uuid | uuid |
+| category | string |
+| title | string |
+| description | text |
+| status | string |
+| complaint_date | date |
+| resolved_date | date |
+| is_active | boolean |
+| timestamps | |
 
 ---
 
 ## 🔗 Logical Relationships (UUID Based)
 
-User (uuid)
-- hasMany Pumps (user_uuid)
+### User
+- hasMany FuelStations (user_uuid → uuid)
 
-Pump (uuid)
-- hasMany PumpFuelPrices
-- hasMany PumpFuelStocks
-- hasMany PumpFuelReadings
+### FuelStation
+- hasMany FuelStationFuelPrices
+- hasMany FuelStationFuelStocks
+- hasMany FuelStationFuelReadings
 - hasMany CostEntries
-- hasMany PumpComplaints
+- hasMany FuelStationComplaints
 
-FuelUnit (uuid)
+### FuelUnit
 - hasMany FuelTypes
 
-FuelType (uuid)
-- hasMany PumpFuelPrices
-- hasMany PumpFuelStocks
-- hasMany PumpFuelReadings
+### FuelType
 - belongsTo FuelUnit
+- hasMany FuelStationFuelPrices
+- hasMany FuelStationFuelStocks
+- hasMany FuelStationFuelReadings
 
-CostCategory (uuid)
+### CostCategory
 - hasMany CostEntries
 
 ---
 
 ## 📐 ERD (Text Representation)
+
 ```
 [users]
-   uuid
-     |
-     | user_uuid
-     v
-[pumps]───────────────┐
-   uuid               │
-     │                │
-     │ pump_uuid      │ pump_uuid
-     v                v
-[pump_fuel_prices]  [pump_fuel_stocks]
-     │                │
-     │ fuel_type_uuid │ fuel_type_uuid
-     v                v
-         [fuel_types]───────[fuel_units]
+uuid
+|
+| user_uuid
+v
+[fuel_stations]
+uuid
+|
+| fuel_station_uuid
+├──────────────┬──────────────┬──────────────┐
+v v v v
+[fuel_prices] [fuel_stocks] [fuel_readings] [cost_entries]
+|
+| fuel_type_uuid
+v
+[fuel_types] ───────► [fuel_units]
 ```
+
 
 ---
 
 ## 🌱 Seeder Execution Order
 
 ```
-1. FuelUnitSeeder
-2. FuelTypeSeeder
-3. PumpSeeder
-4. PumpFuelPriceSeeder
-5. PumpFuelStockSeeder
-6. PumpFuelReadingSeeder
-7. CostCategorySeeder
-8. CostEntrySeeder
-9. PumpComplaintSeeder
+FuelUnitSeeder
+
+FuelTypeSeeder
+
+FuelStationSeeder
+
+FuelStationFuelPriceSeeder
+
+FuelStationFuelStockSeeder
+
+FuelStationFuelReadingSeeder
+
+CostCategorySeeder
+
+CostEntrySeeder
+
+FuelStationComplaintSeeder
 ```
+
 
 ---
 
-## 🧠 Key Business Logic
+## 🧠 Business Rules
 
-- Latest fuel price retrieved per pump and fuel type
-- Historical pricing and stock maintained
+- Latest fuel price retrieved per station and fuel type
+- Historical pricing and stock preserved
 - Nozzle-wise meter readings supported
 - Unit-agnostic fuel management
+- No cascading deletes
 
 ---
 
@@ -305,6 +320,6 @@ CostCategory (uuid)
 ## ✅ Project Status
 
 - Database schema finalized
-- UUID-based relationships verified
+- UUID-based relationships validated
 - Seeder-safe architecture
 - Production-ready foundation

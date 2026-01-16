@@ -1,5 +1,5 @@
 @extends('application.layouts.app')
-@section('title', 'Dashboard - Fuel Pump Management')
+@section('title', 'Dashboard - Fuel Station Management')
 
 @section('content')
 <!--begin::Content-->
@@ -313,7 +313,7 @@
                                         'time' => $stock->created_at->format('H:i'),
                                         'title' => 'Stock Added',
                                         'description' => $stock->quantity . 'L of ' . $stock->fuelType->name,
-                                        'pump' => $stock->pump->name,
+                                        'fuelStation' => $stock->fuelStation->name,
                                         'color' => 'primary',
                                         'icon' => 'ki-duotone ki-droplet fs-2x'
                                     ]);
@@ -326,7 +326,7 @@
                                         'time' => $complaint->created_at->format('H:i'),
                                         'title' => 'New Complaint',
                                         'description' => $complaint->title,
-                                        'pump' => $complaint->pump->name,
+                                        'fuelStation' => $complaint->fuelStation->name,
                                         'color' => 'danger',
                                         'icon' => 'ki-duotone ki-notification fs-2x'
                                     ]);
@@ -367,7 +367,7 @@
                                             <span class="bullet"></span>
                                             <!--end::Separator-->
                                             <!--begin::Text-->
-                                            <div class="text-muted fw-semibold">{{ $activity['pump'] }}</div>
+                                            <div class="text-muted fw-semibold">{{ $activity['fuelStation'] }}</div>
                                             <!--end::Text-->
                                         </div>
                                         <!--end::Description-->
@@ -390,14 +390,14 @@
             </div>
             <!--end::Col-->
 
-            <!--begin::Col - Pump Performance-->
+            <!--begin::Col - Fuel Station Performance-->
             <div class="col-xl-6">
                 <!--begin::Table widget 2-->
                 <div class="card card-flush h-xl-100">
                     <!--begin::Card header-->
                     <div class="card-header border-0 pt-7">
                         <h3 class="card-title align-items-start flex-column">
-                            <span class="card-label fw-bold text-gray-900">Pump Performance</span>
+                            <span class="card-label fw-bold text-gray-900">Fuel Station Performance</span>
                             <span class="text-gray-500 mt-1 fw-semibold fs-6">Stock & Complaint Overview</span>
                         </h3>
                         <!--begin::Toolbar-->
@@ -418,7 +418,7 @@
                                 <!--begin::Table head-->
                                 <thead>
                                     <tr class="fs-7 fw-bold text-gray-500 border-bottom-0">
-                                        <th class="ps-0 min-w-175px">Pump</th>
+                                        <th class="ps-0 min-w-175px">Fuel Station</th>
                                         <th class="min-w-100px">Stock Value</th>
                                         <th class="min-w-100px">Complaints</th>
                                         <th class="min-w-125px text-end pe-0">Status</th>
@@ -427,7 +427,7 @@
                                 <!--end::Table head-->
                                 <!--begin::Table body-->
                                 <tbody>
-                                    @foreach($pumpPerformance as $pump)
+                                    @foreach($pumpPerformance as $fuelStation)
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -440,25 +440,25 @@
                                                     </span>
                                                 </div>
                                                 <div class="d-flex justify-content-start flex-column">
-                                                    <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ $pump->name }}</a>
-                                                    <span class="text-gray-500 fw-semibold d-block fs-7">{{ $pump->location }}</span>
+                                                    <a href="#" class="text-gray-900 fw-bold text-hover-primary mb-1 fs-6">{{ $fuelStation->name }}</a>
+                                                    <span class="text-gray-500 fw-semibold d-block fs-7">{{ $fuelStation->location }}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-gray-900 fw-bold fs-6">৳{{ number_format($pump->stock_value, 0) }}</span>
+                                            <span class="text-gray-900 fw-bold fs-6">৳{{ number_format($fuelStation->stock_value, 0) }}</span>
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column w-100 me-2">
-                                                <span class="text-gray-900 fw-bold fs-6">{{ $pump->complaint_count }}</span>
+                                                <span class="text-gray-900 fw-bold fs-6">{{ $fuelStation->complaint_count }}</span>
                                                 <div class="progress h-6px w-100">
-                                                    <div class="progress-bar bg-{{ $pump->complaint_count > 5 ? 'danger' : ($pump->complaint_count > 2 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ min(100, ($pump->complaint_count/10)*100) }}%"></div>
+                                                    <div class="progress-bar bg-{{ $fuelStation->complaint_count > 5 ? 'danger' : ($fuelStation->complaint_count > 2 ? 'warning' : 'success') }}" role="progressbar" style="width: {{ min(100, ($fuelStation->complaint_count/10)*100) }}%"></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="text-end">
-                                            <span class="badge badge-light-{{ $pump->is_active ? 'success' : 'danger' }} py-3 px-4 fs-7">
-                                                {{ $pump->is_active ? 'Active' : 'Inactive' }}
+                                            <span class="badge badge-light-{{ $fuelStation->is_active ? 'success' : 'danger' }} py-3 px-4 fs-7">
+                                                {{ $fuelStation->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                     </tr>

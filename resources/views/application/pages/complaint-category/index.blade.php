@@ -14,7 +14,7 @@
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
-                            <small>filter pump complaints</small>
+                            <small>Filter Fuel Station Complaints</small>
                         </h3>
                     </div>
                 </div>
@@ -22,12 +22,12 @@
                     <form method="GET" action="{{ route('complaint-category.index') }}">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <select name="pump_uuid" class="form-select form-select-solid">
-                                    <option value="">Select Pump</option>
-                                    @foreach ($pumps as $pump)
-                                        <option value="{{ $pump->uuid }}"
-                                            {{ isset($filters['pump_uuid']) && $filters['pump_uuid'] == $pump->uuid ? 'selected' : '' }}>
-                                            {{ $pump->name }}
+                                <select name="fuel_station_uuid" class="form-select form-select-solid">
+                                    <option value="">Select Fuel Station</option>
+                                    @foreach ($fuelStations as $fuelStation)
+                                        <option value="{{ $fuelStation->uuid }}"
+                                            {{ isset($filters['fuel_station_uuid']) && $filters['fuel_station_uuid'] == $fuelStation->uuid ? 'selected' : '' }}>
+                                            {{ $fuelStation->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -86,10 +86,10 @@
                 </div>
             </div>
 
-            <!-- Pump Complaints Table -->
+            <!-- Fuel Station Complaints Table -->
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
-                    <h3 class="card-title fw-bold fs-3 mb-1">Pump Complaints List</h3>
+                    <h3 class="card-title fw-bold fs-3 mb-1">Fuel Station Complaints List</h3>
                     <a href="{{ route('complaint-category.create') }}" class="btn btn-sm btn-primary">
                         <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Complaint
                     </a>
@@ -105,7 +105,7 @@
                                             <i class="ki-duotone ki-home-3 fs-2 me-2 text-primary">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Pump
+                                            Fuel Station
                                         </div>
                                     </th>
                                     <th>
@@ -182,7 +182,7 @@
                                         <td class="text-dark fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    {{ $complaint->pump->name ?? 'N/A' }}
+                                                    {{ $complaint->fuelStation->name ?? 'N/A' }}
                                                 </div>
                                             </div>
                                         </td>
@@ -311,7 +311,7 @@
                                     <tr>
                                         <td colspan="10" class="text-center text-muted py-10">
                                             <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i><br>
-                                            No pump complaints found.
+                                            No fuel station complaints found.
                                         </td>
                                     </tr>
                                 @endforelse

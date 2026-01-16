@@ -6,7 +6,7 @@ class UserType
 {
     public const ADMIN = 'Admin';
     public const EXECUTIVE = 'Executive';
-    public const PUMP_MANAGER = 'Pump Manager';
+    public const FUEL_STATION_MANAGER = 'Fuel Station Manager';
 
     /**
      * All roles
@@ -16,7 +16,7 @@ class UserType
         return [
             self::ADMIN,
             self::EXECUTIVE,
-            self::PUMP_MANAGER,
+            self::FUEL_STATION_MANAGER,
         ];
     }
 
@@ -28,7 +28,7 @@ class UserType
         return [
             self::ADMIN => 'Admin',
             self::EXECUTIVE => 'Executive',
-            self::PUMP_MANAGER => 'Pump Manager',
+            self::FUEL_STATION_MANAGER => 'Fuel Station Manager',
         ];
     }
 
@@ -48,7 +48,7 @@ class UserType
         return match ($role) {
             self::ADMIN => 'badge-light-danger',       // red
             self::EXECUTIVE => 'badge-light-primary',  // blue
-            self::PUMP_MANAGER => 'badge-light-success', // green
+            self::FUEL_STATION_MANAGER => 'badge-light-success', // green
             default => 'badge-light-secondary',
         };
     }

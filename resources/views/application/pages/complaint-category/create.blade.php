@@ -55,7 +55,7 @@
                                 <i class="ki-duotone ki-exclamation-triangle fs-2 text-primary me-2">
                                     <i class="path1"></i><i class="path2"></i>
                                 </i>
-                                Create New Pump Complaint
+                                Create New Fuel Station Complaint
                             </h3>
                             <a href="{{ route('complaint-category.index') }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-arrow-left fs-3 me-2"></i>
@@ -68,30 +68,30 @@
                                 <div class="row">
                                     <!-- Left column -->
                                     <div class="col-md-6">
-                                        <!-- Pump Selection -->
+                                        <!-- Fuel Station Selection -->
                                         <div class="mb-5">
                                             <label class="form-label required">
                                                 <i class="ki-duotone ki-home-3 fs-2 me-2 text-primary">
                                                     <span class="path1"></span>
                                                     <span class="path2"></span>
                                                 </i>
-                                                Pump
+                                                Fuel Station
                                             </label>
-                                            <select name="pump_uuid" class="form-select form-select-solid"
+                                            <select name="fuel_station_uuid" class="form-select form-select-solid"
                                                 data-kt-validate="true" 
-                                                data-kt-validate-required="Pump selection is required">
-                                                <option value="">Select Pump</option>
-                                                @foreach ($pumps as $pump)
-                                                    <option value="{{ $pump->uuid }}"
-                                                        {{ old('pump_uuid') == $pump->uuid ? 'selected' : '' }}>
-                                                        {{ $pump->name }}
-                                                        @if($pump->location)
-                                                            - {{ $pump->location }}
+                                                data-kt-validate-required="Fuel Station selection is required">
+                                                <option value="">Select Fuel Station</option>
+                                                @foreach ($fuelStations as $fuelStation)
+                                                    <option value="{{ $fuelStation->uuid }}"
+                                                        {{ old('fuel_station_uuid') == $fuelStation->uuid ? 'selected' : '' }}>
+                                                        {{ $fuelStation->name }}
+                                                        @if($fuelStation->location)
+                                                            - {{ $fuelStation->location }}
                                                         @endif
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            <div class="form-text">Select the pump with the issue</div>
+                                            <div class="form-text">Select the fuel station with the issue</div>
                                         </div>
 
                                         <!-- Category -->
@@ -415,7 +415,7 @@
                 // Confirm before submit
                 const result = await Swal.fire({
                     title: 'Confirm Creation',
-                    text: 'Are you sure you want to create this pump complaint?',
+                    text: 'Are you sure you want to create this fuel station complaint?',
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonText: 'Yes, create complaint',

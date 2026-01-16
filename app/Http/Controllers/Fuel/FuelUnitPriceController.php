@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Fuel;
 
 use App\Http\Controllers\Controller;
-use App\Models\PumpFuelPrice;
-use App\Models\Pump;
+use App\Models\FuelStationPrice;
+use App\Models\FuelStation;
 use App\Models\FuelType;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
@@ -20,17 +20,17 @@ class FuelUnitPriceController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['pump_uuid', 'fuel_type_uuid', 'is_active']);
+        $filters = $request->only(['fuel_station_uuid', 'fuel_type_uuid', 'is_active']);
 
-        $prices = PumpFuelPrice::with(['pump', 'fuelType'])
-            ->when($filters['pump_uuid'] ?? null, fn ($q, $pump) => $q->where('pump_uuid', $pump))
+        $prices = FuelStationPrice::with(['fuelStation', 'fuelType'])
+            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $fuelStation) => $q->where('fuel_station_uuid', $fuelStation))
             ->when($filters['fuel_type_uuid'] ?? null, fn ($q, $fuelType) => $q->where('fuel_type_uuid', $fuelType))
             ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        $pumps = Pump::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $fuelTypes = FuelType::where('is_active', true)->get();
 
         $breadcrumb = [
@@ -46,7 +46,7 @@ class FuelUnitPriceController extends Controller
             "third_item_icon" => "fa-list",
         ];
 
-        return view('application.pages.fuel.fuel-unit-price.index', compact('prices', 'filters', 'pumps', 'fuelTypes', 'breadcrumb'));
+        return view('application.pages.fuel.fuel-unit-price.index', compact('prices', 'filters', 'fuelStations', 'fuelTypes', 'breadcrumb'));
     }
 
     /**
@@ -54,7 +54,7 @@ class FuelUnitPriceController extends Controller
      */
     public function create()
     {
-        $pumps = Pump::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $fuelTypes = FuelType::where('is_active', true)->get();
 
         $breadcrumb = [
@@ -70,7 +70,7 @@ class FuelUnitPriceController extends Controller
             "third_item_icon" => "fa-plus",
         ];
 
-        return view('application.pages.fuel.fuel-unit-price.create', compact('pumps', 'fuelTypes', 'breadcrumb'));
+        return view('application.pages.fuel.fuel-unit-price.create', compact('fuelStations', 'fuelTypes', 'breadcrumb'));
     }
 
     /**
@@ -79,7 +79,7 @@ class FuelUnitPriceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'pump_uuid'       => 'required|exists:pumps,uuid',
+            'fuel_station_uuid'       => 'required|exists:fuel_stations,uuid',
             'fuel_type_uuid'  => 'required|exists:fuel_types,uuid',
             'price_per_unit'  => 'required|numeric|min:0',
             'is_active'       => 'required|boolean',
@@ -87,7 +87,7 @@ class FuelUnitPriceController extends Controller
 
         DB::beginTransaction();
         try {
-            $price = PumpFuelPrice::create($validated);
+            $price = FuelStationPrice::create($validated);
 
             AuditLog::create([
                 'user_id' => Auth::id(),
@@ -127,7 +127,7 @@ class FuelUnitPriceController extends Controller
      */
     public function show($uuid)
     {
-        $price = PumpFuelPrice::with(['pump', 'fuelType'])->where('uuid', $uuid)->firstOrFail();
+        $price = FuelStationPrice::with(['fuelStation', 'fuelType'])->where('uuid', $uuid)->firstOrFail();
 
         $breadcrumb = [
             "page_header" => "Fuel Unit Price Details",
@@ -150,8 +150,8 @@ class FuelUnitPriceController extends Controller
      */
     public function edit($uuid)
     {
-        $price = PumpFuelPrice::where('uuid', $uuid)->firstOrFail();
-        $pumps = Pump::where('is_active', true)->get();
+        $price = FuelStationPrice::where('uuid', $uuid)->firstOrFail();
+        $fuelStations = FuelStation::where('is_active', true)->get();
         $fuelTypes = FuelType::where('is_active', true)->get();
 
         $breadcrumb = [
@@ -167,7 +167,7 @@ class FuelUnitPriceController extends Controller
             "third_item_icon" => "fa-edit",
         ];
 
-        return view('application.pages.fuel.fuel-unit-price.edit', compact('price', 'pumps', 'fuelTypes', 'breadcrumb'));
+        return view('application.pages.fuel.fuel-unit-price.edit', compact('price', 'fuelStations', 'fuelTypes', 'breadcrumb'));
     }
 
     /**
@@ -175,10 +175,10 @@ class FuelUnitPriceController extends Controller
      */
     public function update(Request $request, $uuid)
     {
-        $price = PumpFuelPrice::where('uuid', $uuid)->firstOrFail();
+        $price = FuelStationPrice::where('uuid', $uuid)->firstOrFail();
 
         $validated = $request->validate([
-            'pump_uuid'       => 'required|exists:pumps,uuid',
+            'fuel_station_uuid'       => 'required|exists:fuel_stations,uuid',
             'fuel_type_uuid'  => 'required|exists:fuel_types,uuid',
             'price_per_unit'  => 'required|numeric|min:0',
             'is_active'       => 'required|boolean',
@@ -226,7 +226,7 @@ class FuelUnitPriceController extends Controller
      */
     public function destroy($uuid)
     {
-        $price = PumpFuelPrice::where('uuid', $uuid)->firstOrFail();
+        $price = FuelStationPrice::where('uuid', $uuid)->firstOrFail();
 
         try {
             DB::transaction(function () use ($price) {
@@ -264,7 +264,7 @@ class FuelUnitPriceController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $price = PumpFuelPrice::where('uuid', $uuid)->firstOrFail();
+        $price = FuelStationPrice::where('uuid', $uuid)->firstOrFail();
 
         try {
             $price->update([

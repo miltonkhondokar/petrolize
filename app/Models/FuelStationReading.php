@@ -6,22 +6,25 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PumpFuelPrice extends Model
+class FuelStationReading extends Model
 {
     use HasFactory;
 
-    protected $table = 'pump_fuel_prices';
+    protected $table = 'fuel_station_readings';
 
     protected $fillable = [
         'uuid',
-        'pump_uuid',
+        'fuel_station_uuid',
         'fuel_type_uuid',
-        'price_per_unit',
+        'nozzle_number',
+        'reading',
+        'reading_date',
         'is_active',
     ];
 
     protected $casts = [
-        'price_per_unit' => 'decimal:2',
+        'reading' => 'decimal:3',
+        'reading_date' => 'date',
         'is_active' => 'boolean',
     ];
 
@@ -29,17 +32,14 @@ class PumpFuelPrice extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->uuid) {
-                $model->uuid = (string) Str::uuid();
-            }
+            if (!$model->uuid) $model->uuid = (string) Str::uuid();
         });
     }
 
     // Relations
-
-    public function pump()
+    public function fuelStation()
     {
-        return $this->belongsTo(Pump::class, 'pump_uuid', 'uuid');
+        return $this->belongsTo(FuelStation::class, 'fuel_station_uuid', 'uuid');
     }
 
     public function fuelType()

@@ -12,7 +12,7 @@ class RolesTableSeeder extends Seeder
         $roles = [
             'Admin',
             'Executive',
-            'Pump Manager',
+            'Fuel Station Manager',
         ];
 
         foreach ($roles as $role) {

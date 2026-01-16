@@ -12,7 +12,7 @@ class PermissionController extends Controller
 {
     public function index()
     {
-        // $this->authorize('permission_list');
+        $this->authorize('permission_list');
     
         $permissions = Permission::paginate(10);
     
@@ -81,8 +81,17 @@ class PermissionController extends Controller
     public function edit(Permission $permission)
     {
         $this->authorize('permission_edit');
+        // Define breadcrumb for the page
+        $breadcrumb = [
+            "page_header" => "Access Management",
+            "first_item_name" => "Permissions",
+            "first_item_link" => route('permissions.index'),
+            "second_item_name" => "Permission List",
+            "second_item_link" => route('permissions.index'),
+        ];
 
-        return view('access-management.permission.edit', compact('permission'));
+
+        return view('access-management.permission.edit', compact('permission', 'breadcrumb'));
     }
 
     public function update(Request $request, Permission $permission)

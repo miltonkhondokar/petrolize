@@ -40,12 +40,12 @@ class FuelType extends Model
 
     public function pumpFuelPrices()
     {
-        return $this->hasMany(PumpFuelPrice::class, 'fuel_type_uuid', 'uuid');
+        return $this->hasMany(FuelStationPrice::class, 'fuel_type_uuid', 'uuid');
     }
 
     public function pumpFuelStocks()
     {
-        return $this->hasMany(PumpFuelStock::class, 'fuel_type_uuid', 'uuid');
+        return $this->hasMany(FuelStationStock::class, 'fuel_type_uuid', 'uuid');
     }
 
     public function pumpFuelReadings()
@@ -61,10 +61,10 @@ class FuelType extends Model
     public function pumps()
     {
         return $this->belongsToMany(
-            Pump::class,
+            FuelStation::class,
             'pump_fuel_prices',
             'fuel_type_uuid',
-            'pump_uuid',
+            'fuel_station_uuid',
             'uuid',
             'uuid'
         );

@@ -13,7 +13,7 @@
                         <i class="ki-duotone ki-exclamation-triangle fs-2 text-primary me-2">
                             <i class="path1"></i><i class="path2"></i>
                         </i>
-                        Pump Complaint Details
+                        Fuel Station Complaint Details
                     </h3>
                     <a href="{{ route('complaint-category.index') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-arrow-left fs-3 me-2"></i>
@@ -24,12 +24,12 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="d-flex flex-column">
-                                <!-- Pump Information -->
+                                <!-- Fuel Station Information -->
                                 <div class="d-flex align-items-center mb-7">
-                                    <span class="fw-bold text-gray-600 fs-5 me-2">Pump:</span>
-                                    <span class="fw-bold fs-5 text-dark">{{ $complaint->pump->name ?? 'N/A' }}</span>
-                                    @if($complaint->pump->location)
-                                        <span class="text-muted ms-2">({{ $complaint->pump->location }})</span>
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Fuel Station:</span>
+                                    <span class="fw-bold fs-5 text-dark">{{ $complaint->fuelStation->name ?? 'N/A' }}</span>
+                                    @if($complaint->fuelStation->location)
+                                        <span class="text-muted ms-2">({{ $complaint->fuelStation->location }})</span>
                                     @endif
                                 </div>
 

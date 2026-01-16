@@ -5,7 +5,7 @@ use App\Http\Controllers\Complaint\ComplaintController;
 
 /*
 |--------------------------------------------------------------------------
-| Pump Complaint Routes
+| Fuel Station Complaint Routes
 |--------------------------------------------------------------------------
 |
 */

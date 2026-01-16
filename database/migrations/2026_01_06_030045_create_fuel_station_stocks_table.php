@@ -10,10 +10,10 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        Schema::create('pump_fuel_stocks', function (Blueprint $table) {
+        Schema::create('fuel_station_stocks', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
-            $table->uuid('pump_uuid')->index();
+            $table->uuid('fuel_station_uuid')->index();
             $table->uuid('vendor_uuid')->index()->nullable()->comment('Vendor supplying the fuel stock');
             $table->uuid('fuel_type_uuid')->index();
             $table->decimal('quantity', 12, 3);
@@ -33,6 +33,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('pump_fuel_stocks');
+        Schema::dropIfExists('fuel_station_stocks');
     }
 };

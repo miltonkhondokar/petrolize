@@ -18,7 +18,7 @@ class CostCategorySeeder extends Seeder
             [
                 'uuid' => Str::uuid(),
                 'name' => 'Maintenance',
-                'description' => 'Pump maintenance and servicing',
+                'description' => 'Fuel Station maintenance and servicing',
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),

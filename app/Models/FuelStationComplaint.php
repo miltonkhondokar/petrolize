@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class PumpComplaint extends Model
+class FuelStationComplaint extends Model
 {
     use HasFactory;
 
-    protected $table = 'pump_complaints';
+    protected $table = 'fuel_station_complaints';
 
     protected $fillable = [
         'uuid',
-        'pump_uuid',
+        'fuel_station_uuid',
         'category',
         'title',
         'description',
@@ -39,8 +39,8 @@ class PumpComplaint extends Model
     }
 
     // Relations
-    public function pump()
+    public function fuelStation()
     {
-        return $this->belongsTo(Pump::class, 'pump_uuid', 'uuid');
+        return $this->belongsTo(FuelStation::class, 'fuel_station_uuid', 'uuid');
     }
 }

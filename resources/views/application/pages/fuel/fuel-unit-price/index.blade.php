@@ -22,12 +22,12 @@
                     <form method="GET" action="{{ route('fuel-unit-price.index') }}">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <select name="pump_uuid" class="form-select form-select-solid">
-                                    <option value="">Select Pump</option>
-                                    @foreach ($pumps as $pump)
-                                        <option value="{{ $pump->uuid }}"
-                                            {{ isset($filters['pump_uuid']) && $filters['pump_uuid'] == $pump->uuid ? 'selected' : '' }}>
-                                            {{ $pump->name }}
+                                <select name="fuel_station_uuid" class="form-select form-select-solid">
+                                    <option value="">Select Fuel Station</option>
+                                    @foreach ($fuelStations as $fuelStation)
+                                        <option value="{{ $fuelStation->uuid }}"
+                                            {{ isset($filters['fuel_station_uuid']) && $filters['fuel_station_uuid'] == $fuelStation->uuid ? 'selected' : '' }}>
+                                            {{ $fuelStation->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -88,7 +88,7 @@
                                             <i class="ki-duotone ki-home-3 fs-2 me-2 text-primary">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Pump
+                                            Fuel Station
                                         </div>
                                     </th>
                                     <th>
@@ -141,9 +141,9 @@
                                         <td class="text-dark fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    {{ $price->pump->name ?? 'N/A' }}
-                                                    @if($price->pump->location)
-                                                        <div class="text-muted fs-7">{{ $price->pump->location }}</div>
+                                                    {{ $price->fuelStation->name ?? 'N/A' }}
+                                                    @if($price->fuelStation->location)
+                                                        <div class="text-muted fs-7">{{ $price->fuelStation->location }}</div>
                                                     @endif
                                                 </div>
                                             </div>

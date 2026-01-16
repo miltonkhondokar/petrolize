@@ -68,25 +68,25 @@
                                 <div class="row">
                                     <!-- Left column -->
                                     <div class="col-md-6">
-                                        <!-- Pump Selection -->
+                                        <!-- Fuel Station Selection -->
                                         <div class="mb-5">
                                             <label class="form-label required">
                                                 <i class="ki-duotone ki-home-3 fs-2 me-2 text-primary">
                                                     <span class="path1"></span>
                                                     <span class="path2"></span>
                                                 </i>
-                                                Fuel Station (Pump)
+                                                Fuel Station
                                             </label>
-                                            <select name="pump_uuid" class="form-select form-select-solid"
+                                            <select name="fuel_station_uuid" class="form-select form-select-solid"
                                                 data-kt-validate="true" 
-                                                data-kt-validate-required="Pump selection is required">
-                                                <option value="">Select Pump</option>
-                                                @foreach ($pumps as $pump)
-                                                    <option value="{{ $pump->uuid }}"
-                                                        {{ old('pump_uuid') == $pump->uuid ? 'selected' : '' }}>
-                                                        {{ $pump->name }}
-                                                        @if($pump->location)
-                                                            - {{ $pump->location }}
+                                                data-kt-validate-required="Fuel Station selection is required">
+                                                <option value="">Select Fuel Station</option>
+                                                @foreach ($fuelStations as $fuelStation)
+                                                    <option value="{{ $fuelStation->uuid }}"
+                                                        {{ old('fuel_station_uuid') == $fuelStation->uuid ? 'selected' : '' }}>
+                                                        {{ $fuelStation->name }}
+                                                        @if($fuelStation->location)
+                                                            - {{ $fuelStation->location }}
                                                         @endif
                                                     </option>
                                                 @endforeach

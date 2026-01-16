@@ -39,7 +39,7 @@
                             </a>
                         </div>
                         <div class="card-body">
-                            <form id="fuel_station_form" method="POST" action="{{ route('fuel-station.update', $pump->uuid) }}">
+                            <form id="fuel_station_form" method="POST" action="{{ route('fuel-station.update', $fuelStation->uuid) }}">
                                 @csrf
                                 @method('PUT')
                                 <div class="row">
@@ -56,7 +56,7 @@
                                             </label>
                                             <input type="text" name="name" class="form-control form-control-solid"
                                                 placeholder="Enter fuel station name" 
-                                                value="{{ old('name', $pump->name) }}"
+                                                value="{{ old('name', $fuelStation->name) }}"
                                                 data-kt-validate="true" 
                                                 data-kt-validate-required="Station name is required"
                                                 data-kt-validate-pattern="^[a-zA-Z0-9\s\-&]{3,100}$"
@@ -75,7 +75,7 @@
                                             </label>
                                             <input type="text" name="location" class="form-control form-control-solid"
                                                 placeholder="Enter location (e.g., City, Street)" 
-                                                value="{{ old('location', $pump->location) }}"
+                                                value="{{ old('location', $fuelStation->location) }}"
                                                 data-kt-validate="true" 
                                                 data-kt-validate-pattern="^[a-zA-Z0-9\s\-,\.]{0,255}$"
                                                 data-kt-validate-pattern-msg="Only letters, numbers, spaces, commas, dots and hyphens, max 255 characters" />
@@ -98,7 +98,7 @@
                                                 <option value="">Select Manager (Optional)</option>
                                                 @foreach ($managers as $manager)
                                                     <option value="{{ $manager->uuid }}"
-                                                        {{ old('user_uuid', $pump->user_uuid) == $manager->uuid ? 'selected' : '' }}>
+                                                        {{ old('user_uuid', $fuelStation->user_uuid) == $manager->uuid ? 'selected' : '' }}>
                                                         {{ $manager->name }} ({{ $manager->email }})
                                                     </option>
                                                 @endforeach
@@ -118,10 +118,10 @@
                                             <select name="is_active" class="form-select form-select-solid"
                                                 data-kt-validate="true"
                                                 data-kt-validate-required="Status is required">
-                                                <option value="1" {{ old('is_active', $pump->is_active) == '1' ? 'selected' : '' }}>
+                                                <option value="1" {{ old('is_active', $fuelStation->is_active) == '1' ? 'selected' : '' }}>
                                                     Active
                                                 </option>
-                                                <option value="0" {{ old('is_active', $pump->is_active) == '0' ? 'selected' : '' }}>
+                                                <option value="0" {{ old('is_active', $fuelStation->is_active) == '0' ? 'selected' : '' }}>
                                                     Inactive
                                                 </option>
                                             </select>

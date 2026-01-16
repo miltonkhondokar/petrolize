@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Models\Pump;
+use App\Models\FuelStation;
 use App\Models\CostCategory;
 
 class CostEntrySeeder extends Seeder
@@ -17,14 +17,14 @@ class CostEntrySeeder extends Seeder
     public function run(): void
     {
 
-        //fetch pump and pump uuids
-        $pump = Pump::first();
+        //fetch Fuel Station and Fuel Station uuids
+        $fuelStation = FuelStation::first();
         $costCategory = CostCategory::first();
 
         DB::table('cost_entries')->insert([
             [
                 'uuid' => Str::uuid(),
-                'pump_uuid' => $pump->uuid,
+                'fuel_station_uuid' => $fuelStation->uuid,
                 'cost_category_uuid' => $costCategory->uuid,
                 'amount' => 15000.00,
                 'expense_date' => now(),

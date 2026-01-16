@@ -2,26 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pump;
+use App\Models\FuelStation;
 use App\Models\FuelType;
 use App\Models\CostEntry;
-use App\Models\PumpComplaint;
-use App\Models\PumpFuelStock;
-use App\Models\CostCategory;
-use App\Models\PumpFuelPrice;
-use Illuminate\Http\Request;
+use App\Models\FuelStationComplaint;
+use App\Models\FuelStationStock;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
+
     public function index()
     {
         // Summary Statistics
-        $totalPumps = Pump::count();
-        $activePumps = Pump::where('is_active', true)->count();
-        $inactivePumps = Pump::where('is_active', false)->count();
+        $totalPumps = FuelStation::count();
+        $activePumps = FuelStation::where('is_active', true)->count();
+        $inactivePumps = FuelStation::where('is_active', false)->count();
 
         $totalFuelTypes = FuelType::count();
         $activeFuelTypes = FuelType::where('is_active', true)->count();
@@ -36,21 +33,21 @@ class DashboardController extends Controller
             ->count();
 
         // Complaints
-        $openComplaints = PumpComplaint::where('status', 'open')
+        $openComplaints = FuelStationComplaint::where('status', 'open')
             ->where('is_active', true)
             ->count();
-        $resolvedComplaints = PumpComplaint::where('status', 'resolved')
+        $resolvedComplaints = FuelStationComplaint::where('status', 'resolved')
             ->where('is_active', true)
             ->count();
 
         // Monthly Expenses Chart (Last 6 months - changed from 30 days to match blade)
         $monthlyExpensesChart = $this->getMonthlyExpensesChart();
 
-        // Stock Value by Pump Chart
+        // Stock Value by Fuel Station Chart
         $stockValueChart = $this->getStockValueByPumpChart();
 
         // Recent Stock Additions
-        $recentStocks = PumpFuelStock::with(['pump', 'fuelType', 'fuelUnit'])
+        $recentStocks = FuelStationStock::with(['fuelStation', 'fuelType', 'fuelUnit'])
             ->where('is_active', true)
             ->orderBy('stock_date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -58,7 +55,7 @@ class DashboardController extends Controller
             ->get();
 
         // Recent Complaints
-        $recentComplaints = PumpComplaint::with('pump')
+        $recentComplaints = FuelStationComplaint::with('fuelStation')
             ->where('is_active', true)
             ->orderBy('complaint_date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -71,7 +68,7 @@ class DashboardController extends Controller
         // NEW: Fuel Type Stocks for Distribution Chart
         $fuelTypeStocks = $this->getFuelTypeStocks();
 
-        // NEW: Pump Performance Data
+        // NEW: Fuel Station Performance Data
         $pumpPerformance = $this->getPumpPerformance();
 
         // NEW: Fuel Types for distribution
@@ -80,7 +77,7 @@ class DashboardController extends Controller
             ->get();
 
         // Get total stock value for dashboard stats
-        $totalStockValue = PumpFuelStock::where('is_active', true)->sum('total_cost');
+        $totalStockValue = FuelStationStock::where('is_active', true)->sum('total_cost');
 
         return view('application.pages.dashboard.dashboard', compact(
             'totalPumps',
@@ -115,7 +112,7 @@ class DashboardController extends Controller
 
         $expenses = CostEntry::where('is_active', true)
             ->whereBetween('expense_date', [$startDate, $endDate])
-            ->selectRaw("TO_CHAR(expense_date, 'YYYY-MM') as month, SUM(amount) as total")
+            ->selectRaw("DATE_FORMAT(expense_date, '%Y-%m') as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -142,12 +139,12 @@ class DashboardController extends Controller
 
 
     /**
-     * Get stock value by pump chart data
+     * Get stock value by fuel stations chart data
      */
     private function getStockValueByPumpChart()
     {
-        $stockValues = DB::table('pump_fuel_stocks as pfs')
-            ->join('pumps as p', 'pfs.pump_uuid', '=', 'p.uuid')
+        $stockValues = DB::table('fuel_station_stocks as pfs')
+            ->join('fuel_stations as p', 'pfs.fuel_station_uuid', '=', 'p.uuid')
             ->where('pfs.is_active', true)
             ->where('p.is_active', true)
             ->selectRaw('p.name as pump_name, SUM(pfs.total_cost) as total_value')
@@ -188,7 +185,7 @@ class DashboardController extends Controller
      */
     private function getFuelTypeStocks()
     {
-        return DB::table('pump_fuel_stocks as pfs')
+        return DB::table('fuel_station_stocks as pfs')
             ->join('fuel_types as ft', 'pfs.fuel_type_uuid', '=', 'ft.uuid')
             ->where('pfs.is_active', true)
             ->selectRaw('
@@ -203,35 +200,35 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get pump performance data
+     * Get fuel station performance data
      */
     private function getPumpPerformance()
     {
-        $pumps = Pump::where('is_active', true)
+        $fuelStations = FuelStation::where('is_active', true)
             ->select('uuid', 'name', 'location', 'is_active')
             ->withCount(['complaints' => function ($query) {
                 $query->where('is_active', true);
             }])
             ->get()
-            ->map(function ($pump) {
-                // Get stock value for this pump
-                $stockValue = PumpFuelStock::where('pump_uuid', $pump->uuid)
+            ->map(function ($fuelStation) {
+            // Get stock value for this fuel station
+            $stockValue = FuelStationStock::where('fuel_station_uuid', $fuelStation->uuid)
                     ->where('is_active', true)
                     ->sum('total_cost');
 
                 return (object) [
-                    'uuid' => $pump->uuid,
-                    'name' => $pump->name,
-                    'location' => $pump->location,
-                    'complaint_count' => $pump->complaints_count,
+                    'uuid' => $fuelStation->uuid,
+                    'name' => $fuelStation->name,
+                    'location' => $fuelStation->location,
+                    'complaint_count' => $fuelStation->complaints_count,
                     'stock_value' => $stockValue ?? 0,
-                    'is_active' => $pump->is_active
+                    'is_active' => $fuelStation->is_active
                 ];
             })
             ->sortByDesc('stock_value')
             ->take(5); // Limit to top 5 pumps by stock value
 
-        return $pumps;
+        return $fuelStations;
     }
 
     /**
@@ -244,9 +241,9 @@ class DashboardController extends Controller
         $endOfMonth = Carbon::now()->endOfMonth();
 
         // Get total pumps
-        $totalPumps = Pump::count();
-        $activePumps = Pump::where('is_active', true)->count();
-        $inactivePumps = Pump::where('is_active', false)->count();
+        $totalPumps = FuelStation::count();
+        $activePumps = FuelStation::where('is_active', true)->count();
+        $inactivePumps = FuelStation::where('is_active', false)->count();
 
         // Get fuel types
         $totalFuelTypes = FuelType::count();
@@ -267,15 +264,15 @@ class DashboardController extends Controller
             ->sum('amount');
 
         // Get complaints
-        $openComplaints = PumpComplaint::where('status', 'open')
+        $openComplaints = FuelStationComplaint::where('status', 'open')
             ->where('is_active', true)
             ->count();
-        $resolvedComplaints = PumpComplaint::where('status', 'resolved')
+        $resolvedComplaints = FuelStationComplaint::where('status', 'resolved')
             ->where('is_active', true)
             ->count();
 
         // Get total stock value
-        $totalStockValue = PumpFuelStock::where('is_active', true)->sum('total_cost');
+        $totalStockValue = FuelStationStock::where('is_active', true)->sum('total_cost');
 
         return response()->json([
             'success' => true,

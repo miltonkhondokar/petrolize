@@ -200,12 +200,12 @@
                                 </a>
                             </div>
 
-                            <!-- Pump Complaints -->
+                            <!-- Fuel Station Complaints -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('complaint-category.*', null, 'link') }}"
                                     href="{{ route('complaint-category.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Pump Complaints</span>
+                                    <span class="menu-title">Fuel Station Complaints</span>
                                 </a>
                             </div>
 
@@ -297,44 +297,42 @@
                     </div>
 
                     <div class="menu-item menu-accordion {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}"
-                        data-kt-menu-trigger="click">
-                        <span
-                            class="menu-link {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}">
-                            <span class="menu-icon">
-                                <i class="ki-solid ki-lock-3 fs-1" style="color:#fbff00;"></i>
-                                <span class="path1"></span><span class="path2"></span>
-                                </i>
+                            data-kt-menu-trigger="click">
+                            <span
+                                class="menu-link {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}">
+                                <span class="menu-icon">
+                                    <i class="ki-solid ki-lock-3 fs-1" style="color:#fc37ca;"></i>
+                                </span>
+                                <span class="menu-title">Access Management</span>
+                                <span class="menu-arrow"></span>
                             </span>
-                            <span class="menu-title">Access Management</span>
-                            <span class="menu-arrow"></span>
-                        </span>
 
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['users.index'], 'users', 'submenu') }}">
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('users.index', 'users', 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">User</span>
-                                </a>
-                                <a class="menu-link {{ active_menu('roles.index', 'roles', 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Role</span>
-                                </a>
-                                <a class="menu-link {{ active_menu('permissions.index', 'permissions', 'link') }}"
-                                    href="#">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Permission</span>
-                                </a>
-                                <a class="menu-link {{ active_menu('permissions.index', 'permissions', 'link') }}"
-                                    href="{{ route('user-role.index') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">User Role</span>
-                                </a>
+                            <div
+                                class="menu-sub menu-sub-accordion {{ active_menu(['users.index'], 'users', 'submenu') }}">
+                                <div class="menu-item">
+                                    <a class="menu-link {{ active_menu('users.index', 'users', 'link') }}"
+                                        href="{{ route('users.index') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">User</span>
+                                    </a>
+                                    <a class="menu-link {{ active_menu('roles.index', 'roles', 'link') }}"
+                                        href="{{ route('roles.index') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">Role</span>
+                                    </a>
+                                    <a class="menu-link {{ active_menu('permissions.index', 'permissions', 'link') }}"
+                                        href="{{ route('permissions.index') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">Permission</span>
+                                    </a>
+                                    <a class="menu-link {{ active_menu(['user-role.index', 'user-role.edit'], 'link') }}"
+                                        href="{{ route('user-role.index') }}">
+                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                        <span class="menu-title">User Permission</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
                     <!-- Help Section Title -->
                     <div class="menu-item pt-5">

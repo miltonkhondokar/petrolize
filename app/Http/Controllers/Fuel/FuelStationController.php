@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Fuel;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pump;
+use App\Models\FuelStation;
 use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ class FuelStationController extends Controller
     {
         $filters = $request->only(['name', 'location', 'is_active']);
 
-        $pumps = Pump::with('manager')
+        $fuelStations = FuelStation::with('manager')
             ->when($filters['name'] ?? null, fn ($query, $name) => $query->where('name', 'like', "%{$name}%"))
             ->when($filters['location'] ?? null, fn ($query, $location) => $query->where('location', 'like', "%{$location}%"))
             ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($query) => $query->where('is_active', $filters['is_active'] == '1'))
@@ -47,7 +47,7 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-list",
         ];
 
-        return view('application.pages.fuel.stations.index', compact('breadcrumb', 'pumps', 'managers', 'filters'));
+        return view('application.pages.fuel.stations.index', compact('breadcrumb', 'fuelStations', 'managers', 'filters'));
     }
 
     /**
@@ -88,8 +88,8 @@ class FuelStationController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($validated, $request, &$pump) {
-                $pump = Pump::create([
+            DB::transaction(function () use ($validated, $request, &$fuelStation) {
+                $fuelStation = FuelStation::create([
                     'uuid'      => Str::uuid(),
                     'name'      => $validated['name'],
                     'location'  => $validated['location'],
@@ -101,7 +101,7 @@ class FuelStationController extends Controller
                     'user_id'    => Auth::id(),
                     'action'     => 'Created Fuel Station',
                     'type'       => 'create',
-                    'item_id'    => $pump->id,
+                    'item_id'    => $fuelStation->id,
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
@@ -126,7 +126,7 @@ class FuelStationController extends Controller
      */
     public function show($uuid)
     {
-        $pump = Pump::with('manager')->where('uuid', $uuid)->firstOrFail();
+        $fuelStation = FuelStation::with('manager')->where('uuid', $uuid)->firstOrFail();
 
         $breadcrumb = [
             "page_header" => "Fuel Station Details",
@@ -141,7 +141,7 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-eye",
         ];
 
-        return view('application.pages.fuel.stations.show', compact('pump', 'breadcrumb'));
+        return view('application.pages.fuel.stations.show', compact('fuelStation', 'breadcrumb'));
     }
 
     /**
@@ -149,7 +149,7 @@ class FuelStationController extends Controller
      */
     public function edit($uuid)
     {
-        $pump = Pump::with('manager')->where('uuid', $uuid)->firstOrFail();
+        $fuelStation = FuelStation::with('manager')->where('uuid', $uuid)->firstOrFail();
 
         $managers = User::active()
             ->whereHas('roles', fn ($query) => $query->where('name', 'manager'))
@@ -168,7 +168,7 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-edit",
         ];
 
-        return view('application.pages.fuel.stations.edit', compact('pump', 'managers', 'breadcrumb'));
+        return view('application.pages.fuel.stations.edit', compact('fuelStation', 'managers', 'breadcrumb'));
     }
 
     /**
@@ -177,11 +177,11 @@ class FuelStationController extends Controller
     public function update(Request $request, $uuid)
     {
 
-        $fuel_station = Pump::where('uuid', $uuid)->firstOrFail();
+        $fuel_station = FuelStation::where('uuid', $uuid)->firstOrFail();
 
 
         $validated = $request->validate([
-            'name'      => 'required|string|max:100|unique:pumps,name,' . $fuel_station->id,
+            'name'      => 'required|string|max:100|unique:fuel_stations,name,' . $fuel_station->id,
             'location'  => 'nullable|string|max:255',
             'user_uuid' => 'nullable|exists:users,uuid',
             'is_active' => 'required|boolean',
@@ -211,7 +211,7 @@ class FuelStationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('FuelStation update failed', [
-                'pump_id' => $fuel_station->id,
+                'fuel_station_id' => $fuel_station->id,
                 'error'   => $e->getMessage()
             ]);
 
@@ -223,7 +223,7 @@ class FuelStationController extends Controller
     /**
      * Delete a fuel station safely.
      */
-    public function destroy(Pump $fuel_station)
+    public function destroy(FuelStation $fuel_station)
     {
         try {
             if (
@@ -255,7 +255,7 @@ class FuelStationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('FuelStation delete failed', [
-                'pump_id' => $fuel_station->id,
+                'fuel_station_id' => $fuel_station->id,
                 'error'   => $e->getMessage()
             ]);
 
@@ -274,9 +274,9 @@ class FuelStationController extends Controller
         ]);
 
         try {
-            $pump = Pump::where('uuid', $uuid)->firstOrFail();
+            $fuelStation = FuelStation::where('uuid', $uuid)->firstOrFail();
 
-            $pump->update([
+            $fuelStation->update([
                 'is_active' => $validated['status'] === 'active',
             ]);
 
@@ -284,7 +284,7 @@ class FuelStationController extends Controller
                 'user_id'    => Auth::id(),
                 'action'     => 'Updated Fuel Station Status',
                 'type'       => 'update',
-                'item_id'    => $pump->id,
+                'item_id'    => $fuelStation->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
