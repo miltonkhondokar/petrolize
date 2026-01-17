@@ -40,3 +40,6 @@ require __DIR__.'/application/complaint-category/complaint_category.php';
 
 // Vendor Management Routes
 require __DIR__.'/application/vendor/vendor.php';
+
+// Geo Location Management Routes
+require __DIR__.'/application/geo-locations/geo_location.php';

@@ -14,20 +14,31 @@
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
-                            <small>filter cost categories</small>
+                            <small>filter governorates</small>
                         </h3>
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="GET" action="{{ route('cost-category.index') }}">
+                    <form method="GET" action="{{ route('governorates.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <input type="text" name="name" class="form-control form-control-solid"
-                                    placeholder="Category Name" value="{{ $filters['name'] ?? '' }}">
+                                    placeholder="Governorate Name" value="{{ $filters['name'] ?? '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <select name="region_uuid" class="form-select form-select-solid">
+                                    <option value="">All Regions</option>
+                                    @foreach($regions as $region)
+                                        <option value="{{ $region->uuid }}"
+                                            {{ ($filters['region_uuid'] ?? '') == $region->uuid ? 'selected' : '' }}>
+                                            {{ $region->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-3">
                                 <select name="is_active" class="form-select form-select-solid">
-                                    <option value="">Status</option>
+                                    <option value="">All Status</option>
                                     <option value="1"
                                         {{ isset($filters['is_active']) && $filters['is_active'] == '1' ? 'selected' : '' }}>
                                         Active
@@ -38,11 +49,11 @@
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3">
                                 <button type="submit" class="btn btn-info">
                                     <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
                                 </button>
-                                <a href="{{ route('cost-category.index') }}" class="btn btn-warning ms-2">
+                                <a href="{{ route('governorates.index') }}" class="btn btn-warning ms-2">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
@@ -51,12 +62,12 @@
                 </div>
             </div>
 
-            <!-- Cost Categories Table -->
+            <!-- Governorates Table -->
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
-                    <h3 class="card-title fw-bold fs-3 mb-1">Cost Categories List</h3>
-                    <a href="{{ route('cost-category.create') }}" class="btn btn-sm btn-primary">
-                        <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Category
+                    <h3 class="card-title fw-bold fs-3 mb-1">Governorates List</h3>
+                    <a href="{{ route('governorates.create') }}" class="btn btn-sm btn-primary">
+                        <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Governorate
                     </a>
                 </div>
                 <div class="card-body py-3">
@@ -67,26 +78,34 @@
                                     <th>#</th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-category fs-2 me-2 text-primary">
+                                            <i class="ki-duotone ki-location fs-2 me-2 text-primary">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Category Name
+                                            Governorate Name
                                         </div>
                                     </th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-note fs-2 me-2 text-info">
+                                            <i class="ki-duotone ki-code-square fs-2 me-2 text-info">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Description
+                                            Code
                                         </div>
                                     </th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-dollar fs-2 me-2 text-success">
+                                            <i class="ki-duotone ki-map fs-2 me-2 text-success">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Cost Entries
+                                            Region
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="d-flex align-items-center">
+                                            <i class="ki-duotone ki-shop fs-2 me-2 text-warning">
+                                                <i class="path1"></i><i class="path2"></i>
+                                            </i>
+                                            Centers
                                         </div>
                                     </th>
                                     <th>
@@ -117,33 +136,43 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($categories as $index => $category)
+                                @forelse ($governorates as $index => $governorate)
                                     <tr>
-                                        <td>{{ $categories->firstItem() + $index }}</td>
+                                        <td>{{ $governorates->firstItem() + $index }}</td>
                                         <td class="text-dark fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    {{ $category->name }}
+                                                    {{ $governorate->name }}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-muted">{{ Str::limit($category->description, 50) ?? '-' }}</span>
+                                            @if($governorate->code)
+                                                <span class="badge badge-light-info">{{ $governorate->code }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-info">{{ $category->costs_count ?? $category->costs()->count() }}</span>
+                                            @if($governorate->region)
+                                                <span class="badge badge-light-primary">{{ $governorate->region->name }}</span>
+                                            @else
+                                                <span class="text-muted">N/A</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-{{ $category->is_active ? 'success' : 'danger' }}">
-                                                <i
-                                                    class="ki-duotone {{ $category->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
-                                                {{ $category->is_active ? 'Active' : 'Inactive' }}
+                                            <span class="badge badge-light-info">{{ $governorate->centers_count ?? $governorate->centers()->count() }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-light-{{ $governorate->is_active ? 'success' : 'danger' }}">
+                                                <i class="ki-duotone {{ $governorate->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
+                                                {{ $governorate->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td>
                                             <span class="text-muted"
-                                                title="{{ $category->created_at->format('d M Y, h:i A') }}">
-                                                {{ $category->created_at->diffForHumans() }}
+                                                title="{{ $governorate->created_at->format('d M Y, h:i A') }}">
+                                                {{ $governorate->created_at->diffForHumans() }}
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -154,7 +183,7 @@
                                                 </a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="{{ route('cost-category.show', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('governorates.show', $governorate->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-eye fs-2 me-2 text-info">
                                                                 <span class="path1"></span>
                                                                 <span class="path2"></span>
@@ -164,7 +193,7 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('cost-category.edit', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('governorates.edit', $governorate->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-pencil fs-2 me-2 text-warning">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>
@@ -172,27 +201,36 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        @if ($category->is_active)
+                                                        @if ($governorate->is_active)
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('cost-category.status-update', $category->uuid) }}', 'inactive')"
+                                                                onclick="changeStatus('{{ route('governorate-status-update', $governorate->uuid) }}', 'inactive')"
                                                                 class="dropdown-item">
-                                                                <i
-                                                                    class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
+                                                                <i class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Deactivate
                                                             </a>
                                                         @else
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('cost-category.status-update', $category->uuid) }}', 'active')"
+                                                                onclick="changeStatus('{{ route('governorate-status-update', $governorate->uuid) }}', 'active')"
                                                                 class="dropdown-item">
-                                                                <i
-                                                                    class="ki-duotone ki-check-circle fs-2 me-2 text-success">
+                                                                <i class="ki-duotone ki-check-circle fs-2 me-2 text-success">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Activate
                                                             </a>
                                                         @endif
+                                                    </li>
+                                                    <li>
+                                                        <a href="javascript:void(0)" onclick="deleteGovernorate('{{ route('governorates.destroy', $governorate->uuid) }}')" class="dropdown-item text-danger">
+                                                            <i class="ki-duotone ki-trash fs-2 me-2 text-danger">
+                                                                <i class="path1"></i><i class="path2"></i>
+                                                                <i class="path3"></i>
+                                                                <i class="path4"></i>
+                                                                <i class="path5"></i>
+                                                            </i>
+                                                            Delete
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -200,9 +238,9 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-10">
+                                        <td colspan="8" class="text-center text-muted py-10">
                                             <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i><br>
-                                            No cost categories found.
+                                            No governorates found.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -210,7 +248,7 @@
                         </table>
                         <!-- Pagination -->
                         <div class="mt-4">
-                            {{ $categories->appends($filters)->links('pagination::bootstrap-5') }}
+                            {{ $governorates->appends($filters)->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
@@ -225,7 +263,7 @@
         function changeStatus(url, status) {
             const action = status === 'active' ? 'activate' : 'deactivate';
             Swal.fire({
-                title: `Are you sure you want to ${action} this cost category?`,
+                title: `Are you sure you want to ${action} this governorate?`,
                 text: "You can change this later.",
                 icon: 'question',
                 showCancelButton: true,
@@ -257,6 +295,40 @@
                     form.appendChild(methodField);
                     form.appendChild(csrfField);
                     form.appendChild(statusField);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function deleteGovernorate(url) {
+            Swal.fire({
+                title: 'Are you sure you want to delete this governorate?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+
+                    const csrfToken = "{{ csrf_token() }}";
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+
+                    const csrfField = document.createElement('input');
+                    csrfField.type = 'hidden';
+                    csrfField.name = '_token';
+                    csrfField.value = csrfToken;
+
+                    form.appendChild(methodField);
+                    form.appendChild(csrfField);
                     document.body.appendChild(form);
                     form.submit();
                 }

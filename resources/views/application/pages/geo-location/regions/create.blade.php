@@ -25,71 +25,68 @@
                         </div>
                     @endif
 
-                    @if (session('success'))
-                        <div class="alert alert-success d-flex align-items-center p-5">
-                            <i class="ki-duotone ki-check fs-2hx text-success me-4">
-                                <i class="path1"></i><i class="path2"></i>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <h4 class="mb-1 text-success">Success!</h4>
-                                <span>{{ session('success') }}</span>
-                            </div>
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="alert alert-danger d-flex align-items-center p-5">
-                            <i class="ki-duotone ki-cross-circle fs-2hx text-danger me-4">
-                                <i class="path1"></i><i class="path2"></i>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <h4 class="mb-1 text-danger">Error!</h4>
-                                <span>{{ session('error') }}</span>
-                            </div>
-                        </div>
-                    @endif
-
                     <div class="card card-flush shadow-sm">
                         <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
                             <h3 class="card-title">
-                                <i class="ki-duotone ki-category fs-2 text-primary me-2">
+                                <i class="ki-duotone ki-map fs-2 text-primary me-2">
                                     <i class="path1"></i><i class="path2"></i>
                                 </i>
-                                Create New Cost Category
+                                Create New Region
                             </h3>
-                            <a href="{{ route('cost-category.index') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('regions.index') }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-arrow-left fs-3 me-2"></i>
                                 Back to List
                             </a>
                         </div>
                         <div class="card-body">
-                            <form id="cost_category_form" method="POST" action="{{ route('cost-category.store') }}">
+                            <form id="region_form" method="POST" action="{{ route('regions.store') }}">
                                 @csrf
                                 <div class="row">
                                     <!-- Left column -->
                                     <div class="col-md-6">
-                                        <!-- Category Name -->
+                                        <!-- Region Name -->
                                         <div class="mb-5">
                                             <label class="form-label required">
-                                                <i class="ki-duotone ki-category fs-2 me-2 text-primary">
+                                                <i class="ki-duotone ki-map fs-2 me-2 text-primary">
                                                     <span class="path1"></span>
                                                     <span class="path2"></span>
                                                 </i>
-                                                Category Name
+                                                Region Name
                                             </label>
                                             <input type="text" name="name" class="form-control form-control-solid"
-                                                placeholder="Enter category name (e.g., Maintenance, Rent, Utilities)" 
+                                                placeholder="Enter region name (e.g., North Region, Central Region)" 
                                                 value="{{ old('name') }}"
                                                 data-kt-validate="true" 
-                                                data-kt-validate-required="Category name is required"
-                                                data-kt-validate-pattern="^[a-zA-Z0-9\s\-&]{3,255}$"
-                                                data-kt-validate-pattern-msg="Only letters, numbers, spaces, hyphens and ampersands, 3 to 255 characters" />
-                                            <div class="form-text">Unique name for the cost category</div>
+                                                data-kt-validate-required="Region name is required"
+                                                data-kt-validate-pattern="^[a-zA-Z\s\-&]{3,100}$"
+                                                data-kt-validate-pattern-msg="Only letters, spaces, hyphens and ampersands, 3 to 100 characters" />
+                                            <div class="form-text">Unique name for the region</div>
                                         </div>
                                     </div>
 
                                     <!-- Right column -->
                                     <div class="col-md-6">
+                                        <!-- Region Code -->
+                                        <div class="mb-5">
+                                            <label class="form-label">
+                                                <i class="ki-duotone ki-code-square fs-2 me-2 text-info">
+                                                    <span class="path1"></span>
+                                                    <span class="path2"></span>
+                                                </i>
+                                                Region Code
+                                            </label>
+                                            <input type="text" name="code" class="form-control form-control-solid"
+                                                placeholder="Enter region code (e.g., NR, CR)" 
+                                                value="{{ old('code') }}"
+                                                data-kt-validate="true"
+                                                data-kt-validate-pattern="^[A-Z0-9]{0,10}$"
+                                                data-kt-validate-pattern-msg="Only uppercase letters and numbers, max 10 characters" />
+                                            <div class="form-text">Unique code for the region (optional, will be auto-uppercased)</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Full width for status -->
+                                    <div class="col-md-12">
                                         <!-- Status -->
                                         <div class="mb-5">
                                             <label class="form-label required">
@@ -109,27 +106,7 @@
                                                     Inactive
                                                 </option>
                                             </select>
-                                            <div class="form-text">Active categories will be available for selection</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Full width for description -->
-                                    <div class="col-md-12">
-                                        <!-- Description -->
-                                        <div class="mb-5">
-                                            <label class="form-label">
-                                                <i class="ki-duotone ki-note fs-2 me-2 text-warning">
-                                                    <span class="path1"></span>
-                                                    <span class="path2"></span>
-                                                </i>
-                                                Description
-                                            </label>
-                                            <textarea name="description" class="form-control form-control-solid" 
-                                                rows="4" placeholder="Enter description (optional)"
-                                                data-kt-validate="true" 
-                                                data-kt-validate-pattern="^[a-zA-Z0-9\s\-\.,!?]{0,1000}$"
-                                                data-kt-validate-pattern-msg="Only letters, numbers, spaces and basic punctuation, max 1000 characters">{{ old('description') }}</textarea>
-                                            <div class="form-text">Additional information about this cost category</div>
+                                            <div class="form-text">Active regions will be available for selection</div>
                                         </div>
                                     </div>
                                 </div>
@@ -141,7 +118,7 @@
                                     </button>
                                     <button type="submit" id="submitBtn" class="btn btn-primary btn-sm">
                                         <i class="fa-regular fa-floppy-disk fs-3 me-2"></i>
-                                        Create Category
+                                        Create Region
                                     </button>
                                 </div>
                             </form>
@@ -188,36 +165,6 @@
             return true;
         }
 
-        // Validate textarea fields
-        function validateTextarea(textarea) {
-            // Clear previous error
-            textarea.classList.remove('is-invalid');
-            let next = textarea.nextElementSibling;
-            if (next && next.classList.contains('invalid-feedback')) {
-                next.remove();
-            }
-
-            const value = textarea.value.trim();
-            const pattern = textarea.getAttribute('data-kt-validate-pattern');
-            const patternMsg = textarea.getAttribute('data-kt-validate-pattern-msg');
-
-            let errorMsg = null;
-
-            if (pattern && value && !new RegExp(pattern).test(value)) {
-                errorMsg = patternMsg;
-            }
-
-            if (errorMsg) {
-                textarea.classList.add('is-invalid');
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('invalid-feedback');
-                errorDiv.innerText = errorMsg;
-                textarea.after(errorDiv);
-                return false;
-            }
-            return true;
-        }
-
         // Validate select fields
         function validateSelect(select) {
             // Clear previous error
@@ -242,14 +189,10 @@
         }
 
         // Attach live validation handlers
-        document.querySelectorAll('#cost_category_form [data-kt-validate="true"]').forEach(input => {
+        document.querySelectorAll('#region_form [data-kt-validate="true"]').forEach(input => {
             if (input.tagName === 'SELECT') {
                 input.addEventListener('change', () => {
                     validateSelect(input);
-                });
-            } else if (input.tagName === 'TEXTAREA') {
-                input.addEventListener('input', () => {
-                    validateTextarea(input);
                 });
             } else {
                 input.addEventListener('input', () => {
@@ -259,7 +202,7 @@
         });
 
         // Submit handler with validation + Swal
-        document.getElementById('cost_category_form').addEventListener('submit', async function(e) {
+        document.getElementById('region_form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const form = e.target;
@@ -270,12 +213,6 @@
             // Clear all previous errors first
             inputs.forEach(input => {
                 if (input.tagName === 'SELECT') {
-                    input.classList.remove('is-invalid');
-                    let next = input.nextElementSibling;
-                    if (next && next.classList.contains('invalid-feedback')) {
-                        next.remove();
-                    }
-                } else if (input.tagName === 'TEXTAREA') {
                     input.classList.remove('is-invalid');
                     let next = input.nextElementSibling;
                     if (next && next.classList.contains('invalid-feedback')) {
@@ -295,8 +232,6 @@
                 let isValid;
                 if (input.tagName === 'SELECT') {
                     isValid = validateSelect(input);
-                } else if (input.tagName === 'TEXTAREA') {
-                    isValid = validateTextarea(input);
                 } else {
                     isValid = validateInput(input);
                 }
@@ -313,10 +248,10 @@
                 // Confirm before submit
                 const result = await Swal.fire({
                     title: 'Confirm Creation',
-                    text: 'Are you sure you want to create this cost category?',
+                    text: 'Are you sure you want to create this region?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes, create category',
+                    confirmButtonText: 'Yes, create region',
                     cancelButtonText: 'Cancel'
                 });
 
@@ -331,10 +266,10 @@
         // Reset form handler
         document.querySelector('button[type="reset"]').addEventListener('click', function() {
             // Clear all validation errors
-            document.querySelectorAll('#cost_category_form .is-invalid').forEach(el => {
+            document.querySelectorAll('#region_form .is-invalid').forEach(el => {
                 el.classList.remove('is-invalid');
             });
-            document.querySelectorAll('#cost_category_form .invalid-feedback').forEach(el => {
+            document.querySelectorAll('#region_form .invalid-feedback').forEach(el => {
                 el.remove();
             });
             
@@ -348,7 +283,7 @@
                 confirmButtonText: 'Yes, reset it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('cost_category_form').reset();
+                    document.getElementById('region_form').reset();
                 }
             });
         });

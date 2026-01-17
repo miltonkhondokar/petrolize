@@ -110,6 +110,62 @@
                         </a>
                     </div>
 
+                    <!-- Geo Location Management -->
+                    <div class="menu-item menu-accordion {{ active_menu(['regions.*', 'governorates.*', 'cities.*', 'centers.*'], null, 'menu') }}"
+                        data-kt-menu-trigger="click">
+
+                        <span class="menu-link">
+                            <span class="menu-icon">
+                                <i class="ki-solid ki-geolocation fs-1 text-danger"></i>
+                            </span>
+                            <span class="menu-title">Geo Location</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['regions.*', 'governorates.*', 'cities.*', 'centers.*'], null, 'menu') }}">
+
+                            <!-- Regions -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('regions.*', null, 'link') }}"
+                                    href="{{ route('regions.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Regions</span>
+                                </a>
+                            </div>
+
+                            <!-- Governorates -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('governorates.*', null, 'link') }}"
+                                    href="{{ route('governorates.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Governorates</span>
+                                </a>
+                            </div>
+
+                            <!-- Cities -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('cities.*', null, 'link') }}"
+                                    href="{{ route('cities.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Cities</span>
+                                </a>
+                            </div>
+
+                            <!-- Centers -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('centers.*', null, 'link') }}"
+                                    href="{{ route('centers.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Centers</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
                     <!-- Vendor Management -->
                     <div class="menu-item menu-accordion {{ active_menu(['vendors.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
@@ -125,7 +181,7 @@
                             <!-- Active Users -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu(['vendors.*'], null, 'link') }}"
-                                    href="{{ route("vendors.index") }}">
+                                    href="{{ route('vendors.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Vendors</span>
                                 </a>
@@ -297,42 +353,42 @@
                     </div>
 
                     <div class="menu-item menu-accordion {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}"
-                            data-kt-menu-trigger="click">
-                            <span
-                                class="menu-link {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}">
-                                <span class="menu-icon">
-                                    <i class="ki-solid ki-lock-3 fs-1" style="color:#fc37ca;"></i>
-                                </span>
-                                <span class="menu-title">Access Management</span>
-                                <span class="menu-arrow"></span>
+                        data-kt-menu-trigger="click">
+                        <span
+                            class="menu-link {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}">
+                            <span class="menu-icon">
+                                <i class="ki-solid ki-lock-3 fs-1" style="color:#fc37ca;"></i>
                             </span>
+                            <span class="menu-title">Access Management</span>
+                            <span class="menu-arrow"></span>
+                        </span>
 
-                            <div
-                                class="menu-sub menu-sub-accordion {{ active_menu(['users.index'], 'users', 'submenu') }}">
-                                <div class="menu-item">
-                                    <a class="menu-link {{ active_menu('users.index', 'users', 'link') }}"
-                                        href="{{ route('users.index') }}">
-                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                        <span class="menu-title">User</span>
-                                    </a>
-                                    <a class="menu-link {{ active_menu('roles.index', 'roles', 'link') }}"
-                                        href="{{ route('roles.index') }}">
-                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                        <span class="menu-title">Role</span>
-                                    </a>
-                                    <a class="menu-link {{ active_menu('permissions.index', 'permissions', 'link') }}"
-                                        href="{{ route('permissions.index') }}">
-                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                        <span class="menu-title">Permission</span>
-                                    </a>
-                                    <a class="menu-link {{ active_menu(['user-role.index', 'user-role.edit'], 'link') }}"
-                                        href="{{ route('user-role.index') }}">
-                                        <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                        <span class="menu-title">User Permission</span>
-                                    </a>
-                                </div>
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['users.index'], 'users', 'submenu') }}">
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('users.index', 'users', 'link') }}"
+                                    href="{{ route('users.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">User</span>
+                                </a>
+                                <a class="menu-link {{ active_menu('roles.index', 'roles', 'link') }}"
+                                    href="{{ route('roles.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Role</span>
+                                </a>
+                                <a class="menu-link {{ active_menu('permissions.index', 'permissions', 'link') }}"
+                                    href="{{ route('permissions.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Permission</span>
+                                </a>
+                                <a class="menu-link {{ active_menu(['user-role.index', 'user-role.edit'], 'link') }}"
+                                    href="{{ route('user-role.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">User Permission</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
 
                     <!-- Help Section Title -->
                     <div class="menu-item pt-5">

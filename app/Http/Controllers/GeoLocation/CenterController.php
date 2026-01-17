@@ -20,9 +20,9 @@ class CenterController extends Controller
         $filters = $request->only(['name', 'governorate_uuid', 'is_active']);
 
         $centers = Center::with('governorate')
-            ->when($filters['name'] ?? null, fn($q, $name) => $q->where('name', 'like', "%{$name}%"))
-            ->when($filters['governorate_uuid'] ?? null, fn($q, $gov) => $q->where('governorate_uuid', $gov))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn($q) => $q->where('is_active', $filters['is_active']))
+            ->when($filters['name'] ?? null, fn ($q, $name) => $q->where('name', 'like', "%{$name}%"))
+            ->when($filters['governorate_uuid'] ?? null, fn ($q, $gov) => $q->where('governorate_uuid', $gov))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
             ->latest()->paginate(20)->withQueryString();
 
         $governorates = Governorate::where('is_active', true)->get();
@@ -33,7 +33,7 @@ class CenterController extends Controller
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Centers",
-            "second_item_link" => route('center.index'),
+            "second_item_link" => route('centers.index'),
             "second_item_icon" => "fa-map",
             "third_item_name" => "List",
             "third_item_link" => "#",
@@ -53,7 +53,7 @@ class CenterController extends Controller
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Centers",
-            "second_item_link" => route('center.index'),
+            "second_item_link" => route('centers.index'),
             "second_item_icon" => "fa-map",
             "third_item_name" => "Create",
             "third_item_link" => "#",
@@ -91,13 +91,34 @@ class CenterController extends Controller
 
             DB::commit();
             Alert::success('Success', 'Center created successfully.');
-            return redirect()->route('center.index');
+            return redirect()->route('centers.index');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Center create failed', ['error' => $e->getMessage(), 'data' => $request->all()]);
             Alert::error('Error', 'Failed to create center.');
             return back()->withInput();
         }
+    }
+
+
+    public function show($uuid)
+    {
+        $center = Center::with(['governorate.region', 'cities'])->where('uuid', $uuid)->firstOrFail();
+
+        $breadcrumb = [
+            "page_header" => "Center Details",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route('/'),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Centers",
+            "second_item_link" => route('centers.index'),
+            "second_item_icon" => "fa-map",
+            "third_item_name" => "Details",
+            "third_item_link" => "#",
+            "third_item_icon" => "fa-eye",
+        ];
+
+        return view('application.pages.geo-location.centers.show', compact('center', 'breadcrumb'));
     }
 
     public function edit($uuid)
@@ -111,7 +132,7 @@ class CenterController extends Controller
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Centers",
-            "second_item_link" => route('center.index'),
+            "second_item_link" => route('centers.index'),
             "second_item_icon" => "fa-map",
             "third_item_name" => "Edit",
             "third_item_link" => "#",
@@ -121,8 +142,10 @@ class CenterController extends Controller
         return view('application.pages.geo-location.centers.edit', compact('center', 'governorates', 'breadcrumb'));
     }
 
-    public function update(Request $request, Center $center)
+    public function update(Request $request, $uuid)
     {
+        $center = Center::where('uuid', $uuid)->firstOrFail();
+
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:centers,name,' . $center->id,
             'governorate_uuid' => 'required|exists:governorates,uuid',
@@ -144,7 +167,7 @@ class CenterController extends Controller
 
             DB::commit();
             Alert::success('Success', 'Center updated successfully.');
-            return redirect()->route('center.index');
+            return redirect()->route('centers.index');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Center update failed', ['error' => $e->getMessage(), 'center' => $center->id]);
@@ -174,11 +197,42 @@ class CenterController extends Controller
             });
 
             Alert::success('Success', 'Center deleted successfully.');
-            return redirect()->route('center.index');
+            return redirect()->route('centers.index');
         } catch (\Exception $e) {
             Log::error('Center delete failed', ['error' => $e->getMessage(), 'id' => $center->id]);
             Alert::error('Error', 'Failed to delete center.');
             return back();
         }
     }
+
+    public function centerStatusUpdate(Request $request, $uuid)
+    {
+        $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        try {
+            $center = Center::where('uuid', $uuid)->firstOrFail();
+            $center->is_active = $request->status === 'active' ? 1 : 0;
+            $center->save();
+
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => 'Updated Center Status',
+                'type'       => 'update',
+                'item_id'    => $center->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            Alert::success('Success', 'Center status updated successfully.');
+            return back();
+        } catch (\Exception $e) {
+            Log::error('Center status update failed', ['uuid' => $uuid, 'error' => $e->getMessage()]);
+            Alert::error('Error', 'Failed to update center status.');
+            return back();
+        }
+    }
+
+
 }

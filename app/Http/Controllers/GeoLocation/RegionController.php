@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Geo;
+namespace App\Http\Controllers\GeoLocation;
 
 use App\Http\Controllers\Controller;
 use App\Models\Region;
@@ -19,9 +19,9 @@ class RegionController extends Controller
         $filters = $request->only(['name', 'code', 'is_active']);
 
         $regions = Region::query()
-            ->when($filters['name'] ?? null, fn($q, $v) => $q->where('name', 'like', "%{$v}%"))
-            ->when($filters['code'] ?? null, fn($q, $v) => $q->where('code', 'like', "%{$v}%"))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn($q) => $q->where('is_active', $filters['is_active']))
+            ->when($filters['name'] ?? null, fn ($q, $v) => $q->where('name', 'like', "%{$v}%"))
+            ->when($filters['code'] ?? null, fn ($q, $v) => $q->where('code', 'like', "%{$v}%"))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -153,8 +153,10 @@ class RegionController extends Controller
         return view('application.pages.geo-location.regions.edit', compact('region', 'breadcrumb'));
     }
 
-    public function update(Request $request, Region $region)
+    public function update(Request $request, $uuid)
     {
+        $region = Region::where('uuid', $uuid)->firstOrFail();
+
         $validated = $request->validate([
             'name' => 'required|string|max:100|unique:regions,name,' . $region->id,
             'code' => 'nullable|string|max:10|unique:regions,code,' . $region->id,
@@ -247,16 +249,14 @@ class RegionController extends Controller
 
         try {
             $region = Region::where('uuid', $uuid)->firstOrFail();
-
-            $region->update([
-                'is_active' => $request->status === 'active',
-            ]);
+            $region->is_active = $request->status === 'active' ? 1 : 0;
+            $region->save();
 
             AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'Updated Region Status',
-                'type' => 'update',
-                'item_id' => $region->id,
+                'user_id'    => Auth::id(),
+                'action'     => 'Updated Region Status',
+                'type'       => 'update',
+                'item_id'    => $region->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -264,13 +264,10 @@ class RegionController extends Controller
             Alert::success('Success', 'Region status updated successfully.');
             return back();
         } catch (\Exception $e) {
-            Log::error('Region status update failed', [
-                'uuid' => $uuid,
-                'error' => $e->getMessage(),
-            ]);
-
+            Log::error('Region status update failed', ['uuid' => $uuid, 'error' => $e->getMessage()]);
             Alert::error('Error', 'Failed to update region status.');
             return back();
         }
     }
+
 }

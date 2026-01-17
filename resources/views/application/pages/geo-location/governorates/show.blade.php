@@ -10,12 +10,12 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-light-primary d-flex justify-content-between align-items-center">
                     <h3 class="card-title">
-                        <i class="ki-duotone ki-shop fs-2 text-primary me-2">
+                        <i class="ki-duotone ki-location fs-2 text-primary me-2">
                             <i class="path1"></i><i class="path2"></i>
                         </i>
-                        Center Details
+                        Governorate Details
                     </h3>
-                    <a href="{{ route('centers.index') }}" class="btn btn-sm btn-primary">
+                    <a href="{{ route('governorates.index') }}" class="btn btn-sm btn-primary">
                         <i class="bi bi-arrow-left fs-3 me-2"></i>
                         Back to List
                     </a>
@@ -24,109 +24,108 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div class="d-flex flex-column">
-                                <!-- Center Name -->
+                                <!-- Governorate Name -->
                                 <div class="d-flex align-items-center mb-7">
-                                    <span class="fw-bold text-gray-600 fs-5 me-2">Center Name:</span>
-                                    <span class="fw-bold fs-5 text-dark">{{ $center->name }}</span>
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Governorate Name:</span>
+                                    <span class="fw-bold fs-5 text-dark">{{ $governorate->name }}</span>
                                 </div>
 
-                                <!-- Governorate -->
+                                <!-- Code -->
                                 <div class="d-flex align-items-center mb-7">
-                                    <span class="fw-bold text-gray-600 fs-5 me-2">Governorate:</span>
-                                    @if($center->governorate)
-                                        <span class="badge badge-light-info fs-5">{{ $center->governorate->name }}</span>
-                                        <a href="{{ route('governorates.show', $center->governorate->uuid) }}" class="ms-2 text-info" title="View Governorate Details">
-                                            <i class="ki-duotone ki-eye fs-4"></i>
-                                        </a>
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Code:</span>
+                                    @if($governorate->code)
+                                        <span class="badge badge-light-info fs-5">{{ $governorate->code }}</span>
                                     @else
-                                        <span class="text-muted fs-5">No governorate assigned</span>
+                                        <span class="text-muted fs-5">No code assigned</span>
                                     @endif
                                 </div>
 
                                 <!-- Region -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Region:</span>
-                                    @if($center->governorate && $center->governorate->region)
-                                        <span class="badge badge-light-primary fs-5">{{ $center->governorate->region->name }}</span>
-                                        <a href="{{ route('regions.show', $center->governorate->region->uuid) }}" class="ms-2 text-primary" title="View Region Details">
-                                            <i class="ki-duotone ki-eye fs-4"></i>
-                                        </a>
+                                    @if($governorate->region)
+                                        <span class="badge badge-light-primary fs-5">{{ $governorate->region->name }}</span>
+                                        @if($governorate->region->code)
+                                            <span class="text-muted ms-2">({{ $governorate->region->code }})</span>
+                                        @endif
                                     @else
-                                        <span class="text-muted fs-5">N/A</span>
+                                        <span class="text-muted fs-5">No region assigned</span>
                                     @endif
                                 </div>
 
-                                <!-- Cities Count -->
+                                <!-- Centers Count -->
                                 <div class="d-flex align-items-center mb-7">
-                                    <span class="fw-bold text-gray-600 fs-5 me-2">Total Cities:</span>
-                                    <span class="badge badge-light-info fs-5">{{ $center->cities->count() }}</span>
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Total Centers:</span>
+                                    <span class="badge badge-light-info fs-5">{{ $governorate->centers->count() }}</span>
                                 </div>
 
                                 <!-- Status -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Status:</span>
-                                    <span class="badge badge-light-{{ $center->is_active ? 'success' : 'danger' }} fs-5">
-                                        <i class="ki-duotone {{ $center->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-4 me-1"></i>
-                                        {{ $center->is_active ? 'Active' : 'Inactive' }}
+                                    <span class="badge badge-light-{{ $governorate->is_active ? 'success' : 'danger' }} fs-5">
+                                        <i class="ki-duotone {{ $governorate->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-4 me-1"></i>
+                                        {{ $governorate->is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </div>
 
                                 <!-- UUID -->
                                 <div class="d-flex align-items-center mb-7">
-                                    <span class="fw-bold text-gray-600 fs-5 me-2">Center ID:</span>
-                                    <span class="text-muted fs-5">{{ $center->uuid }}</span>
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Governorate ID:</span>
+                                    <span class="text-muted fs-5">{{ $governorate->uuid }}</span>
                                 </div>
 
                                 <!-- Created At -->
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Created:</span>
-                                    <span class="text-muted fs-5">{{ $center->created_at->format('d M Y, h:i A') }}</span>
-                                    <span class="text-muted ms-2">({{ $center->created_at->diffForHumans() }})</span>
+                                    <span class="text-muted fs-5">{{ $governorate->created_at->format('d M Y, h:i A') }}</span>
+                                    <span class="text-muted ms-2">({{ $governorate->created_at->diffForHumans() }})</span>
                                 </div>
 
                                 <!-- Last Updated -->
                                 <div class="d-flex align-items-center">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Last Updated:</span>
-                                    <span class="text-muted fs-5">{{ $center->updated_at->format('d M Y, h:i A') }}</span>
-                                    <span class="text-muted ms-2">({{ $center->updated_at->diffForHumans() }})</span>
+                                    <span class="text-muted fs-5">{{ $governorate->updated_at->format('d M Y, h:i A') }}</span>
+                                    <span class="text-muted ms-2">({{ $governorate->updated_at->diffForHumans() }})</span>
                                 </div>
                             </div>
 
-                            <!-- Cities Section -->
-                            @if($center->cities->count() > 0)
+                            <!-- Centers Section -->
+                            @if($governorate->centers->count() > 0)
                                 <div class="mt-10">
                                     <div class="separator separator-dashed my-5"></div>
                                     <h4 class="text-dark mb-5">
-                                        <i class="ki-duotone ki-city fs-2 text-warning me-2">
+                                        <i class="ki-duotone ki-shop fs-2 text-warning me-2">
                                             <i class="path1"></i><i class="path2"></i>
                                         </i>
-                                        Cities in {{ $center->name }}
+                                        Centers in {{ $governorate->name }}
                                     </h4>
                                     <div class="table-responsive">
                                         <table class="table table-hover table-rounded table-striped border gy-7 gs-7">
                                             <thead>
                                                 <tr class="fw-bold fs-6 text-gray-800 border-bottom border-gray-200">
                                                     <th>Name</th>
+                                                    <th>Code</th>
                                                     <th>Status</th>
                                                     <th>Created At</th>
-                                                    <th class="text-end">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($center->cities as $city)
+                                                @foreach($governorate->centers as $center)
                                                     <tr>
-                                                        <td>{{ $city->name }}</td>
+                                                        <td>{{ $center->name }}</td>
                                                         <td>
-                                                            <span class="badge badge-light-{{ $city->is_active ? 'success' : 'danger' }}">
-                                                                {{ $city->is_active ? 'Active' : 'Inactive' }}
+                                                            @if($center->code)
+                                                                <span class="badge badge-light-info">{{ $center->code }}</span>
+                                                            @else
+                                                                <span class="text-muted">-</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge badge-light-{{ $center->is_active ? 'success' : 'danger' }}">
+                                                                {{ $center->is_active ? 'Active' : 'Inactive' }}
                                                             </span>
                                                         </td>
-                                                        <td>{{ $city->created_at->format('d M Y') }}</td>
-                                                        <td class="text-end">
-                                                            <a href="{{ route('cities.edit', $city->uuid) }}" class="btn btn-sm btn-light-warning">
-                                                                <i class="ki-duotone ki-pencil fs-3"></i>
-                                                            </a>
-                                                        </td>
+                                                        <td>{{ $center->created_at->format('d M Y') }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -148,48 +147,41 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-flex flex-column gap-3">
-                                        <a href="{{ route('centers.edit', $center->uuid) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('governorates.edit', $governorate->uuid) }}" class="btn btn-warning btn-sm">
                                             <i class="ki-duotone ki-pencil fs-3 me-2">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Edit Center
+                                            Edit Governorate
                                         </a>
                                         
-                                        @if($center->is_active)
+                                        @if($governorate->is_active)
                                             <a href="javascript:void(0)"
-                                                onclick="changeStatus('{{ route('center-status-update', $center->uuid) }}', 'inactive')"
+                                                onclick="changeStatus('{{ route('governorate-status-update', $governorate->uuid) }}', 'inactive')"
                                                 class="btn btn-danger btn-sm">
                                                 <i class="ki-duotone ki-cross-circle fs-3 me-2">
                                                     <i class="path1"></i><i class="path2"></i>
                                                 </i>
-                                                Deactivate Center
+                                                Deactivate Governorate
                                             </a>
                                         @else
                                             <a href="javascript:void(0)"
-                                                onclick="changeStatus('{{ route('center-status-update', $center->uuid) }}', 'active')"
+                                                onclick="changeStatus('{{ route('governorate-status-update', $governorate->uuid) }}', 'active')"
                                                 class="btn btn-success btn-sm">
                                                 <i class="ki-duotone ki-check-circle fs-3 me-2">
                                                     <i class="path1"></i><i class="path2"></i>
                                                 </i>
-                                                Activate Center
+                                                Activate Governorate
                                             </a>
                                         @endif
 
-                                        <a href="javascript:void(0)" onclick="deleteCenter('{{ route('centers.destroy', $center->uuid) }}')" class="btn btn-danger btn-sm">
+                                        <a href="javascript:void(0)" onclick="deleteGovernorate('{{ route('governorates.destroy', $governorate->uuid) }}')" class="btn btn-danger btn-sm">
                                             <i class="ki-duotone ki-trash fs-3 me-2">
                                                 <i class="path1"></i><i class="path2"></i>
                                                 <i class="path3"></i>
                                                 <i class="path4"></i>
                                                 <i class="path5"></i>
                                             </i>
-                                            Delete Center
-                                        </a>
-
-                                        <a href="{{ route('cities.create') }}?center_uuid={{ $center->uuid }}" class="btn btn-info btn-sm">
-                                            <i class="ki-duotone ki-plus fs-3 me-2">
-                                                <i class="path1"></i><i class="path2"></i>
-                                            </i>
-                                            Add City
+                                            Delete Governorate
                                         </a>
                                     </div>
                                 </div>
@@ -207,7 +199,7 @@
         function changeStatus(url, status) {
             const action = status === 'active' ? 'activate' : 'deactivate';
             Swal.fire({
-                title: `Are you sure you want to ${action} this center?`,
+                title: `Are you sure you want to ${action} this governorate?`,
                 text: "You can change this later.",
                 icon: 'question',
                 showCancelButton: true,
@@ -245,10 +237,10 @@
             });
         }
 
-        function deleteCenter(url) {
+        function deleteGovernorate(url) {
             Swal.fire({
-                title: 'Are you sure you want to delete this center?',
-                text: "This will also delete all associated cities!",
+                title: 'Are you sure you want to delete this governorate?',
+                text: "This will also delete all associated centers!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',

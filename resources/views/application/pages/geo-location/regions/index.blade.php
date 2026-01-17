@@ -14,20 +14,24 @@
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
-                            <small>filter cost categories</small>
+                            <small>filter regions</small>
                         </h3>
                     </div>
                 </div>
                 <div class="card-body">
-                    <form method="GET" action="{{ route('cost-category.index') }}">
+                    <form method="GET" action="{{ route('regions.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <input type="text" name="name" class="form-control form-control-solid"
-                                    placeholder="Category Name" value="{{ $filters['name'] ?? '' }}">
+                                    placeholder="Region Name" value="{{ $filters['name'] ?? '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="code" class="form-control form-control-solid"
+                                    placeholder="Region Code" value="{{ $filters['code'] ?? '' }}">
                             </div>
                             <div class="col-md-3">
                                 <select name="is_active" class="form-select form-select-solid">
-                                    <option value="">Status</option>
+                                    <option value="">All Status</option>
                                     <option value="1"
                                         {{ isset($filters['is_active']) && $filters['is_active'] == '1' ? 'selected' : '' }}>
                                         Active
@@ -38,11 +42,11 @@
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-3">
                                 <button type="submit" class="btn btn-info">
                                     <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
                                 </button>
-                                <a href="{{ route('cost-category.index') }}" class="btn btn-warning ms-2">
+                                <a href="{{ route('regions.index') }}" class="btn btn-warning ms-2">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
@@ -51,12 +55,12 @@
                 </div>
             </div>
 
-            <!-- Cost Categories Table -->
+            <!-- Regions Table -->
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
-                    <h3 class="card-title fw-bold fs-3 mb-1">Cost Categories List</h3>
-                    <a href="{{ route('cost-category.create') }}" class="btn btn-sm btn-primary">
-                        <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Category
+                    <h3 class="card-title fw-bold fs-3 mb-1">Regions List</h3>
+                    <a href="{{ route('regions.create') }}" class="btn btn-sm btn-primary">
+                        <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Region
                     </a>
                 </div>
                 <div class="card-body py-3">
@@ -67,26 +71,26 @@
                                     <th>#</th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-category fs-2 me-2 text-primary">
+                                            <i class="ki-duotone ki-map fs-2 me-2 text-primary">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Category Name
+                                            Region Name
                                         </div>
                                     </th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-note fs-2 me-2 text-info">
+                                            <i class="ki-duotone ki-code-square fs-2 me-2 text-info">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Description
+                                            Code
                                         </div>
                                     </th>
                                     <th>
                                         <div class="d-flex align-items-center">
-                                            <i class="ki-duotone ki-dollar fs-2 me-2 text-success">
+                                            <i class="ki-duotone ki-location fs-2 me-2 text-success">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
-                                            Cost Entries
+                                            Governorates
                                         </div>
                                     </th>
                                     <th>
@@ -117,33 +121,36 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($categories as $index => $category)
+                                @forelse ($regions as $index => $region)
                                     <tr>
-                                        <td>{{ $categories->firstItem() + $index }}</td>
+                                        <td>{{ $regions->firstItem() + $index }}</td>
                                         <td class="text-dark fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    {{ $category->name }}
+                                                    {{ $region->name }}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="text-muted">{{ Str::limit($category->description, 50) ?? '-' }}</span>
+                                            @if($region->code)
+                                                <span class="badge badge-light-info">{{ $region->code }}</span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-info">{{ $category->costs_count ?? $category->costs()->count() }}</span>
+                                            <span class="badge badge-light-info">{{ $region->governorates_count ?? $region->governorates()->count() }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-{{ $category->is_active ? 'success' : 'danger' }}">
-                                                <i
-                                                    class="ki-duotone {{ $category->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
-                                                {{ $category->is_active ? 'Active' : 'Inactive' }}
+                                            <span class="badge badge-light-{{ $region->is_active ? 'success' : 'danger' }}">
+                                                <i class="ki-duotone {{ $region->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
+                                                {{ $region->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td>
                                             <span class="text-muted"
-                                                title="{{ $category->created_at->format('d M Y, h:i A') }}">
-                                                {{ $category->created_at->diffForHumans() }}
+                                                title="{{ $region->created_at->format('d M Y, h:i A') }}">
+                                                {{ $region->created_at->diffForHumans() }}
                                             </span>
                                         </td>
                                         <td class="text-end">
@@ -154,7 +161,7 @@
                                                 </a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="{{ route('cost-category.show', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('regions.show', $region->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-eye fs-2 me-2 text-info">
                                                                 <span class="path1"></span>
                                                                 <span class="path2"></span>
@@ -164,7 +171,7 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('cost-category.edit', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('regions.edit', $region->uuid) }}" class="dropdown-item">
                                                             <i class="ki-duotone ki-pencil fs-2 me-2 text-warning">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>
@@ -172,27 +179,36 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        @if ($category->is_active)
+                                                        @if ($region->is_active)
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('cost-category.status-update', $category->uuid) }}', 'inactive')"
+                                                                onclick="changeStatus('{{ route('region-status-update', $region->uuid) }}', 'inactive')"
                                                                 class="dropdown-item">
-                                                                <i
-                                                                    class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
+                                                                <i class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Deactivate
                                                             </a>
                                                         @else
                                                             <a href="javascript:void(0)"
-                                                                onclick="changeStatus('{{ route('cost-category.status-update', $category->uuid) }}', 'active')"
+                                                                onclick="changeStatus('{{ route('region-status-update', $region->uuid) }}', 'active')"
                                                                 class="dropdown-item">
-                                                                <i
-                                                                    class="ki-duotone ki-check-circle fs-2 me-2 text-success">
+                                                                <i class="ki-duotone ki-check-circle fs-2 me-2 text-success">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Activate
                                                             </a>
                                                         @endif
+                                                    </li>
+                                                    <li>
+                                                        <a href="javascript:void(0)" onclick="deleteRegion('{{ route('regions.destroy', $region->uuid) }}')" class="dropdown-item text-danger">
+                                                            <i class="ki-duotone ki-trash fs-2 me-2 text-danger">
+                                                                <i class="path1"></i><i class="path2"></i>
+                                                                <i class="path3"></i>
+                                                                <i class="path4"></i>
+                                                                <i class="path5"></i>
+                                                            </i>
+                                                            Delete
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -202,7 +218,7 @@
                                     <tr>
                                         <td colspan="7" class="text-center text-muted py-10">
                                             <i class="ki-duotone ki-information-2 fs-2x text-gray-400 mb-2"></i><br>
-                                            No cost categories found.
+                                            No regions found.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -210,7 +226,7 @@
                         </table>
                         <!-- Pagination -->
                         <div class="mt-4">
-                            {{ $categories->appends($filters)->links('pagination::bootstrap-5') }}
+                            {{ $regions->appends($filters)->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
                 </div>
@@ -225,7 +241,7 @@
         function changeStatus(url, status) {
             const action = status === 'active' ? 'activate' : 'deactivate';
             Swal.fire({
-                title: `Are you sure you want to ${action} this cost category?`,
+                title: `Are you sure you want to ${action} this region?`,
                 text: "You can change this later.",
                 icon: 'question',
                 showCancelButton: true,
@@ -257,6 +273,40 @@
                     form.appendChild(methodField);
                     form.appendChild(csrfField);
                     form.appendChild(statusField);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function deleteRegion(url) {
+            Swal.fire({
+                title: 'Are you sure you want to delete this region?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+
+                    const csrfToken = "{{ csrf_token() }}";
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+
+                    const csrfField = document.createElement('input');
+                    csrfField.type = 'hidden';
+                    csrfField.name = '_token';
+                    csrfField.value = csrfToken;
+
+                    form.appendChild(methodField);
+                    form.appendChild(csrfField);
                     document.body.appendChild(form);
                     form.submit();
                 }
