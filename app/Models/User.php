@@ -11,6 +11,7 @@ use App\Constants\UserType;
 use App\Constants\UserStatus;
 use App\Constants\UserEmailVerificationStatus;
 use App\Constants\UserGender;
+use Laravel\Passport\HasApiTokens;
 
 /**
  * @method bool hasRole(string|array $roles)
@@ -19,6 +20,7 @@ use App\Constants\UserGender;
  */
 class User extends Authenticatable
 {
+    use HasApiTokens;
     use HasFactory;
     use Notifiable;
     use HasRoles;
