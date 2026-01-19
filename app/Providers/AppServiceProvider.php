@@ -22,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Passport::enablePasswordGrant();
+         // Example: Set token expiration
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
 
     }
 }

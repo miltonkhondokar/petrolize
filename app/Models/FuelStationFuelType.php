@@ -16,7 +16,7 @@ class FuelStationFuelType extends Model
         'uuid',
         'fuel_station_uuid',
         'fuel_type_uuid',
-        // you can add extra fields here later, e.g. 'price', 'stock', 'is_active'
+        'is_active'
     ];
 
     protected static function boot()

@@ -211,15 +211,6 @@
                         <div
                             class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}">
 
-                            <!-- Fuel Types -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('fuel.*', null, 'link') }}"
-                                    href="{{ route('fuel.index') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Fuel Types</span>
-                                </a>
-                            </div>
-
                             <!-- Fuel Units -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('fuel-unit.*', null, 'link') }}"
@@ -229,12 +220,30 @@
                                 </a>
                             </div>
 
+                            <!-- Fuel Types -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('fuel.*', null, 'link') }}"
+                                    href="{{ route('fuel.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Fuel Types</span>
+                                </a>
+                            </div>
+
                             <!-- Fuel Stations -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('fuel-station.*', null, 'link') }}"
                                     href="{{ route('fuel-station.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Fuel Stations</span>
+                                </a>
+                            </div>
+
+                            <!-- Station Wise Fuel Types -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('fuel-station-fuel-type.*', null, 'link') }}"
+                                    href="{{ route('fuel-station-fuel-type.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Station Wise Fuel</span>
                                 </a>
                             </div>
 

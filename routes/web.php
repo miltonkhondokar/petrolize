@@ -43,3 +43,6 @@ require __DIR__.'/application/vendor/vendor.php';
 
 // Geo Location Management Routes
 require __DIR__.'/application/geo-locations/geo_location.php';
+
+//Fuel Station Fuel Type Management Routes
+require __DIR__.'/application/fuel-station-fuel-type/fuel_station_fuel_type.php';
