@@ -1,31 +1,63 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\CustomAuthController;
 use App\Models\FuelStation;
 
-// All routes inside this group require a Bearer Token
-Route::middleware('auth:api')->group(function () {
+Route::prefix('v1')->group(function () {
 
-    // 1. Test Route
-    Route::get('/passport-test', function (Request $request) {
-        return response()->json([
-            'user_id' => $request->user()->id,
-            'email'   => $request->user()->email,
-        ]);
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication APIs
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('auth')->group(function () {
+
+        // Public (no token required)
+        Route::post('/login', [CustomAuthController::class, 'apiLogin']);
+        Route::get('/check', [CustomAuthController::class, 'apiCheckAuth']);
+
+        // Protected (Bearer token required)
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/logout', [CustomAuthController::class, 'apiLogout']);
+            Route::get('/user', [CustomAuthController::class, 'apiUser']);
+        });
     });
 
-    // 2. Fuel Station Route
-    Route::get('/fuel-stations/{uuid}', function ($uuid) {
-        $station = FuelStation::where('uuid', $uuid)->first();
+    /*
+    |--------------------------------------------------------------------------
+    | Protected Resources
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('auth:api')->group(function () {
 
-        if (!$station) {
-            return response()->json(['message' => 'Fuel Station not found'], 404);
-        }
+        Route::get('/fuel-stations/{uuid}', function ($uuid) {
+            $station = FuelStation::where('uuid', $uuid)->first();
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => $station
-        ]);
+            if (!$station) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Fuel Station not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $station
+            ]);
+        });
     });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Passport OAuth Routes
+|--------------------------------------------------------------------------
+| Used ONLY for refresh tokens and password grant
+*/
+Route::prefix('oauth')->group(function () {
+    Route::post('/token', [
+        \Laravel\Passport\Http\Controllers\AccessTokenController::class,
+        'issueToken'
+    ]);
 });
