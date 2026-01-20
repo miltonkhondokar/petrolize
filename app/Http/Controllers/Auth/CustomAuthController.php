@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Str;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
-
+use App\Models\AuditLog;
 
 class CustomAuthController extends Controller
 {
@@ -95,6 +95,15 @@ class CustomAuthController extends Controller
             if (Auth::attempt($credentials, $remember)) {
                 $request->session()->regenerate(); // prevent session fixation
 
+                AuditLog::create([
+                        'user_id' => Auth::id(),
+                        'action' => 'User logged in',
+                        'type' => 'auth',
+                        'item_id' => null,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
+
                 // Redirect to the route
                 $redirectUrl = route("/");
 
@@ -104,6 +113,16 @@ class CustomAuthController extends Controller
             }
 
             // Invalid credentials
+
+            AuditLog::create([
+                'user_id' => null, // unknown user
+                'action' => 'Failed login attempt',
+                'type' => 'auth',
+                'item_id' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             $errorMessage = ['email' => ['Invalid credentials']];
 
             return $request->expectsJson()
@@ -113,6 +132,16 @@ class CustomAuthController extends Controller
             throw $e; // allow Laravel to handle too many attempts (429)
 
         } catch (\Throwable $e) {
+
+            AuditLog::create([
+                'user_id' => null,
+                'action' => 'Login error: ' . $e->getMessage(),
+                'type' => 'error',
+                'item_id' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             Log::error('Login failed', [
                 'message' => $e->getMessage(),
                 'ip' => $request->ip(),
@@ -128,8 +157,19 @@ class CustomAuthController extends Controller
     }
 
     // Logout Logic
-    public function logout()
+    public function logout(Request $request)
     {
+        if (Auth::check()) {
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'User logged out',
+                'type' => 'auth',
+                'item_id' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
+
         Auth::logout();
 
         // Prevent browser cache for dashboard page after logout
