@@ -79,7 +79,7 @@
                                             @endphp
                                             <div class="col-md-4 col-lg-3">
                                                 <div class="form-check form-check-custom form-check-solid border rounded p-4 h-100 
-                                                    {{ $isAssigned ? 'border-primary border-2' : '' }}">
+                                                    {{ ($isAssigned && $isActive) ? 'border-primary border-2' : '' }}">
                                                     <input class="form-check-input" type="checkbox" 
                                                         name="fuel_types[{{ $fuelType->uuid }}][is_active]" 
                                                         id="fuel_type_{{ $fuelType->uuid }}"

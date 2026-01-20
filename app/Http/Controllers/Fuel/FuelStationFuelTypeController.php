@@ -23,9 +23,9 @@ class FuelStationFuelTypeController extends Controller
         $filters = $request->only(['fuel_station_uuid', 'fuel_type_uuid', 'is_active']);
 
         $assignments = FuelStationFuelType::with(['fuelStation', 'fuelType'])
-            ->when($filters['fuel_station_uuid'] ?? null, fn($q, $v) => $q->where('fuel_station_uuid', $v))
-            ->when($filters['fuel_type_uuid'] ?? null, fn($q, $v) => $q->where('fuel_type_uuid', $v))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn($q) => $q->where('is_active', $filters['is_active']))
+            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $v) => $q->where('fuel_station_uuid', $v))
+            ->when($filters['fuel_type_uuid'] ?? null, fn ($q, $v) => $q->where('fuel_type_uuid', $v))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -182,19 +182,24 @@ class FuelStationFuelTypeController extends Controller
     {
         $request->validate([
             'fuel_station_uuid' => 'required|exists:fuel_stations,uuid',
-            'fuel_types' => 'required|array',
+            'fuel_types' => 'array',
         ]);
 
         DB::beginTransaction();
         try {
-            foreach ($request->fuel_types as $fuelTypeUuid => $row) {
+            // 1️⃣ Get all fuel types
+            $allFuelTypes = FuelType::where('is_active', true)->pluck('uuid');
+
+            foreach ($allFuelTypes as $fuelTypeUuid) {
+                $isActive = isset($request->fuel_types[$fuelTypeUuid]['is_active']);
+
                 FuelStationFuelType::updateOrCreate(
                     [
                         'fuel_station_uuid' => $request->fuel_station_uuid,
                         'fuel_type_uuid' => $fuelTypeUuid,
                     ],
                     [
-                        'is_active' => isset($row['is_active']) ? true : false,
+                        'is_active' => $isActive,
                     ]
                 );
             }
@@ -211,6 +216,7 @@ class FuelStationFuelTypeController extends Controller
             DB::commit();
             Alert::success('Success', 'Fuel station fuel types updated successfully.');
             return redirect()->route('fuel-station-fuel-type.index');
+
         } catch (\Exception $e) {
             DB::rollBack();
 
