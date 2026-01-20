@@ -12,13 +12,14 @@ use App\Constants\UserStatus;
 use App\Constants\UserEmailVerificationStatus;
 use App\Constants\UserGender;
 use Laravel\Passport\HasApiTokens;
+use Laravel\Passport\Contracts\OAuthenticatable;
 
 /**
  * @method bool hasRole(string|array $roles)
  * @method bool hasAnyRole(string|array $roles)
  * @method bool hasAllRoles(string|array $roles)
  */
-class User extends Authenticatable
+class User extends Authenticatable implements OAuthenticatable
 {
     use HasApiTokens;
     use HasFactory;
