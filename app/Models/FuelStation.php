@@ -103,11 +103,11 @@ class FuelStation extends Model
     {
         return $this->belongsToMany(
             FuelType::class,
-            'pump_fuel_type',            // Pivot table
-            'fuel_station_uuid',                 // Foreign key on pivot for Fuel Station
-            'fuel_type_uuid',            // Foreign key on pivot for FuelType
-            'uuid',                      // Local key on Fuel Station
-            'uuid'                       // Local key on FuelType
-        )->withTimestamps(); // optional, keeps track of pivot created_at / updated_at
+            'fuel_station_fuel_type',
+            'fuel_station_uuid',
+            'fuel_type_uuid',
+            'uuid',
+            'uuid'
+        )->withTimestamps();
     }
 }

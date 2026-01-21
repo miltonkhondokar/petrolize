@@ -62,7 +62,19 @@
                     </div>
 
                     <!-- Fuel Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['inventories'], null, 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(
+                        [
+                            'fuel_purchases.index',
+                            'fuel_purchases.create',
+                            'fuel_purchases.show',
+                            'fuel_sales_days.index',
+                            'fuel_sales_days.create',
+                            'fuel_sales_days.show',
+                            'fuel_sales_days.edit',
+                        ],
+                        null,
+                        'menu',
+                    ) }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -74,23 +86,43 @@
                             <span class="menu-title">Fuel</span>
                             <span class="menu-arrow"></span>
                         </span>
+
                         <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['inventories', 'request-for-stock.index', 'request-for-stock.create'], null, 'menu') }}">
+                            class="menu-sub menu-sub-accordion {{ active_menu(
+                                [
+                                    'fuel_purchases.index',
+                                    'fuel_purchases.create',
+                                    'fuel_purchases.show',
+                                    'fuel_sales_days.index',
+                                    'fuel_sales_days.create',
+                                    'fuel_sales_days.show',
+                                    'fuel_sales_days.edit',
+                                ],
+                                null,
+                                'menu',
+                            ) }}">
+
+                            {{-- Purchase --}}
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('inventories', null, 'link') }}" href="#">
+                                <a class="menu-link {{ active_menu(['fuel_purchases.index', 'fuel_purchases.create', 'fuel_purchases.show'], null, 'link') }}"
+                                    href="{{ route('fuel_purchases.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Stock Entry</span>
+                                    <span class="menu-title">Purchase Entry</span>
                                 </a>
                             </div>
+
+                            {{-- Sale --}}
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu(['request-for-stock.index', 'request-for-stock.create'], null, 'link') }}"
-                                    href="#">
+                                <a class="menu-link {{ active_menu(['fuel_sales_days.index', 'fuel_sales_days.create', 'fuel_sales_days.show', 'fuel_sales_days.edit'], null, 'link') }}"
+                                    href="{{ route('fuel_sales_days.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Sale Entry</span>
                                 </a>
                             </div>
+
                         </div>
                     </div>
+
 
                     <!-- MASTER DATA -->
                     <div class="menu-item pt-5">

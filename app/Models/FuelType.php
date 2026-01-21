@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use phpseclib3\File\ASN1\Maps\ExtKeyUsageSyntax;
 
 class FuelType extends Model
 {
@@ -38,19 +39,19 @@ class FuelType extends Model
 
     // Relations
 
-    public function pumpFuelPrices()
+    public function stationPrices()
     {
         return $this->hasMany(FuelStationPrice::class, 'fuel_type_uuid', 'uuid');
     }
 
-    public function pumpFuelStocks()
+    public function stationStocks()
     {
         return $this->hasMany(FuelStationStock::class, 'fuel_type_uuid', 'uuid');
     }
 
-    public function pumpFuelReadings()
+    public function stationReadings()
     {
-        return $this->hasMany(PumpFuelReading::class, 'fuel_type_uuid', 'uuid');
+        return $this->hasMany(FuelStationReading::class, 'fuel_type_uuid', 'uuid');
     }
 
     public function defaultUnit()
@@ -58,15 +59,27 @@ class FuelType extends Model
         return $this->belongsTo(FuelUnit::class, 'fuel_unit_uuid', 'uuid');
     }
 
-    public function pumps()
+    public function stockLedgers()
+    {
+        return $this->hasMany(FuelStockLedger::class, 'fuel_type_uuid', 'uuid');
+    }
+
+    public function stations()
     {
         return $this->belongsToMany(
             FuelStation::class,
-            'pump_fuel_prices',
+            'fuel_station_fuel_type',
             'fuel_type_uuid',
             'fuel_station_uuid',
             'uuid',
             'uuid'
-        );
+        )->withTimestamps();
     }
 }
+
+// usages
+
+// $in  = $fuelType->stockLedgers()->sum('qty_in');
+// $out = $fuelType->stockLedgers()->sum('qty_out');
+
+// $currentStock = $in - $out;

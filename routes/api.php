@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\CustomAuthController;
 use App\Models\FuelStation;
+use App\Http\Controllers\Api\FuelSalesController;
 
 Route::prefix('v1')->group(function () {
 
@@ -46,6 +47,13 @@ Route::prefix('v1')->group(function () {
                 'data' => $station
             ]);
         });
+
+
+        Route::get('/fuel-sales-days', [FuelSalesController::class, 'index']);
+        Route::post('/fuel-sales-days', [FuelSalesController::class, 'store']);
+        Route::get('/fuel-sales-days/{uuid}', [FuelSalesController::class, 'show']);
+        Route::post('/fuel-sales-days/{uuid}/submit', [FuelSalesController::class, 'submit']);
+
     });
 });
 
