@@ -18,7 +18,6 @@ use Laravel\Passport\HasApiTokens;
 
 class CustomAuthController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('throttle:5,1')->only(['login', 'apiLogin']);
@@ -156,6 +155,47 @@ class CustomAuthController extends Controller
                 : redirect()->back()->withErrors($fallbackMessage)->withInput();
         }
     }
+
+    // Web Logout
+    public function logout(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+
+            // Logout user
+            Auth::logout();
+
+            // Invalidate session
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            // Audit log
+            AuditLog::create([
+                'user_id'    => $userId,
+                'action'     => 'User logged out (Web)',
+                'type'       => 'auth',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            // Redirect to login
+            return redirect()
+                ->route('login')
+                ->with('success', 'Logged out successfully');
+
+        } catch (\Throwable $e) {
+
+            Log::error('Web Logout Error', [
+                'message' => $e->getMessage(),
+                'ip'      => $request->ip(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Logout failed. Please try again.']);
+        }
+    }
+
 
     // Web Logout
     public function apiLogin(Request $request)
