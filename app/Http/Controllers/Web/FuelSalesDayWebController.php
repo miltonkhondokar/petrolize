@@ -44,12 +44,19 @@ class FuelSalesDayWebController extends Controller
 
         $stations = FuelStation::orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Sales (Day End)', 'url' => route('fuel_sales_days.index')],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_sales_days.index', compact('days', 'filters', 'stations', 'breadcrumb'));
+
+        return view('application.pages.fuel_sales_days.index', compact('days', 'filters', 'stations', 'breadcrumb'));
     }
 
     public function create()
@@ -57,13 +64,19 @@ class FuelSalesDayWebController extends Controller
         $stations  = FuelStation::orderBy('name')->get(['uuid','name']);
         $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Sales (Day End)', 'url' => route('fuel_sales_days.index')],
-            ['title' => 'Create', 'url' => route('fuel_sales_days.create')],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_sales_days.create', compact('stations', 'fuelTypes', 'breadcrumb'));
+
+        return view('application.pages.fuel_sales_days.create', compact('stations', 'fuelTypes', 'breadcrumb'));
     }
 
     public function store(Request $request)
@@ -146,13 +159,19 @@ class FuelSalesDayWebController extends Controller
             ->with(['station','manager','items.fuelType'])
             ->firstOrFail();
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Sales (Day End)', 'url' => route('fuel_sales_days.index')],
-            ['title' => 'Details', 'url' => route('fuel_sales_days.show', $day->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_sales_days.show', compact('day', 'breadcrumb'));
+
+        return view('application.pages.fuel_sales_days.show', compact('day', 'breadcrumb'));
     }
 
     public function edit(string $uuid)
@@ -168,13 +187,19 @@ class FuelSalesDayWebController extends Controller
         $stations  = FuelStation::orderBy('name')->get(['uuid','name']);
         $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Sales (Day End)', 'url' => route('fuel_sales_days.index')],
-            ['title' => 'Edit', 'url' => route('fuel_sales_days.edit', $day->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_sales_days.edit', compact('day', 'stations', 'fuelTypes', 'breadcrumb'));
+
+        return view('application.pages.fuel_sales_days.edit', compact('day', 'stations', 'fuelTypes', 'breadcrumb'));
     }
 
     public function update(Request $request, string $uuid)

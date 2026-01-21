@@ -45,12 +45,19 @@ class FuelPurchaseWebController extends Controller
         $vendors  = Vendor::orderBy('name')->get(['uuid','name']);
 
         // If you use breadcrumb in layout
-        $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Purchases', 'url' => route('fuel_purchases.index')],
-        ];
 
-        return view('fuel_purchases.index', compact('purchases', 'filters', 'stations', 'vendors', 'breadcrumb'));
+        $breadcrumb = [
+                    "page_header" => "Audit Logs",
+                    "first_item_name" => "Users",
+                    "first_item_link" => route('audit.user.index'),
+                    "first_item_icon" => "fa-user-shield",
+                    "second_item_name" => "Activity Log",
+                    "second_item_link" => "#",
+                    "second_item_icon" => "fa-list-check",
+                ];
+
+
+        return view('application.pages.fuel_purchases.index', compact('purchases', 'filters', 'stations', 'vendors', 'breadcrumb'));
     }
 
     public function create()
@@ -60,13 +67,19 @@ class FuelPurchaseWebController extends Controller
         $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
         $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid','name','abbreviation']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Purchases', 'url' => route('fuel_purchases.index')],
-            ['title' => 'Create', 'url' => route('fuel_purchases.create')],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_purchases.create', compact('stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
+
+        return view('application.pages.fuel_purchases.create', compact('stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
     }
 
     public function store(Request $request)
@@ -138,13 +151,19 @@ class FuelPurchaseWebController extends Controller
             ->with(['vendor','station','items.fuelType','items.fuelUnit'])
             ->firstOrFail();
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Purchases', 'url' => route('fuel_purchases.index')],
-            ['title' => 'Details', 'url' => route('fuel_purchases.show', $purchase->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_purchases.show', compact('purchase', 'breadcrumb'));
+
+        return view('application.pages.fuel_purchases.show', compact('purchase', 'breadcrumb'));
     }
 
     public function edit(string $uuid)
@@ -158,13 +177,19 @@ class FuelPurchaseWebController extends Controller
         $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
         $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid','name','abbreviation']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Fuel Purchases', 'url' => route('fuel_purchases.index')],
-            ['title' => 'Edit', 'url' => route('fuel_purchases.edit', $purchase->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('fuel_purchases.edit', compact('purchase', 'stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
+
+        return view('application.pages.fuel_purchases.edit', compact('purchase', 'stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
     }
 
     public function update(Request $request, string $uuid)

@@ -37,25 +37,38 @@ class VendorPaymentWebController extends Controller
 
         $vendors = Vendor::orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Vendor Payments', 'url' => route('vendor_payments.index')],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('vendor_payments.index', compact('payments', 'vendors', 'filters', 'breadcrumb'));
+
+        return view('application.pages.vendor_payments.index', compact('payments', 'vendors', 'filters', 'breadcrumb'));
     }
 
     public function create()
     {
         $vendors = Vendor::orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Vendor Payments', 'url' => route('vendor_payments.index')],
-            ['title' => 'Create', 'url' => route('vendor_payments.create')],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('vendor_payments.create', compact('vendors', 'breadcrumb'));
+
+        return view('application.pages.vendor_payments.create', compact('vendors', 'breadcrumb'));
     }
 
     public function store(Request $request)
@@ -99,13 +112,19 @@ class VendorPaymentWebController extends Controller
             ->orderByDesc('purchase_date')
             ->get();
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Vendor Payments', 'url' => route('vendor_payments.index')],
-            ['title' => 'Details', 'url' => route('vendor_payments.show', $payment->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('vendor_payments.show', compact('payment', 'openPurchases', 'breadcrumb'));
+
+        return view('application.pages.vendor_payments.show', compact('payment', 'openPurchases', 'breadcrumb'));
     }
 
     public function edit(string $uuid)
@@ -113,13 +132,19 @@ class VendorPaymentWebController extends Controller
         $payment = VendorPayment::where('uuid', $uuid)->firstOrFail();
         $vendors = Vendor::orderBy('name')->get(['uuid','name']);
 
+
         $breadcrumb = [
-            ['title' => 'Dashboard', 'url' => route('/')],
-            ['title' => 'Vendor Payments', 'url' => route('vendor_payments.index')],
-            ['title' => 'Edit', 'url' => route('vendor_payments.edit', $payment->uuid)],
+            "page_header" => "Audit Logs",
+            "first_item_name" => "Users",
+            "first_item_link" => route('audit.user.index'),
+            "first_item_icon" => "fa-user-shield",
+            "second_item_name" => "Activity Log",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-list-check",
         ];
 
-        return view('vendor_payments.edit', compact('payment', 'vendors', 'breadcrumb'));
+
+        return view('application.pages.vendor_payments.edit', compact('payment', 'vendors', 'breadcrumb'));
     }
 
     public function update(Request $request, string $uuid)
