@@ -14,7 +14,9 @@
                 <div class="d-flex flex-column">
                     <h4 class="mb-1 text-warning">Validation Errors</h4>
                     <ul class="mb-0">
-                        @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
                     </ul>
                 </div>
             </div>
@@ -26,6 +28,7 @@
                     <i class="ki-duotone ki-basket fs-2 text-primary me-2"><i class="path1"></i><i class="path2"></i></i>
                     Edit Fuel Purchase
                 </h3>
+
                 <a href="{{ route('fuel_purchases.index') }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-arrow-left fs-3 me-2"></i> Back to List
                 </a>
@@ -64,14 +67,23 @@
 
                         <div class="col-md-4">
                             <label class="form-label required">Purchase Date</label>
-                            <input type="date" name="purchase_date" class="form-control form-control-solid"
-                                   value="{{ old('purchase_date', \Carbon\Carbon::parse($purchase->purchase_date)->toDateString()) }}" required />
+                            <input
+                                type="date"
+                                name="purchase_date"
+                                class="form-control form-control-solid"
+                                value="{{ old('purchase_date', \Carbon\Carbon::parse($purchase->purchase_date)->toDateString()) }}"
+                                required
+                            />
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label">Invoice No</label>
-                            <input type="text" name="invoice_no" class="form-control form-control-solid"
-                                   value="{{ old('invoice_no', $purchase->invoice_no) }}" />
+                            <input
+                                type="text"
+                                name="invoice_no"
+                                class="form-control form-control-solid"
+                                value="{{ old('invoice_no', $purchase->invoice_no) }}"
+                            />
                         </div>
 
                         <div class="col-md-3">
@@ -84,14 +96,22 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Truck No</label>
-                            <input type="text" name="truck_no" class="form-control form-control-solid"
-                                   value="{{ old('truck_no', $purchase->truck_no) }}" />
+                            <input
+                                type="text"
+                                name="truck_no"
+                                class="form-control form-control-solid"
+                                value="{{ old('truck_no', $purchase->truck_no) }}"
+                            />
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label">Note</label>
-                            <input type="text" name="note" class="form-control form-control-solid"
-                                   value="{{ old('note', $purchase->note) }}" />
+                            <input
+                                type="text"
+                                name="note"
+                                class="form-control form-control-solid"
+                                value="{{ old('note', $purchase->note) }}"
+                            />
                         </div>
 
                     </div>
@@ -100,7 +120,7 @@
 
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0">Purchase Items</h4>
-                        <button type="button" class="btn btn-sm btn-light-primary" onclick="addRow()">
+                        <button type="button" class="btn btn-sm btn-light-primary" id="add_row_btn">
                             <i class="ki-outline ki-plus fs-2 me-1"></i> Add Row
                         </button>
                     </div>
@@ -117,7 +137,9 @@
                                     <th style="width: 4%" class="text-center">X</th>
                                 </tr>
                             </thead>
+
                             <tbody id="items_body"></tbody>
+
                             <tfoot>
                                 <tr>
                                     <th colspan="4" class="text-end">Grand Total</th>
@@ -147,46 +169,79 @@
 
 @push('scripts')
 <script>
-    const fuelTypes = @json(($fuelTypes ?? [])->map(fn($x)=>['uuid'=>$x->uuid,'name'=>$x->name])->values());
-    const fuelUnits = @json(($fuelUnits ?? [])->map(fn($x)=>['uuid'=>$x->uuid,'name'=>$x->name,'abbr'=>$x->abbreviation])->values());
-    const existing = @json(($purchase->items ?? [])->map(function($it){
-        return [
-            'fuel_type_uuid' => $it->fuel_type_uuid,
-            'fuel_unit_uuid' => $it->fuel_unit_uuid,
-            'quantity' => (float)$it->quantity,
-            'unit_price' => (float)$it->unit_price
-        ];
-    })->values());
+(function () {
+    // ✅ From controller (Option A)
+    const fuelTypes = @json($fuelTypesJs);
+    const fuelUnits = @json($fuelUnitsJs);
+    const existing  = @json($existingJs);
+
+    const body = document.getElementById('items_body');
+    const grandTotalEl = document.getElementById('grand_total');
+    const addBtn = document.getElementById('add_row_btn');
+    const form = document.getElementById('purchase_form');
+
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function buildFuelOptions(selected) {
+        let html = `<option value="">Select fuel</option>`;
+        fuelTypes.forEach(f => {
+            const sel = (selected && selected === f.uuid) ? 'selected' : '';
+            html += `<option value="${escapeHtml(f.uuid)}" ${sel}>${escapeHtml(f.name)}</option>`;
+        });
+        return html;
+    }
+
+    function buildUnitOptions(selected) {
+        let html = `<option value="">Select unit</option>`;
+        fuelUnits.forEach(u => {
+            const label = u.abbr ? `${u.name} (${u.abbr})` : u.name;
+            const sel = (selected && selected === u.uuid) ? 'selected' : '';
+            html += `<option value="${escapeHtml(u.uuid)}" ${sel}>${escapeHtml(label)}</option>`;
+        });
+        return html;
+    }
 
     function rowTemplate(index, data = {}) {
-        const fuelOptions = ['<option value="">Select fuel</option>']
-            .concat(fuelTypes.map(f => `<option value="${f.uuid}" ${data.fuel_type_uuid===f.uuid?'selected':''}>${f.name}</option>`)).join('');
-        const unitOptions = ['<option value="">Select unit</option>']
-            .concat(fuelUnits.map(u => `<option value="${u.uuid}" ${data.fuel_unit_uuid===u.uuid?'selected':''}>${u.name}${u.abbr ? ' ('+u.abbr+')' : ''}</option>`)).join('');
+        const fuelOptions = buildFuelOptions(data.fuel_type_uuid);
+        const unitOptions = buildUnitOptions(data.fuel_unit_uuid);
+
+        const qtyVal = (data.quantity ?? '') === 0 ? '0' : (data.quantity ?? '');
+        const priceVal = (data.unit_price ?? '') === 0 ? '0' : (data.unit_price ?? '');
 
         return `
         <tr>
             <td>
-                <select name="items[${index}][fuel_type_uuid]" class="form-select form-select-solid" required onchange="recalc()">
+                <select name="items[${index}][fuel_type_uuid]" class="form-select form-select-solid" required>
                     ${fuelOptions}
                 </select>
             </td>
             <td>
-                <select name="items[${index}][fuel_unit_uuid]" class="form-select form-select-solid" required onchange="recalc()">
+                <select name="items[${index}][fuel_unit_uuid]" class="form-select form-select-solid" required>
                     ${unitOptions}
                 </select>
             </td>
             <td>
-                <input type="number" step="0.001" min="0.001" name="items[${index}][quantity]"
-                       class="form-control form-control-solid" required value="${data.quantity ?? ''}" oninput="recalc()" />
+                <input type="number" step="0.001" min="0.001"
+                       name="items[${index}][quantity]"
+                       class="form-control form-control-solid"
+                       required value="${escapeHtml(qtyVal)}" />
             </td>
             <td>
-                <input type="number" step="0.01" min="0" name="items[${index}][unit_price]"
-                       class="form-control form-control-solid" required value="${data.unit_price ?? ''}" oninput="recalc()" />
+                <input type="number" step="0.01" min="0"
+                       name="items[${index}][unit_price]"
+                       class="form-control form-control-solid"
+                       required value="${escapeHtml(priceVal)}" />
             </td>
             <td class="text-end fw-bold line_total">0.00</td>
             <td class="text-center">
-                <button type="button" class="btn btn-sm btn-light-danger" onclick="removeRow(this)">
+                <button type="button" class="btn btn-sm btn-light-danger btn-remove">
                     <i class="ki-duotone ki-trash fs-3"></i>
                 </button>
             </td>
@@ -194,15 +249,8 @@
     }
 
     function addRow(data = {}) {
-        const body = document.getElementById('items_body');
         const index = body.children.length;
         body.insertAdjacentHTML('beforeend', rowTemplate(index, data));
-        recalc();
-    }
-
-    function removeRow(btn) {
-        btn.closest('tr').remove();
-        reindexRows();
         recalc();
     }
 
@@ -218,21 +266,59 @@
     function recalc() {
         let grand = 0;
         document.querySelectorAll('#items_body tr').forEach(tr => {
-            const qty = parseFloat(tr.querySelector('input[name*="[quantity]"]').value || '0');
-            const price = parseFloat(tr.querySelector('input[name*="[unit_price]"]').value || '0');
+            const qtyEl = tr.querySelector('input[name*="[quantity]"]');
+            const priceEl = tr.querySelector('input[name*="[unit_price]"]');
+
+            const qty = parseFloat(qtyEl?.value || '0');
+            const price = parseFloat(priceEl?.value || '0');
             const total = qty * price;
-            tr.querySelector('.line_total').innerText = total.toFixed(2);
-            grand += total;
+
+            tr.querySelector('.line_total').innerText = isFinite(total) ? total.toFixed(2) : '0.00';
+            grand += isFinite(total) ? total : 0;
         });
-        document.getElementById('grand_total').innerText = grand.toFixed(2);
+
+        grandTotalEl.innerText = grand.toFixed(2);
     }
 
+    // ✅ events (delegate)
+    body.addEventListener('input', function (e) {
+        const t = e.target;
+        if (t && (t.matches('input[name*="[quantity]"]') || t.matches('input[name*="[unit_price]"]'))) {
+            recalc();
+        }
+    });
+
+    body.addEventListener('change', function (e) {
+        const t = e.target;
+        if (t && (t.matches('select[name*="[fuel_type_uuid]"]') || t.matches('select[name*="[fuel_unit_uuid]"]'))) {
+            recalc();
+        }
+    });
+
+    body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-remove');
+        if (!btn) return;
+        btn.closest('tr').remove();
+        reindexRows();
+        recalc();
+    });
+
+    addBtn.addEventListener('click', function () {
+        addRow();
+    });
+
     // init with existing items (or 1 empty row)
-    if (existing.length) existing.forEach(x => addRow(x));
+    if (existing && existing.length) existing.forEach(x => addRow(x));
     else addRow();
 
-    document.getElementById('purchase_form').addEventListener('submit', async function(e){
+    // submit confirm
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        if (typeof Swal === 'undefined') {
+            e.target.submit();
+            return;
+        }
 
         const result = await Swal.fire({
             title: 'Confirm Update',
@@ -245,5 +331,6 @@
 
         if (result.isConfirmed) e.target.submit();
     });
+})();
 </script>
 @endpush

@@ -177,6 +177,16 @@ class FuelPurchaseWebController extends Controller
         $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
         $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid','name','abbreviation']);
 
+        // ✅ prepare JSON-ready arrays (no Blade map)
+        $fuelTypesJs = $fuelTypes->map(fn ($x) => ['uuid' => $x->uuid, 'name' => $x->name])->values();
+        $fuelUnitsJs = $fuelUnits->map(fn ($x) => ['uuid' => $x->uuid, 'name' => $x->name, 'abbr' => $x->abbreviation])->values();
+        $existingJs  = $purchase->items->map(fn ($it) => [
+            'fuel_type_uuid' => $it->fuel_type_uuid,
+            'fuel_unit_uuid' => $it->fuel_unit_uuid,
+            'quantity'       => (float) $it->quantity,
+            'unit_price'     => (float) $it->unit_price,
+        ])->values();
+
 
         $breadcrumb = [
             "page_header" => "Audit Logs",
@@ -189,8 +199,19 @@ class FuelPurchaseWebController extends Controller
         ];
 
 
-        return view('application.pages.fuel_purchases.edit', compact('purchase', 'stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
+        return view('application.pages.fuel_purchases.edit', compact(
+            'purchase',
+            'stations',
+            'vendors',
+            'fuelTypes',
+            'fuelUnits',
+            'fuelTypesJs',
+            'fuelUnitsJs',
+            'breadcrumb',
+            'existingJs'
+        ));
     }
+
 
     public function update(Request $request, string $uuid)
     {

@@ -11,7 +11,9 @@
         <div class="card shadow-sm">
             <div class="card-header bg-light-primary d-flex justify-content-between align-items-center">
                 <h3 class="card-title">
-                    <i class="ki-duotone ki-basket fs-2 text-primary me-2"><i class="path1"></i><i class="path2"></i></i>
+                    <i class="ki-duotone ki-basket fs-2 text-primary me-2">
+                        <i class="path1"></i><i class="path2"></i>
+                    </i>
                     Fuel Purchase Details
                 </h3>
                 <div class="d-flex gap-2">
@@ -34,19 +36,35 @@
                     elseif ($purchase->status === 'draft') $badge = 'info';
                 @endphp
 
+                {{-- ✅ Show validation errors so "nothing happened" never occurs --}}
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <div class="fw-bold mb-2">Please fix the following:</div>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="row g-4">
                     <div class="col-md-6">
                         <div class="d-flex flex-column gap-4">
-                            <div><span class="fw-bold text-gray-600">Purchase Date:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Purchase Date:</span>
                                 <span class="text-muted">{{ \Carbon\Carbon::parse($purchase->purchase_date)->format('d M Y') }}</span>
                             </div>
-                            <div><span class="fw-bold text-gray-600">Station:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Station:</span>
                                 <span class="fw-semibold">{{ $purchase->station->name ?? '-' }}</span>
                             </div>
-                            <div><span class="fw-bold text-gray-600">Vendor:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Vendor:</span>
                                 <span class="fw-semibold">{{ $purchase->vendor->name ?? '-' }}</span>
                             </div>
-                            <div><span class="fw-bold text-gray-600">Invoice No:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Invoice No:</span>
                                 <span class="text-muted">{{ $purchase->invoice_no ?? '-' }}</span>
                             </div>
                         </div>
@@ -54,24 +72,28 @@
 
                     <div class="col-md-6">
                         <div class="d-flex flex-column gap-4">
-                            <div><span class="fw-bold text-gray-600">Transport By:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Transport By:</span>
                                 <span class="text-muted">{{ ucfirst($purchase->transport_by ?? '-') }}</span>
                             </div>
-                            <div><span class="fw-bold text-gray-600">Truck No:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Truck No:</span>
                                 <span class="text-muted">{{ $purchase->truck_no ?? '-' }}</span>
                             </div>
                             <div>
                                 <span class="fw-bold text-gray-600">Status:</span>
                                 <span class="badge badge-light-{{ $badge }}">{{ str_replace('_',' ', ucfirst($purchase->status)) }}</span>
                             </div>
-                            <div><span class="fw-bold text-gray-600">Total Amount:</span>
+                            <div>
+                                <span class="fw-bold text-gray-600">Total Amount:</span>
                                 <span class="fw-bold">{{ number_format((float)$purchase->total_amount, 2) }}</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-md-12">
-                        <div><span class="fw-bold text-gray-600">Note:</span>
+                        <div>
+                            <span class="fw-bold text-gray-600">Note:</span>
                             <span class="text-muted">{{ $purchase->note ?? '—' }}</span>
                         </div>
                     </div>
@@ -152,11 +174,20 @@
                                                 <td class="fw-semibold">{{ $it->fuelType->name ?? '-' }}</td>
                                                 <td class="text-end">{{ number_format($remaining, 3) }}</td>
                                                 <td class="text-end">
+                                                    {{-- ✅ REQUIRED by controller validation --}}
+                                                    <input type="hidden" name="items[{{ $idx }}][item_uuid]" value="{{ $it->uuid }}">
+
+                                                    {{-- optional (not used by controller, but safe if you want it) --}}
                                                     <input type="hidden" name="items[{{ $idx }}][fuel_type_uuid]" value="{{ $it->fuel_type_uuid }}">
-                                                    <input type="number" step="0.001" min="0" max="{{ $remaining }}"
+
+                                                    <input type="number"
+                                                           step="0.001"
+                                                           min="0"
+                                                           max="{{ $remaining }}"
                                                            name="items[{{ $idx }}][received_qty]"
                                                            class="form-control form-control-solid text-end"
-                                                           value="0">
+                                                           value="0"
+                                                           {{ $remaining <= 0 ? 'readonly' : '' }}>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -184,14 +215,28 @@
 
 @push('scripts')
 <script>
-    document.getElementById('receive_form').addEventListener('submit', async function(e){
+(function () {
+    const form = document.getElementById('receive_form');
+    if (!form) return;
+
+    form.addEventListener('submit', async function(e){
         e.preventDefault();
 
         const inputs = [...document.querySelectorAll('input[name$="[received_qty]"]')];
         const totalReceive = inputs.reduce((sum, el) => sum + (parseFloat(el.value || '0')), 0);
 
         if (totalReceive <= 0) {
-            await Swal.fire('Validation Error', 'Please enter receive quantity for at least one item.', 'warning');
+            if (typeof Swal !== 'undefined') {
+                await Swal.fire('Validation Error', 'Please enter receive quantity for at least one item.', 'warning');
+            } else {
+                alert('Please enter receive quantity for at least one item.');
+            }
+            return;
+        }
+
+        // ✅ If SweetAlert isn't loaded, still submit
+        if (typeof Swal === 'undefined') {
+            e.target.submit();
             return;
         }
 
@@ -206,5 +251,6 @@
 
         if (result.isConfirmed) e.target.submit();
     });
+})();
 </script>
 @endpush
