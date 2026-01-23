@@ -49,6 +49,7 @@ class DatabaseSeeder extends Seeder
             CostEntrySeeder::class,
 
             //Fuel Station complaints
+            ComplaintCategorySeeder::class,
             FuelStationComplaintSeeder::class,
 
             //Fuel Station fuel readings

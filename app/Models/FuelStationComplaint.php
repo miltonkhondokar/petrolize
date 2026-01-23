@@ -15,7 +15,7 @@ class FuelStationComplaint extends Model
     protected $fillable = [
         'uuid',
         'fuel_station_uuid',
-        'category',
+        'complaint_category_uuid',
         'title',
         'description',
         'status',
@@ -42,5 +42,14 @@ class FuelStationComplaint extends Model
     public function fuelStation()
     {
         return $this->belongsTo(FuelStation::class, 'fuel_station_uuid', 'uuid');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(
+            ComplaintCategory::class,
+            'complaint_category_uuid',
+            'uuid'
+        );
     }
 }

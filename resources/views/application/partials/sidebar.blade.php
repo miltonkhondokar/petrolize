@@ -124,11 +124,7 @@
                     </div>
 
                     <!-- Vendor Payments Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(
-                        ['vendor_payments.index', 'vendor_payments.create', 'vendor_payments.show', 'vendor_payments.edit'],
-                        null,
-                        'menu',
-                    ) }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['vendor_payments.*'], null,'menu',) }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -162,6 +158,60 @@
                                     href="{{ route('vendor_payments.create') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Add Payment</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complaint Management -->
+                    <div class="menu-item menu-accordion {{ active_menu(['complaints.*'],null,'menu',) }}"
+                        data-kt-menu-trigger="click">
+                        <span class="menu-link">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-abstract-20 fs-1 text-danger">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Complaints</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['complaints.*'],null,'menu',) }}">
+                            <!-- Fuel Station Complaints -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('complaints.*', null, 'link') }}"
+                                    href="{{ route('complaints.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Complaints</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost Entry Management -->
+                    <div class="menu-item menu-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}"
+                        data-kt-menu-trigger="click">
+                        <span class="menu-link">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-abstract-20 fs-1 text-danger">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Cost Entry</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}">
+                            <!-- Fuel Station Complaints -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('cost-entries.*', null, 'link') }}"
+                                    href="{{ route('cost-entries.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Cost Entry</span>
                                 </a>
                             </div>
                         </div>
@@ -274,7 +324,7 @@
                     </div>
 
                     <!-- REFERENCE DATA -->
-                    <div class="menu-item menu-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel.*', 'fuel-station-fuel-type.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -284,7 +334,7 @@
                             <span class="menu-arrow"></span>
                         </span>
                         <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}">
+                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-station-fuel-type.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}">
 
                             <!-- Fuel Units -->
                             <div class="menu-item">
@@ -340,19 +390,17 @@
                                 </a>
                             </div>
 
-                            <!-- Fuel Station Complaints -->
+                            <!-- Complaints Categories -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('complaint-category.*', null, 'link') }}"
                                     href="{{ route('complaint-category.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Fuel Station Complaints</span>
+                                    <span class="menu-title">Complaint Categories</span>
                                 </a>
                             </div>
 
                         </div>
                     </div>
-
-
 
                     <!-- REPORTS -->
                     <div class="menu-item pt-5">

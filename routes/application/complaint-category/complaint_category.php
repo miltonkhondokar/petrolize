@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Complaint\ComplaintController;
+use App\Http\Controllers\ReferenceData\Complaint\ComplaintCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,8 +11,8 @@ use App\Http\Controllers\Complaint\ComplaintController;
 */
 
 Route::middleware(['auth', 'auth.check'])->group(function () {
-    Route::patch('complaint-category-status-update/{uuid}', [ComplaintController::class, 'statusUpdate'])
-        ->name('complaint-category.status-update');
+    Route::patch('complaint-category-status-update/{uuid}', [ComplaintCategoryController::class, 'statusUpdate'])
+        ->name('complaint-category-status-update');
 
-    Route::resource('complaint-category', ComplaintController::class);
+    Route::resource('complaint-category', ComplaintCategoryController::class);
 });

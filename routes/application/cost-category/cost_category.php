@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Cost\CostCategoryController;
+use App\Http\Controllers\ReferenceData\Cost\CostCategoryController;
 
 /*
 |--------------------------------------------------------------------------

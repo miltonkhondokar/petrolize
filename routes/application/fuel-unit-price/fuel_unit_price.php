@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Fuel\FuelUnitPriceController;
+use App\Http\Controllers\ReferenceData\Fuel\FuelUnitPriceController;
 
 /*
 |--------------------------------------------------------------------------

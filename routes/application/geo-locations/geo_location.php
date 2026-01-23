@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\GeoLocation\RegionController;
-use App\Http\Controllers\GeoLocation\GovernorateController;
-use App\Http\Controllers\GeoLocation\CityController;
-use App\Http\Controllers\GeoLocation\CenterController;
+use App\Http\Controllers\ReferenceData\GeoLocation\RegionController;
+use App\Http\Controllers\ReferenceData\GeoLocation\GovernorateController;
+use App\Http\Controllers\ReferenceData\GeoLocation\CityController;
+use App\Http\Controllers\ReferenceData\GeoLocation\CenterController;
 
 /*
 |--------------------------------------------------------------------------

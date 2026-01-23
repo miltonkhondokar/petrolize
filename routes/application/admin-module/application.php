@@ -4,8 +4,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\CustomAuthController;
 use App\Http\Controllers\Command\OptimizeController;
-use App\Http\Controllers\UserMasterDataController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReferenceData\User\UserMasterDataController;
+use App\Http\Controllers\App\Dashboard\DashboardController;
 
 Route::get('/', function () {
     return Auth::check()

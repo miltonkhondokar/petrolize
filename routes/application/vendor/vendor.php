@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Vendor\VendorController;
+use App\Http\Controllers\ReferenceData\Vendor\VendorController;
 
 /*
 |--------------------------------------------------------------------------
