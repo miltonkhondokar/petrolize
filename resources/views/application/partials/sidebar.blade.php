@@ -123,6 +123,49 @@
                         </div>
                     </div>
 
+                    <!-- Vendor Payments Management -->
+                    <div class="menu-item menu-accordion {{ active_menu(
+                        ['vendor_payments.index', 'vendor_payments.create', 'vendor_payments.show', 'vendor_payments.edit'],
+                        null,
+                        'menu',
+                    ) }}"
+                        data-kt-menu-trigger="click">
+                        <span class="menu-link">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-wallet fs-1 text-success">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Payments</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(
+                                ['vendor_payments.index', 'vendor_payments.create', 'vendor_payments.show', 'vendor_payments.edit'],
+                                null,
+                                'menu',
+                            ) }}">
+                            {{-- Payment List --}}
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu(['vendor_payments.index', 'vendor_payments.show'], null, 'link') }}"
+                                    href="{{ route('vendor_payments.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Payment List</span>
+                                </a>
+                            </div>
+
+                            {{-- Create Payment --}}
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu(['vendor_payments.create'], null, 'link') }}"
+                                    href="{{ route('vendor_payments.create') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Add Payment</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- MASTER DATA -->
                     <div class="menu-item pt-5">

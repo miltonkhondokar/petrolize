@@ -23,6 +23,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/logout', [CustomAuthController::class, 'apiLogout']);
             Route::get('/user', [CustomAuthController::class, 'apiUser']);
         });
+
+        // New route for refresh token
+        Route::post('/refresh', [CustomAuthController::class, 'apiRefreshToken']);
     });
 
     /*

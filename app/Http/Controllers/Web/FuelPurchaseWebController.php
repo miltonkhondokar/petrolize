@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\FuelPurchase;
 use App\Models\FuelPurchaseItem;
 use App\Models\FuelStation;
@@ -14,14 +15,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Auth;
 
 class FuelPurchaseWebController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->only(['fuel_station_uuid','vendor_uuid','status','from','to']);
+        $filters = $request->only(['fuel_station_uuid', 'vendor_uuid', 'status', 'from', 'to']);
 
-        $q = FuelPurchase::with(['vendor','station'])->latest();
+        $q = FuelPurchase::with(['vendor', 'station'])->latest();
 
         if (!empty($filters['fuel_station_uuid'])) {
             $q->where('fuel_station_uuid', $filters['fuel_station_uuid']);
@@ -41,43 +43,38 @@ class FuelPurchaseWebController extends Controller
 
         $purchases = $q->paginate(20);
 
-        $stations = FuelStation::orderBy('name')->get(['uuid','name']);
-        $vendors  = Vendor::orderBy('name')->get(['uuid','name']);
-
-        // If you use breadcrumb in layout
+        $stations = FuelStation::orderBy('name')->get(['uuid', 'name']);
+        $vendors  = Vendor::orderBy('name')->get(['uuid', 'name']);
 
         $breadcrumb = [
-                    "page_header" => "Audit Logs",
-                    "first_item_name" => "Users",
-                    "first_item_link" => route('audit.user.index'),
-                    "first_item_icon" => "fa-user-shield",
-                    "second_item_name" => "Activity Log",
-                    "second_item_link" => "#",
-                    "second_item_icon" => "fa-list-check",
-                ];
-
+            "page_header" => "Fuel Purchases",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route(('/')),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Fuel Purchases",
+            "second_item_link" => "#",
+            "second_item_icon" => "fa-boxes",
+        ];
 
         return view('application.pages.fuel_purchases.index', compact('purchases', 'filters', 'stations', 'vendors', 'breadcrumb'));
     }
 
     public function create()
     {
-        $stations  = FuelStation::orderBy('name')->get(['uuid','name']);
-        $vendors   = Vendor::orderBy('name')->get(['uuid','name']);
-        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
-        $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid','name','abbreviation']);
-
+        $stations  = FuelStation::orderBy('name')->get(['uuid', 'name']);
+        $vendors   = Vendor::orderBy('name')->get(['uuid', 'name']);
+        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid', 'name']);
+        $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid', 'name', 'abbreviation']);
 
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
+            "page_header" => "Fuel Purchases",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route(('/')),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Fuel Purchases",
             "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "second_item_icon" => "fa-boxes",
         ];
-
 
         return view('application.pages.fuel_purchases.create', compact('stations', 'vendors', 'fuelTypes', 'fuelUnits', 'breadcrumb'));
     }
@@ -92,8 +89,7 @@ class FuelPurchaseWebController extends Controller
             'transport_by'      => 'nullable|in:vendor,owner',
             'truck_no'          => 'nullable|string|max:255',
             'note'              => 'nullable|string',
-
-            'items' => 'required|array|min:1',
+            'items'             => 'required|array|min:1',
             'items.*.fuel_type_uuid' => 'required|uuid',
             'items.*.fuel_unit_uuid' => 'required|uuid',
             'items.*.quantity'       => 'required|numeric|min:0.001',
@@ -104,64 +100,86 @@ class FuelPurchaseWebController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        DB::transaction(function () use ($request) {
+        try {
+            DB::transaction(function () use ($request, &$purchase) {
 
-            $purchase = FuelPurchase::create([
-                'fuel_station_uuid' => $request->fuel_station_uuid,
-                'vendor_uuid'       => $request->vendor_uuid,
-                'purchase_date'     => $request->purchase_date,
-                'invoice_no'        => $request->invoice_no,
-                'transport_by'      => $request->transport_by ?? 'vendor',
-                'truck_no'          => $request->truck_no,
-                'status'            => 'draft',
-                'note'              => $request->note,
-                'total_amount'      => 0,
-            ]);
-
-            $total = 0.0;
-
-            foreach ($request->items as $it) {
-                $qty   = (float)$it['quantity'];
-                $price = (float)$it['unit_price'];
-
-                FuelPurchaseItem::create([
-                    'fuel_purchase_uuid' => $purchase->uuid,
-                    'fuel_type_uuid'     => $it['fuel_type_uuid'],
-                    'fuel_unit_uuid'     => $it['fuel_unit_uuid'],
-                    'quantity'           => $qty,
-                    'received_qty'       => 0,
-                    'unit_price'         => $price,
-                    'is_active'          => true,
+                $purchase = FuelPurchase::create([
+                    'fuel_station_uuid' => $request->fuel_station_uuid,
+                    'vendor_uuid'       => $request->vendor_uuid,
+                    'purchase_date'     => $request->purchase_date,
+                    'invoice_no'        => $request->invoice_no,
+                    'transport_by'      => $request->transport_by ?? 'vendor',
+                    'truck_no'          => $request->truck_no,
+                    'status'            => 'draft',
+                    'note'              => $request->note,
+                    'total_amount'      => 0,
                 ]);
 
-                // don't depend on line_total column/accessor
-                $total += ($qty * $price);
-            }
+                $total = 0.0;
 
-            $purchase->update(['total_amount' => $total]);
-        });
+                foreach ($request->items as $it) {
+                    $qty   = (float)$it['quantity'];
+                    $price = (float)$it['unit_price'];
 
-        Alert::success('Success', 'Purchase created successfully');
-        return redirect()->route('fuel_purchases.index');
+                    FuelPurchaseItem::create([
+                        'fuel_purchase_uuid' => $purchase->uuid,
+                        'fuel_type_uuid'     => $it['fuel_type_uuid'],
+                        'fuel_unit_uuid'     => $it['fuel_unit_uuid'],
+                        'quantity'           => $qty,
+                        'received_qty'       => 0,
+                        'unit_price'         => $price,
+                        'is_active'          => true,
+                    ]);
+
+                    $total += ($qty * $price);
+                }
+
+                $purchase->update(['total_amount' => $total]);
+
+                // Audit log
+                AuditLog::create([
+                    'user_id'    => Auth::id(),
+                    'action'     => "Created Fuel Purchase {$purchase->uuid}",
+                    'type'       => 'fuel_purchase',
+                    'item_id'    => $purchase->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            });
+
+            Alert::success('Success', 'Fuel Purchase created successfully.');
+            return redirect()->route('fuel_purchases.index');
+        } catch (\Throwable $e) {
+            // log error to audit
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => "Failed to create Fuel Purchase: " . $e->getMessage(),
+                'type'       => 'fuel_purchase_error',
+                'item_id'    => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            Alert::error('Error', $e->getMessage());
+            return back()->withInput();
+        }
     }
 
     public function show(string $uuid)
     {
         $purchase = FuelPurchase::where('uuid', $uuid)
-            ->with(['vendor','station','items.fuelType','items.fuelUnit'])
+            ->with(['vendor', 'station', 'items.fuelType', 'items.fuelUnit'])
             ->firstOrFail();
 
-
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
+            "page_header" => "Fuel Purchases",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route(('/')),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Fuel Purchases",
             "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "second_item_icon" => "fa-boxes",
         ];
-
 
         return view('application.pages.fuel_purchases.show', compact('purchase', 'breadcrumb'));
     }
@@ -169,35 +187,23 @@ class FuelPurchaseWebController extends Controller
     public function edit(string $uuid)
     {
         $purchase = FuelPurchase::where('uuid', $uuid)
-            ->with(['items'])
+            ->with('items')
             ->firstOrFail();
 
-        $stations  = FuelStation::orderBy('name')->get(['uuid','name']);
-        $vendors   = Vendor::orderBy('name')->get(['uuid','name']);
-        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid','name']);
-        $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid','name','abbreviation']);
-
-        // ✅ prepare JSON-ready arrays (no Blade map)
-        $fuelTypesJs = $fuelTypes->map(fn ($x) => ['uuid' => $x->uuid, 'name' => $x->name])->values();
-        $fuelUnitsJs = $fuelUnits->map(fn ($x) => ['uuid' => $x->uuid, 'name' => $x->name, 'abbr' => $x->abbreviation])->values();
-        $existingJs  = $purchase->items->map(fn ($it) => [
-            'fuel_type_uuid' => $it->fuel_type_uuid,
-            'fuel_unit_uuid' => $it->fuel_unit_uuid,
-            'quantity'       => (float) $it->quantity,
-            'unit_price'     => (float) $it->unit_price,
-        ])->values();
-
+        $stations  = FuelStation::orderBy('name')->get(['uuid', 'name']);
+        $vendors   = Vendor::orderBy('name')->get(['uuid', 'name']);
+        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid', 'name']);
+        $fuelUnits = FuelUnit::where('is_active', true)->orderBy('name')->get(['uuid', 'name', 'abbreviation']);
 
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
+            "page_header" => "Fuel Purchases",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route(('/')),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Fuel Purchases",
             "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "second_item_icon" => "fa-boxes",
         ];
-
 
         return view('application.pages.fuel_purchases.edit', compact(
             'purchase',
@@ -205,13 +211,9 @@ class FuelPurchaseWebController extends Controller
             'vendors',
             'fuelTypes',
             'fuelUnits',
-            'fuelTypesJs',
-            'fuelUnitsJs',
-            'breadcrumb',
-            'existingJs'
+            'breadcrumb'
         ));
     }
-
 
     public function update(Request $request, string $uuid)
     {
@@ -223,8 +225,7 @@ class FuelPurchaseWebController extends Controller
             'transport_by'      => 'nullable|in:vendor,owner',
             'truck_no'          => 'nullable|string|max:255',
             'note'              => 'nullable|string',
-
-            'items' => 'required|array|min:1',
+            'items'             => 'required|array|min:1',
             'items.*.fuel_type_uuid' => 'required|uuid',
             'items.*.fuel_unit_uuid' => 'required|uuid',
             'items.*.quantity'       => 'required|numeric|min:0.001',
@@ -235,127 +236,79 @@ class FuelPurchaseWebController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        DB::transaction(function () use ($request, $uuid) {
+        try {
+            DB::transaction(function () use ($request, $uuid, &$purchase) {
 
-            $purchase = FuelPurchase::where('uuid', $uuid)
-                ->with('items')
-                ->lockForUpdate()
-                ->firstOrFail();
+                $purchase = FuelPurchase::where('uuid', $uuid)
+                    ->with('items')
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            // If already received any qty, block editing to avoid mismatch with ledger
-            $anyReceived = $purchase->items->some(fn ($it) => (float)$it->received_qty > 0);
-            if ($anyReceived) {
-                abort(422, 'Cannot edit purchase items after receiving has started. Create a new purchase or adjust via ledger.');
-            }
+                $anyReceived = $purchase->items->some(fn($it) => (float)$it->received_qty > 0);
+                if ($anyReceived) {
+                    abort(422, 'Cannot edit purchase items after receiving has started.');
+                }
 
-            $purchase->update([
-                'fuel_station_uuid' => $request->fuel_station_uuid,
-                'vendor_uuid'       => $request->vendor_uuid,
-                'purchase_date'     => $request->purchase_date,
-                'invoice_no'        => $request->invoice_no,
-                'transport_by'      => $request->transport_by ?? 'vendor',
-                'truck_no'          => $request->truck_no,
-                'note'              => $request->note,
-            ]);
-
-            // Replace items (simple approach)
-            FuelPurchaseItem::where('fuel_purchase_uuid', $purchase->uuid)->delete();
-
-            $total = 0.0;
-            foreach ($request->items as $it) {
-                $qty   = (float)$it['quantity'];
-                $price = (float)$it['unit_price'];
-
-                FuelPurchaseItem::create([
-                    'fuel_purchase_uuid' => $purchase->uuid,
-                    'fuel_type_uuid'     => $it['fuel_type_uuid'],
-                    'fuel_unit_uuid'     => $it['fuel_unit_uuid'],
-                    'quantity'           => $qty,
-                    'received_qty'       => 0,
-                    'unit_price'         => $price,
-                    'is_active'          => true,
+                $purchase->update([
+                    'fuel_station_uuid' => $request->fuel_station_uuid,
+                    'vendor_uuid'       => $request->vendor_uuid,
+                    'purchase_date'     => $request->purchase_date,
+                    'invoice_no'        => $request->invoice_no,
+                    'transport_by'      => $request->transport_by ?? 'vendor',
+                    'truck_no'          => $request->truck_no,
+                    'note'              => $request->note,
                 ]);
 
-                $total += ($qty * $price);
-            }
+                FuelPurchaseItem::where('fuel_purchase_uuid', $purchase->uuid)->delete();
 
-            $purchase->update([
-                'total_amount' => $total,
-                'status'       => 'draft',
-            ]);
-        });
+                $total = 0.0;
+                foreach ($request->items as $it) {
+                    $qty   = (float)$it['quantity'];
+                    $price = (float)$it['unit_price'];
 
-        Alert::success('Success', 'Purchase updated successfully');
-        return redirect()->route('fuel_purchases.show', $uuid);
-    }
+                    FuelPurchaseItem::create([
+                        'fuel_purchase_uuid' => $purchase->uuid,
+                        'fuel_type_uuid'     => $it['fuel_type_uuid'],
+                        'fuel_unit_uuid'     => $it['fuel_unit_uuid'],
+                        'quantity'           => $qty,
+                        'received_qty'       => 0,
+                        'unit_price'         => $price,
+                        'is_active'          => true,
+                    ]);
 
-    public function receive(Request $request, string $uuid)
-    {
-        // allow 0, but require at least one positive qty
-        $validator = Validator::make($request->all(), [
-            'items' => 'required|array|min:1',
-            'items.*.item_uuid'      => 'required|uuid',
-            'items.*.received_qty'   => 'required|numeric|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $hasPositive = collect($request->items)->some(fn ($x) => (float)($x['received_qty'] ?? 0) > 0);
-        if (!$hasPositive) {
-            return back()->withErrors(['items' => 'Please enter receive quantity for at least one item.'])->withInput();
-        }
-
-        DB::transaction(function () use ($request, $uuid) {
-
-            $purchase = FuelPurchase::where('uuid', $uuid)
-                ->with('items')
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            foreach ($request->items as $r) {
-                $qtyNow = (float)$r['received_qty'];
-                if ($qtyNow <= 0) {
-                    continue;
+                    $total += ($qty * $price);
                 }
 
-                $item = $purchase->items->firstWhere('uuid', $r['item_uuid']);
-                if (!$item) {
-                    abort(422, "Purchase item not found.");
-                }
-
-                $newReceived = (float)$item->received_qty + $qtyNow;
-                if ($newReceived > (float)$item->quantity + 0.0001) {
-                    abort(422, "Received qty exceeds purchased qty.");
-                }
-
-                $item->update(['received_qty' => $newReceived]);
-
-                StockLedgerService::add([
-                    'fuel_station_uuid' => $purchase->fuel_station_uuid,
-                    'fuel_type_uuid'    => $item->fuel_type_uuid,
-                    'fuel_unit_uuid'    => $item->fuel_unit_uuid,
-                    'txn_type'          => 'purchase_receive',
-                    'ref_uuid'          => $purchase->uuid,
-                    'txn_date'          => $purchase->purchase_date,
-                    'qty_in'            => $qtyNow,
-                    'qty_out'           => 0,
-                    'note'              => 'Purchase received (Web)',
+                $purchase->update([
+                    'total_amount' => $total,
+                    'status'       => 'draft',
                 ]);
-            }
 
-            $purchase->refresh();
+                // Audit log
+                AuditLog::create([
+                    'user_id'    => Auth::id(),
+                    'action'     => "Updated Fuel Purchase {$purchase->uuid}",
+                    'type'       => 'fuel_purchase',
+                    'item_id'    => $purchase->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            });
 
-            $allReceived = $purchase->items->every(fn ($it) => (float)$it->received_qty >= (float)$it->quantity);
-            $anyReceived = $purchase->items->some(fn ($it) => (float)$it->received_qty > 0);
-
-            $purchase->update([
-                'status' => $allReceived ? 'received_full' : ($anyReceived ? 'received_partial' : 'draft')
+            Alert::success('Success', 'Fuel Purchase updated successfully.');
+            return redirect()->route('fuel_purchases.show', $uuid);
+        } catch (\Throwable $e) {
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => "Failed to update Fuel Purchase {$uuid}: " . $e->getMessage(),
+                'type'       => 'fuel_purchase_error',
+                'item_id'    => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ]);
-        });
 
-        Alert::success('Success', 'Stock received and ledger updated.');
-        return back();
+            Alert::error('Error', $e->getMessage());
+            return back()->withInput();
+        }
     }
 }

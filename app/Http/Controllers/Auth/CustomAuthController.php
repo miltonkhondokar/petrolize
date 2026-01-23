@@ -15,6 +15,7 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use App\Models\AuditLog;
 use Laravel\Passport\Token;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Http;
 
 class CustomAuthController extends Controller
 {
@@ -198,7 +199,7 @@ class CustomAuthController extends Controller
 
 
     // Web Logout
-    public function apiLogin(Request $request)
+    public function apiLoginBak(Request $request)
     {
         try {
             // 1️⃣ Validate request
@@ -335,7 +336,7 @@ class CustomAuthController extends Controller
     }
 
     // API Token Refresh (optional but recommended)
-    public function apiRefreshToken(Request $request)
+    public function apiRefreshTokenBak(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -368,7 +369,7 @@ class CustomAuthController extends Controller
     }
 
     // Get Current User (API)
-    public function apiUser(Request $request)
+    public function apiUserBak(Request $request)
     {
         try {
             $user = $request->user();
@@ -400,10 +401,148 @@ class CustomAuthController extends Controller
     }
 
     // Check Authentication (API)
-    public function apiCheckAuth(Request $request)
+    public function apiCheckAuthBak(Request $request)
     {
         return response()->json([
             'authenticated' => $request->user() ? true : false,
         ]);
+    }
+
+
+    public function apiLogin(Request $request)
+    {
+        try {
+            // 1️⃣ Validate request
+            $validator = Validator::make($request->all(), [
+                'email'       => 'required|email',
+                'password'    => 'required|string|min:6',
+                'device_name' => 'required|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+
+            // 2️⃣ Proxy request to Passport /oauth/token
+            $response = Http::asForm()->post(url('/oauth/token'), [
+                'grant_type'    => 'password',
+                'client_id'     => config('services.passport.client_id'),
+                'client_secret' => config('services.passport.client_secret'),
+                'username'      => $request->email,
+                'password'      => $request->password,
+                'scope'         => '*',
+            ]);
+
+            // 3️⃣ Handle invalid credentials or other errors
+            if ($response->failed()) {
+                AuditLog::create([
+                    'user_id'    => null,
+                    'action'     => 'Failed API login attempt',
+                    'type'       => 'auth',
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'data'       => ['email' => $request->email, 'response' => $response->json()],
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid credentials',
+                    'error'   => $response->json(),
+                ], 401);
+            }
+
+            // 4️⃣ Optional: Audit successful login
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => 'API login successful',
+                'type'       => 'auth',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'data'       => ['device' => $request->device_name],
+            ]);
+
+            // 5️⃣ Return Passport response to mobile app
+            return response()->json([
+                'success' => true,
+                'data'    => $response->json(), // contains access_token, refresh_token, expires_in, token_type
+            ], 200);
+        } catch (\Throwable $e) {
+            Log::error('API Login Error', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication server error',
+            ], 500);
+        }
+    }
+
+    public function apiRefreshToken(Request $request)
+    {
+        try {
+            $request->validate([
+                'refresh_token' => 'required|string',
+            ]);
+
+            $response = Http::asForm()->post(url('/oauth/token'), [
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $request->refresh_token,
+                'client_id'     => config('services.passport.client_id'),
+                'client_secret' => config('services.passport.client_secret'),
+                'scope'         => '*',
+            ]);
+
+            if ($response->failed()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid refresh token',
+                    'error'   => $response->json(),
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data'    => $response->json(),
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Token Refresh Error', ['message' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Token refresh failed'], 500);
+        }
+    }
+
+    public function apiUser(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not authenticated',
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => [
+                    'uuid'       => $user->uuid,
+                    'name'       => $user->name,
+                    'email'      => $user->email,
+                    'created_at' => $user->created_at->toISOString(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Get User Error', ['message' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve user',
+            ], 500);
+        }
     }
 }

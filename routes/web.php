@@ -77,6 +77,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vendor-payments/{uuid}', [VendorPaymentWebController::class, 'show'])->name('vendor_payments.show');
     Route::post('/vendor-payments/{uuid}/allocate', [VendorPaymentWebController::class, 'allocate'])->name('vendor_payments.allocate');
 
+    Route::get('/vendor-payments/unpaid/{vendor_uuid}', [VendorPaymentWebController::class, 'unpaidPurchases'])
+        ->name('vendor_payments.unpaid');
 });
 
 
