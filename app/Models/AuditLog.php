@@ -14,9 +14,15 @@ class AuditLog extends Model
         'user_id',
         'action',
         'type',
+        'event',
+        'model',
+        'model_uuid',
         'item_id',
+        'exception_class',
+        'exception_code',
         'ip_address',
         'user_agent',
+        'meta',
     ];
 
     protected $casts = [

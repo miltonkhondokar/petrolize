@@ -14,12 +14,35 @@ return new class extends Migration
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->bigIncrements('id'); // Primary key
             $table->uuid('uuid')->unique();
-            $table->unsignedBigInteger('user_id')->nullable(); // Just store user ID, no FK
-            $table->string('action');
-            $table->string('type')->default('others'); // 'user_login', 'password', 'folder', etc.
-            $table->unsignedBigInteger('item_id')->nullable();
+
+            // User who triggered the action
+            $table->unsignedBigInteger('user_id')->nullable()->index();
+
+            // Human-readable description of what happened
+            $table->text('action');
+
+            // Logical type/category (like your old 'type' column)
+            $table->string('type', 100)->default('others')->index();
+
+            // Optional event type (create, update, delete, receive, login, error, etc.)
+            $table->string('event', 50)->nullable()->index();
+
+            // Optional related model info
+            $table->string('model', 100)->nullable();         // e.g., FuelPurchase
+            $table->uuid('model_uuid')->nullable()->index();  // UUID of the model instance
+            $table->unsignedBigInteger('item_id')->nullable()->index(); // Old compatibility
+
+            // Optional exception info
+            $table->string('exception_class', 255)->nullable();
+            $table->string('exception_code', 50)->nullable();
+
+            // Request context
             $table->ipAddress('ip_address')->nullable();
             $table->text('user_agent')->nullable();
+
+            // Optional extra JSON meta for future-proofing
+            $table->json('meta')->nullable();
+
             $table->timestamps(); // created_at + updated_at
         });
     }
