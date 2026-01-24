@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Audit;
+namespace App\Http\Controllers\System\Audit;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -32,6 +32,6 @@ class UserAuditController extends Controller
             "second_item_icon" => "fa-list-check",
         ];
 
-        return view('application.pages.audit.user.index', compact('breadcrumb', 'auditLogs'));
+        return view('application.pages.system.audit.user.index', compact('breadcrumb', 'auditLogs'));
     }
 }

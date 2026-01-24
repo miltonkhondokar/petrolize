@@ -10,12 +10,18 @@
             <div class="row">
                 <div class="col-12">
                     <!-- Card for Permissions Assignment -->
-                    <div class="card mt-3">
-                        <!-- Card Header -->
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title">Permissions: <strong>{{ $role->name }}</strong></h4>
-                            <a href="{{ route('roles.index') }}" class="btn btn-info btn-sm">
-                                <i class="far fa-list-alt"></i> Role List
+                    <div class="card card-flush shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                            <h3 class="card-title">
+                                <i class="ki-duotone ki-pencil fs-2 text-primary me-2">
+                                    <i class="path1"></i><i class="path2"></i>
+                                </i>
+                                Permissions For Role&nbsp;<strong>{{ $role->name }}</strong>
+                            </h3>
+
+                            <a href="{{ route('roles.index') }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-arrow-left fs-3 me-2"></i>
+                                Back to List
                             </a>
                         </div>
 

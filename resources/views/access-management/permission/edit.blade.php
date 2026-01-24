@@ -9,11 +9,18 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
 
-            <div class="card card-flush">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title fw-bold">Edit Permission</h3>
-                    <a href="{{ route('permissions.index') }}" class="btn btn-sm btn-info">
-                        <i class="far fa-list-alt"></i>  Back to List
+            <div class="card card-flush shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                    <h3 class="card-title">
+                        <i class="ki-duotone ki-pencil fs-2 text-primary me-2">
+                            <i class="path1"></i><i class="path2"></i>
+                        </i>
+                        Edit Permission
+                    </h3>
+
+                    <a href="{{ route('permissions.index') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-left fs-3 me-2"></i>
+                        Back to List
                     </a>
                 </div>
 
@@ -56,7 +63,7 @@
 
 @push('scripts')
     <script>
-        document.getElementById('confirm-update-btn').addEventListener('click', function () {
+        document.getElementById('confirm-update-btn').addEventListener('click', function() {
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You want to update this permission!',

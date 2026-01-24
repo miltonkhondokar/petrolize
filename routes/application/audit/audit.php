@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Audit\UserAuditController;
+use App\Http\Controllers\System\Audit\UserAuditController;
 
 /*
 |--------------------------------------------------------------------------

@@ -62,7 +62,7 @@ class UserRoleController extends Controller
 
     public function update(Request $request, User $user)
     {
-        $this->authorize('user_role_update');
+        // $this->authorize('user_role_update');
         
         try {
             $request->validate([

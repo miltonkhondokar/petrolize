@@ -8,15 +8,19 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
             <div class="card"> <!-- Add this card wrapper -->
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="card-title">
-                        <h2 class="mb-0">Edit Role</h2>
-                    </div>
-                    <div class="card-toolbar">
-                        <a href="{{ route('roles.index') }}" class="btn btn-info btn-sm">
-                            <i class="far fa-list-alt"></i>  Back to List
-                        </a>
-                    </div>
+                <div class="card card-flush shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                    <h3 class="card-title">
+                        <i class="ki-duotone ki-pencil fs-2 text-primary me-2">
+                            <i class="path1"></i><i class="path2"></i>
+                        </i>
+                        Edit Role
+                    </h3>
+
+                    <a href="{{ route('roles.index') }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-left fs-3 me-2"></i>
+                        Back to List
+                    </a>
                 </div>
 
                 <div class="card-body pt-5"> <!-- pt-5 for some padding on top -->

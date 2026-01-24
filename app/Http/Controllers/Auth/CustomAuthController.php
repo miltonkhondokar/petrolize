@@ -498,6 +498,14 @@ class CustomAuthController extends Controller
                 'scope'         => '*',
             ]);
 
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => 'API token refresh attempt ' . ($response->failed() ? 'failed' : 'successful'),
+                'type'       => 'auth',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
             if ($response->failed()) {
                 return response()->json([
                     'success' => false,

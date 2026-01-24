@@ -62,45 +62,18 @@
                     </div>
 
                     <!-- Fuel Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(
-                        [
-                            'fuel_purchases.index',
-                            'fuel_purchases.create',
-                            'fuel_purchases.show',
-                            'fuel_sales_days.index',
-                            'fuel_sales_days.create',
-                            'fuel_sales_days.show',
-                            'fuel_sales_days.edit',
-                        ],
-                        null,
-                        'menu',
-                    ) }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel_purchases.*','fuel_sales_days.*'],null,'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-primary">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="fa-solid fa-gas-pump fs-1 text-warning"></i>
                             </span>
                             <span class="menu-title">Fuel</span>
                             <span class="menu-arrow"></span>
                         </span>
 
                         <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(
-                                [
-                                    'fuel_purchases.index',
-                                    'fuel_purchases.create',
-                                    'fuel_purchases.show',
-                                    'fuel_sales_days.index',
-                                    'fuel_sales_days.create',
-                                    'fuel_sales_days.show',
-                                    'fuel_sales_days.edit',
-                                ],
-                                null,
-                                'menu',
-                            ) }}">
+                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel_purchases.*','fuel_sales_days.*'],null,'menu') }}">
 
                             {{-- Purchase --}}
                             <div class="menu-item">
@@ -128,10 +101,7 @@
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-wallet fs-1 text-success">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="fa-regular fa-money-bill-1 fs-1 text-success"></i>
                             </span>
                             <span class="menu-title">Payments</span>
                             <span class="menu-arrow"></span>
@@ -163,15 +133,36 @@
                         </div>
                     </div>
 
+                    <!-- Cost Entry Management -->
+                    <div class="menu-item menu-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}"
+                        data-kt-menu-trigger="click">
+                        <span class="menu-link">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-hand-holding-dollar fs-1 text-primary"></i>
+                            </span>
+                            <span class="menu-title">Expenses</span>
+                            <span class="menu-arrow"></span>
+                        </span>
+
+                        <div
+                            class="menu-sub menu-sub-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}">
+                            <!-- Fuel Station Complaints -->
+                            <div class="menu-item">
+                                <a class="menu-link {{ active_menu('cost-entries.*', null, 'link') }}"
+                                    href="{{ route('cost-entries.index') }}">
+                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
+                                    <span class="menu-title">Cost Entry</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Complaint Management -->
                     <div class="menu-item menu-accordion {{ active_menu(['complaints.*'],null,'menu',) }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-danger">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
+                                <i class="fa-solid fa-person-circle-question fs-1" style="color: red"></i>
                             </span>
                             <span class="menu-title">Complaints</span>
                             <span class="menu-arrow"></span>
@@ -185,33 +176,6 @@
                                     href="{{ route('complaints.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
                                     <span class="menu-title">Complaints</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Cost Entry Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}"
-                        data-kt-menu-trigger="click">
-                        <span class="menu-link">
-                            <span class="menu-icon">
-                                <i class="ki-duotone ki-abstract-20 fs-1 text-danger">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                            <span class="menu-title">Cost Entry</span>
-                            <span class="menu-arrow"></span>
-                        </span>
-
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}">
-                            <!-- Fuel Station Complaints -->
-                            <div class="menu-item">
-                                <a class="menu-link {{ active_menu('cost-entries.*', null, 'link') }}"
-                                    href="{{ route('cost-entries.index') }}">
-                                    <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Cost Entry</span>
                                 </a>
                             </div>
                         </div>
@@ -484,10 +448,10 @@
                         </div>
                     </div>
 
-                    <div class="menu-item menu-accordion {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['users.*', 'roles.*', 'permissions.*', 'user-role.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span
-                            class="menu-link {{ active_menu(['users.index', 'roles.index', 'permissions.index'], ['users', 'roles', 'permissions'], 'menu') }}">
+                            class="menu-link {{ active_menu(['users.*', 'roles.*', 'permissions.*', 'user-role.*'], null, 'menu') }}">
                             <span class="menu-icon">
                                 <i class="ki-solid ki-lock-3 fs-1" style="color:#fc37ca;"></i>
                             </span>
