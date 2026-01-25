@@ -16,6 +16,7 @@ use App\Models\AuditLog;
 use Laravel\Passport\Token;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Http;
+use App\Services\ApiResponseService;
 
 class CustomAuthController extends Controller
 {
@@ -197,237 +198,53 @@ class CustomAuthController extends Controller
         }
     }
 
-
-    // Web Logout
-    public function apiLoginBak(Request $request)
-    {
-        try {
-            // 1️⃣ Validate request
-            $validator = Validator::make($request->all(), [
-                'email'       => 'required|email',
-                'password'    => 'required|string|min:6',
-                'device_name' => 'required|string|max:255',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors'  => $validator->errors(),
-                ], 422);
-            }
-
-            // 2️⃣ Attempt authentication (web provider)
-            if (!Auth::attempt([
-                'email'    => $request->email,
-                'password' => $request->password,
-            ])) {
-
-                // Optional: audit failed login
-                AuditLog::create([
-                    'user_id'    => null,
-                    'action'     => 'Failed API login attempt',
-                    'type'       => 'auth',
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'data'       => ['email' => $request->email],
-                ]);
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid credentials',
-                ], 401);
-            }
-
-            // 3️⃣ Authenticated user
-            $user = Auth::user();
-
-            // 4️⃣ Revoke existing token for same device (optional but secure)
-            $user->tokens()
-                ->where('name', $request->device_name)
-                ->delete();
-
-            // 5️⃣ Create Passport personal access token
-            $tokenResult = $user->createToken($request->device_name);
-            $token       = $tokenResult->accessToken;
-            $tokenModel  = $tokenResult->token;
-
-            // 6️⃣ Set token expiry
-            $tokenModel->expires_at = now()->addDays(15);
-            $tokenModel->save();
-
-            // 7️⃣ Audit successful login
-            AuditLog::create([
-                'user_id'    => $user->id,
-                'action'     => 'API login successful',
-                'type'       => 'auth',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-                'data'       => ['device' => $request->device_name],
-            ]);
-
-            // 8️⃣ Success response
-            return response()->json([
-                'success'      => true,
-                'token_type'   => 'Bearer',
-                'access_token' => $token,
-                'expires_at'  => $tokenModel->expires_at->toISOString(),
-                'expires_in'  => $tokenModel->expires_at->diffInSeconds(now()),
-                'user' => [
-                    'uuid'  => $user->uuid,
-                    'name'  => $user->name,
-                    'email' => $user->email,
-                ],
-            ], 200);
-        } catch (\Throwable $e) {
-
-            Log::error('API Login Error', [
-                'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication server error',
-            ], 500);
-        }
-    }
-
     // API Logout
     public function apiLogout(Request $request)
-    {
-        try {
-            if (!$request->user()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Not authenticated',
-                ], 401);
-            }
-
-            $user = $request->user();
-            $currentToken = $user->token();
-
-            if ($currentToken) {
-                // Revoke current access token
-                $currentToken->revoke();
-
-                AuditLog::create([
-                    'user_id' => $user->id,
-                    'action' => 'API logout',
-                    'type' => 'auth',
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                    'data' => ['token_id' => $currentToken->id]
-                ]);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Successfully logged out',
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('API Logout Error: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Logout failed',
-            ], 500);
-        }
-    }
-
-    // API Token Refresh (optional but recommended)
-    public function apiRefreshTokenBak(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'refresh_token' => 'required|string',
-                'device_name' => 'required|string|max:255',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors(),
-                ], 422);
-            }
-
-            // Note: For Passport, refresh tokens are handled via OAuth endpoints
-            // This method assumes you're storing refresh tokens separately
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Use /oauth/token endpoint for refresh',
-            ], 400);
-        } catch (\Throwable $e) {
-            Log::error('Token Refresh Error: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Token refresh failed',
-            ], 500);
-        }
-    }
-
-    // Get Current User (API)
-    public function apiUserBak(Request $request)
     {
         try {
             $user = $request->user();
 
             if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Not authenticated',
-                ], 401);
+                return ApiResponseService::error('Not authenticated', 40100, 401);
             }
 
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'uuid' => $user->uuid,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'created_at' => $user->created_at->toISOString(),
-                ]
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Get User Error: ' . $e->getMessage());
+            $currentToken = $user->token(); // Passport access token model
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve user',
-            ], 500);
+            if ($currentToken) {
+                $currentToken->revoke();
+
+                AuditLog::create([
+                    'user_id'    => $user->id,
+                    'action'     => 'API logout',
+                    'type'       => 'auth',
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'data'       => ['token_id' => $currentToken->id],
+                ]);
+            }
+
+            return ApiResponseService::success(null, 'Successfully logged out');
+        } catch (\Throwable $e) {
+            Log::error('API Logout Error', ['message' => $e->getMessage()]);
+            return ApiResponseService::serverError('Logout failed');
         }
     }
 
-    // Check Authentication (API)
-    public function apiCheckAuthBak(Request $request)
-    {
-        return response()->json([
-            'authenticated' => $request->user() ? true : false,
-        ]);
-    }
 
 
     public function apiLogin(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email'       => 'required|email',
+            'password'    => 'required|string|min:6',
+            'device_name' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponseService::validation($validator->errors(), 'Validation failed');
+        }
+
         try {
-            // 1️⃣ Validate request
-            $validator = Validator::make($request->all(), [
-                'email'       => 'required|email',
-                'password'    => 'required|string|min:6',
-                'device_name' => 'required|string|max:255',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors'  => $validator->errors(),
-                ], 422);
-            }
-
-            // 2️⃣ Proxy request to Passport /oauth/token
             $response = Http::asForm()->post(url('/oauth/token'), [
                 'grant_type'    => 'password',
                 'client_id'     => config('services.passport.client_id'),
@@ -437,7 +254,6 @@ class CustomAuthController extends Controller
                 'scope'         => '*',
             ]);
 
-            // 3️⃣ Handle invalid credentials or other errors
             if ($response->failed()) {
                 AuditLog::create([
                     'user_id'    => null,
@@ -445,19 +261,21 @@ class CustomAuthController extends Controller
                     'type'       => 'auth',
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'data'       => ['email' => $request->email, 'response' => $response->json()],
+                    'data'       => [
+                        'email' => $request->email,
+                        'passport_error' => $response->json(),
+                    ],
                 ]);
 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid credentials',
-                    'error'   => $response->json(),
-                ], 401);
+                // Passport usually returns 400/401 with "invalid_grant"
+                return ApiResponseService::error('Invalid credentials', 40101, 401, $response->json());
             }
 
-            // 4️⃣ Optional: Audit successful login
+            // We want user info also
+            $user = User::where('email', $request->email)->first();
+
             AuditLog::create([
-                'user_id'    => Auth::id(),
+                'user_id'    => $user?->id,
                 'action'     => 'API login successful',
                 'type'       => 'auth',
                 'ip_address' => $request->ip(),
@@ -465,31 +283,36 @@ class CustomAuthController extends Controller
                 'data'       => ['device' => $request->device_name],
             ]);
 
-            // 5️⃣ Return Passport response to mobile app
-            return response()->json([
-                'success' => true,
-                'data'    => $response->json(), // contains access_token, refresh_token, expires_in, token_type
-            ], 200);
+            return ApiResponseService::success([
+                'token' => $response->json(), // access_token, refresh_token, expires_in, token_type
+                'user'  => $user ? [
+                    'uuid'  => $user->uuid,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ] : null,
+            ], 'Login successful');
         } catch (\Throwable $e) {
             Log::error('API Login Error', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Authentication server error',
-            ], 500);
+            return ApiResponseService::serverError('Authentication server error');
         }
     }
 
+
     public function apiRefreshToken(Request $request)
     {
-        try {
-            $request->validate([
-                'refresh_token' => 'required|string',
-            ]);
+        $validator = Validator::make($request->all(), [
+            'refresh_token' => 'required|string',
+        ]);
 
+        if ($validator->fails()) {
+            return ApiResponseService::validation($validator->errors(), 'Validation failed');
+        }
+
+        try {
             $response = Http::asForm()->post(url('/oauth/token'), [
                 'grant_type'    => 'refresh_token',
                 'refresh_token' => $request->refresh_token,
@@ -499,7 +322,7 @@ class CustomAuthController extends Controller
             ]);
 
             AuditLog::create([
-                'user_id'    => Auth::id(),
+                'user_id'    => optional($request->user())->id, // may be null if access token expired
                 'action'     => 'API token refresh attempt ' . ($response->failed() ? 'failed' : 'successful'),
                 'type'       => 'auth',
                 'ip_address' => $request->ip(),
@@ -507,22 +330,18 @@ class CustomAuthController extends Controller
             ]);
 
             if ($response->failed()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid refresh token',
-                    'error'   => $response->json(),
-                ], 401);
+                return ApiResponseService::error('Invalid refresh token', 40102, 401, $response->json());
             }
 
-            return response()->json([
-                'success' => true,
-                'data'    => $response->json(),
-            ]);
+            return ApiResponseService::success([
+                'token' => $response->json(),
+            ], 'Token refreshed');
         } catch (\Throwable $e) {
             Log::error('Token Refresh Error', ['message' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => 'Token refresh failed'], 500);
+            return ApiResponseService::serverError('Token refresh failed');
         }
     }
+
 
     public function apiUser(Request $request)
     {
@@ -530,27 +349,67 @@ class CustomAuthController extends Controller
             $user = $request->user();
 
             if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Not authenticated',
-                ], 401);
+                return ApiResponseService::error('Not authenticated', 40100, 401);
             }
 
-            return response()->json([
-                'success' => true,
-                'user' => [
-                    'uuid'       => $user->uuid,
-                    'name'       => $user->name,
-                    'email'      => $user->email,
-                    'created_at' => $user->created_at->toISOString(),
-                ],
-            ]);
+            return ApiResponseService::success([
+                'uuid'       => $user->uuid,
+                'name'       => $user->name,
+                'email'      => $user->email,
+                'created_at' => optional($user->created_at)->toISOString(),
+            ], 'User fetched');
         } catch (\Throwable $e) {
             Log::error('Get User Error', ['message' => $e->getMessage()]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve user',
-            ], 500);
+            return ApiResponseService::serverError('Failed to retrieve user');
         }
     }
+
+    public function apiCheckAuth(Request $request)
+    {
+        return ApiResponseService::success([
+            'authenticated' => $request->user() ? true : false,
+        ], 'Auth check');
+    }
+
+
 }
+
+
+
+
+
+
+
+
+// 3) Request formats (mobile)
+// Login
+
+// POST /api/v1/auth/login
+
+// {
+//   "email": "admin@example.com",
+//   "password": "123456",
+//   "device_name": "android"
+// }
+
+// Refresh
+
+// POST /api/v1/auth/refresh
+
+// {
+//   "refresh_token": "REFRESH_TOKEN_HERE"
+// }
+
+// Logout
+
+// POST /api/v1/auth/logout
+// Headers:
+
+// Authorization: Bearer <access_token>
+
+// User
+
+// GET /api/v1/auth/user
+// Headers:
+
+// Authorization: Bearer <access_token>

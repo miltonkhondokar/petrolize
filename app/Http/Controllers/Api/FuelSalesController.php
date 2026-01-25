@@ -3,136 +3,111 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
-use App\Models\FuelSalesDay;
-use App\Models\FuelSalesItem;
-use App\Models\FuelStationPrice;
-use App\Models\FuelType;
-use App\Services\StockLedgerService;
+use App\Services\ApiResponseService;
+use App\Services\FuelSalesDayService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 
 class FuelSalesController extends Controller
 {
-    public function index(Request $request)
+    public function __construct(private FuelSalesDayService $service)
     {
-        $q = FuelSalesDay::with(['station', 'manager', 'items.fuelType']);
-
-        if ($request->filled('fuel_station_uuid')) {
-            $q->where('fuel_station_uuid', $request->fuel_station_uuid);
-        }
-        if ($request->filled('sale_date')) {
-            $q->where('sale_date', $request->sale_date);
-        }
-        if ($request->filled('status')) {
-            $q->where('status', $request->status);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $q->latest()->paginate(20)
-        ]);
     }
 
+    // GET /api/v1/fuel-sales-days
+    public function index(Request $request)
+    {
+        try {
+            $filters = $request->only(['fuel_station_uuid', 'sale_date', 'status', 'from', 'to']);
+            $perPage = (int) ($request->get('per_page', 20));
+
+            $days = $this->service->paginate($filters, $perPage);
+
+            return ApiResponseService::success($days, 'Fuel sales days fetched');
+        } catch (\Throwable $e) {
+            Log::error('FuelSalesController@index error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to fetch fuel sales days');
+        }
+    }
+
+    // POST /api/v1/fuel-sales-days  (Create DRAFT)
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fuel_station_uuid' => 'required|uuid',
-            'user_uuid'         => 'nullable|uuid',
-            'sale_date'         => 'required|date',
-            'note'              => 'nullable|string',
-            'items'             => 'required|array|min:1',
-            'items.*.fuel_type_uuid'    => 'required|uuid',
-            'items.*.nozzle_number'     => 'nullable|integer|min:1',
-            'items.*.opening_reading'   => 'required|numeric|min:0',
-            'items.*.closing_reading'   => 'required|numeric|min:0',
+            'fuel_station_uuid'       => 'required|uuid',
+            'sale_date'               => 'required|date',
+            'note'                    => 'nullable|string',
+            'items'                   => 'required|array|min:1',
+            'items.*.fuel_type_uuid'  => 'required|uuid',
+            'items.*.nozzle_number'   => 'nullable|integer|min:1',
+            'items.*.opening_reading' => 'required|numeric|min:0',
+            'items.*.closing_reading' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            return ApiResponseService::validation($validator->errors());
         }
 
         try {
-            return DB::transaction(function () use ($request) {
-
-                // Duplicate check: station+date
-                $exists = FuelSalesDay::where('fuel_station_uuid', $request->fuel_station_uuid)
-                    ->where('sale_date', $request->sale_date)
-                    ->exists();
-
-                if ($exists) {
-                    throw new \Exception('Sales day already exists for this station and date.');
-                }
-
-                $day = FuelSalesDay::create([
-                    'fuel_station_uuid' => $request->fuel_station_uuid,
-                    'user_uuid'         => $request->user_uuid,
-                    'sale_date'         => $request->sale_date,
-                    'status'            => 'draft',
-                    'cash_amount'       => 0,
-                    'bank_amount'       => 0,
-                    'total_amount'      => 0,
-                    'note'              => $request->note,
-                ]);
-
-                $total = 0;
-
-                foreach ($request->items as $it) {
-                    $price = FuelStationPrice::where('fuel_station_uuid', $request->fuel_station_uuid)
-                        ->where('fuel_type_uuid', $it['fuel_type_uuid'])
-                        ->where('is_active', true)
-                        ->latest('created_at')
-                        ->value('price_per_unit') ?? 0;
-
-                    $sold_qty = $it['closing_reading'] - $it['opening_reading'];
-                    $line_total = $sold_qty * $price;
-
-                    FuelSalesItem::create([
-                        'fuel_sales_day_uuid' => $day->uuid,
-                        'fuel_type_uuid'      => $it['fuel_type_uuid'],
-                        'nozzle_number'       => $it['nozzle_number'] ?? null,
-                        'opening_reading'     => $it['opening_reading'],
-                        'closing_reading'     => $it['closing_reading'],
-                        'sold_qty'            => $sold_qty,
-                        'price_per_unit'      => $price,
-                        'line_total'          => $line_total,
-                        'is_active'           => true,
-                    ]);
-
-                    $total += $line_total;
-                }
-
-                $day->update(['total_amount' => $total]);
-
-                // Audit log
-                AuditLog::create([
-                    'user_id'    => Auth::id(),
-                    'action'     => "Created draft fuel sales day {$day->uuid}",
-                    'type'       => 'fuel_sales_day',
-                    'item_id'    => $day->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-
-                return response()->json(['success' => true, 'data' => $day->load('items')], 201);
-            });
+            $day = $this->service->createDraft($validator->validated());
+            return ApiResponseService::success($day, 'Fuel sales day created as draft', 1, 201);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            // abort(422/403/...) bubbles here
+            return ApiResponseService::error($e->getMessage(), 0, $e->getStatusCode());
         } catch (\Throwable $e) {
-            AuditLog::create([
-                'user_id'    => Auth::id(),
-                'action'     => "Failed to create fuel sales day: " . $e->getMessage(),
-                'type'       => 'fuel_sales_day_error',
-                'item_id'    => null,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            Log::error('FuelSalesController@store error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to create fuel sales day');
         }
     }
 
-    public function submit(Request $request, string $salesDayUuid)
+    // GET /api/v1/fuel-sales-days/{uuid}
+    public function show(string $uuid)
+    {
+        try {
+            $day = $this->service->findOrFail($uuid);
+            return ApiResponseService::success($day, 'Fuel sales day fetched');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ApiResponseService::notFound('Fuel sales day not found');
+        } catch (\Throwable $e) {
+            Log::error('FuelSalesController@show error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to fetch fuel sales day');
+        }
+    }
+
+    // PUT/PATCH /api/v1/fuel-sales-days/{uuid} (Update DRAFT only)
+    public function update(Request $request, string $uuid)
+    {
+        $validator = Validator::make($request->all(), [
+            'fuel_station_uuid'       => 'required|uuid',
+            'sale_date'               => 'required|date',
+            'note'                    => 'nullable|string',
+            'items'                   => 'required|array|min:1',
+            'items.*.fuel_type_uuid'  => 'required|uuid',
+            'items.*.nozzle_number'   => 'nullable|integer|min:1',
+            'items.*.opening_reading' => 'required|numeric|min:0',
+            'items.*.closing_reading' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponseService::validation($validator->errors());
+        }
+
+        try {
+            $day = $this->service->updateDraft($uuid, $validator->validated());
+            return ApiResponseService::success($day, 'Fuel sales day updated');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ApiResponseService::notFound('Fuel sales day not found');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return ApiResponseService::error($e->getMessage(), 0, $e->getStatusCode());
+        } catch (\Throwable $e) {
+            Log::error('FuelSalesController@update error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to update fuel sales day');
+        }
+    }
+
+    // POST /api/v1/fuel-sales-days/{uuid}/submit
+    public function submit(Request $request, string $uuid)
     {
         $validator = Validator::make($request->all(), [
             'cash_amount' => 'required|numeric|min:0',
@@ -140,92 +115,138 @@ class FuelSalesController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            return ApiResponseService::validation($validator->errors());
         }
 
         try {
-            return DB::transaction(function () use ($request, $salesDayUuid) {
+            $cash = (float) $request->cash_amount;
+            $bank = (float) $request->bank_amount;
 
-                $day = FuelSalesDay::where('uuid', $salesDayUuid)
-                    ->with('items.fuelType')
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                if ($day->status !== 'draft') {
-                    throw new \Exception('Only draft can be submitted.');
-                }
-
-                $total = (float)$day->items->sum('line_total');
-                $cash  = (float)$request->cash_amount;
-                $bank  = (float)$request->bank_amount;
-
-                if (abs(($cash + $bank) - $total) > 0.01) {
-                    throw new \Exception("Cash + Bank must equal total. total={$total}, got=" . ($cash + $bank));
-                }
-
-                foreach ($day->items as $it) {
-                    $sold = (float) $it->sold_qty;
-                    if ($sold <= 0) continue;
-
-                    $balance = StockLedgerService::getBalance($day->fuel_station_uuid, $it->fuel_type_uuid);
-                    if ($balance + 0.0001 < $sold) {
-                        throw new \Exception("Insufficient stock for fuel type {$it->fuel_type_uuid}. balance={$balance}, sold={$sold}");
-                    }
-
-                    $fuelUnitUuid = $it->fuelType->fuel_unit_uuid
-                        ?? FuelType::where('uuid', $it->fuel_type_uuid)->value('fuel_unit_uuid');
-
-                    StockLedgerService::add([
-                        'fuel_station_uuid' => $day->fuel_station_uuid,
-                        'fuel_type_uuid'    => $it->fuel_type_uuid,
-                        'fuel_unit_uuid'    => $fuelUnitUuid,
-                        'txn_type'          => 'sale',
-                        'ref_uuid'          => $day->uuid,
-                        'txn_date'          => $day->sale_date,
-                        'qty_in'            => 0,
-                        'qty_out'           => $sold,
-                        'note'              => 'Day-end sale submission (API)',
-                    ]);
-                }
-
-                $day->update([
-                    'cash_amount'  => $cash,
-                    'bank_amount'  => $bank,
-                    'total_amount' => $total,
-                    'status'       => 'submitted',
-                ]);
-
-                AuditLog::create([
-                    'user_id'    => Auth::id(),
-                    'action'     => "Submitted fuel sales day {$day->uuid}",
-                    'type'       => 'fuel_sales_day',
-                    'item_id'    => $day->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-
-                return response()->json(['success' => true, 'data' => $day->fresh()->load('items')]);
-            });
+            $day = $this->service->submit($uuid, $cash, $bank);
+            return ApiResponseService::success($day, 'Sales day submitted and stock updated');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return ApiResponseService::notFound('Fuel sales day not found');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return ApiResponseService::error($e->getMessage(), 0, $e->getStatusCode());
         } catch (\Throwable $e) {
-            AuditLog::create([
-                'user_id'    => Auth::id(),
-                'action'     => "Failed to submit fuel sales day {$salesDayUuid}: " . $e->getMessage(),
-                'type'       => 'fuel_sales_day_error',
-                'item_id'    => null,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            Log::error('FuelSalesController@submit error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to submit sales day');
         }
     }
 
-    public function show(string $salesDayUuid)
+    // GET /api/v1/fuel-stations/{uuid}/fuel-prices
+    public function stationFuelPrices(string $uuid)
     {
-        $day = FuelSalesDay::where('uuid', $salesDayUuid)
-            ->with(['station', 'manager', 'items.fuelType'])
-            ->firstOrFail();
-
-        return response()->json(['success' => true, 'data' => $day]);
+        try {
+            $prices = $this->service->stationFuelPrices($uuid);
+            return ApiResponseService::success($prices, 'Fuel prices fetched');
+        } catch (\Throwable $e) {
+            Log::error('FuelSalesController@stationFuelPrices error', ['e' => $e]);
+            return ApiResponseService::serverError('Failed to fetch fuel prices');
+        }
     }
 }
+
+
+
+
+
+
+// 1) Create Sales Day (Draft)
+
+// POST /api/v1/fuel-sales-days
+
+// {
+//   "fuel_station_uuid": "9f2d6f6a-5f1e-4c7a-9b4a-6b2a1f9c3c11",
+//   "sale_date": "2026-01-25",
+//   "note": "Day end sales",
+//   "items": [
+//     {
+//       "fuel_type_uuid": "a1111111-2222-3333-4444-555555555555",
+//       "nozzle_number": 1,
+//       "opening_reading": 1200.5,
+//       "closing_reading": 1350.75
+//     },
+//     {
+//       "fuel_type_uuid": "b1111111-2222-3333-4444-555555555555",
+//       "nozzle_number": 2,
+//       "opening_reading": 900,
+//       "closing_reading": 980
+//     }
+//   ]
+// }
+
+
+
+// 2) Update Sales Day (Draft only)
+
+// PUT/PATCH /api/v1/fuel-sales-days/{uuid}
+
+// {
+//   "fuel_station_uuid": "9f2d6f6a-5f1e-4c7a-9b4a-6b2a1f9c3c11",
+//   "sale_date": "2026-01-25",
+//   "note": "Updated note",
+//   "items": [
+//     {
+//       "fuel_type_uuid": "a1111111-2222-3333-4444-555555555555",
+//       "nozzle_number": 1,
+//       "opening_reading": 1200.5,
+//       "closing_reading": 1360.0
+//     }
+//   ]
+// }
+
+
+
+// 3) Submit Sales Day (Final + Stock Out)
+
+// POST /api/v1/fuel-sales-days/{uuid}/submit
+
+// {
+//   "cash_amount": 50000,
+//   "bank_amount": 20000
+// }
+
+
+
+// 4) List Sales Days (with filters)
+
+// GET /api/v1/fuel-sales-days?fuel_station_uuid=...&status=draft&from=2026-01-01&to=2026-01-31&per_page=20
+
+// No body.
+
+// Filters supported:
+
+// fuel_station_uuid
+
+// sale_date
+
+// status (draft / submitted)
+
+// from / to
+
+// per_page
+
+
+
+// 5) Show Single Sales Day
+
+// GET /api/v1/fuel-sales-days/{uuid}
+
+
+
+
+
+// 6) Get Station Fuel Prices (for mobile UI)
+
+// GET /api/v1/fuel-stations/{uuid}/fuel-prices
+
+
+// {
+//   "success": true,
+//   "response": { "code": 1, "meaning": "success", "message": "Fuel prices fetched" },
+//   "data": {
+//     "fuel-type-uuid-1": 112.5,
+//     "fuel-type-uuid-2": 109.0
+//   }
+// }

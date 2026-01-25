@@ -53,33 +53,79 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="bg-light">
-                            <tr>
-                                <th>Fuel</th>
-                                <th>Nozzle</th>
-                                <th class="text-end">Opening</th>
-                                <th class="text-end">Closing</th>
-                                <th class="text-end">Sold</th>
-                                <th class="text-end">Price</th>
-                                <th class="text-end">Line Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($day->items as $it)
-                                <tr>
-                                    <td>{{ $it->fuelType->name ?? '-' }}</td>
-                                    <td>{{ $it->nozzle_number ?? '-' }}</td>
-                                    <td class="text-end">{{ number_format((float)$it->opening_reading,3) }}</td>
-                                    <td class="text-end">{{ number_format((float)$it->closing_reading,3) }}</td>
-                                    <td class="text-end">{{ number_format((float)$it->sold_qty,3) }}</td>
-                                    <td class="text-end">{{ number_format((float)$it->price_per_unit,2) }}</td>
-                                    <td class="text-end">{{ number_format((float)$it->line_total,2) }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+    <table class="table table-row-dashed table-row-gray-200 align-middle gs-2 gy-3">
+        <thead class="bg-light">
+            <tr class="fw-semibold text-gray-700">
+                <th>Fuel</th>
+                <th class="text-center">Nozzle</th>
+                <th class="text-end">Opening</th>
+                <th class="text-end">Closing</th>
+                <th class="text-end">Sold</th>
+
+                {{-- ✅ Design improved columns --}}
+                <th class="text-end" style="min-width: 110px;">Price</th>
+                <th class="text-end" style="min-width: 140px;">Line Total</th>
+            </tr>
+        </thead>
+        <tbody class="fw-semibold text-gray-800">
+            @foreach($day->items as $it)
+                <tr>
+                    <td class="text-gray-900">
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold">{{ $it->fuelType->name ?? '-' }}</span>
+                            {{-- Optional small subtext (remove if you don’t want) --}}
+                            <span class="text-muted fs-8">Nozzle: {{ $it->nozzle_number ?? '-' }}</span>
+                        </div>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge badge-light-secondary">
+                            {{ $it->nozzle_number ?? '-' }}
+                        </span>
+                    </td>
+
+                    <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                        {{ number_format((float)$it->opening_reading,3) }}
+                    </td>
+
+                    <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                        {{ number_format((float)$it->closing_reading,3) }}
+                    </td>
+
+                    <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                        {{ number_format((float)$it->sold_qty,3) }}
+                    </td>
+
+                    {{-- ✅ Price pill --}}
+                    <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                        <span class="badge badge-light-info px-3 py-2">
+                            {{ number_format((float)$it->price_per_unit,2) }}
+                        </span>
+                    </td>
+
+                    {{-- ✅ Line total emphasized --}}
+                    <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                        <span class="badge badge-light-success px-3 py-2 fw-bold">
+                            {{ number_format((float)$it->line_total,2) }}
+                        </span>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+
+        {{-- Optional footer summary row --}}
+        <tfoot>
+            <tr class="bg-light fw-bold">
+                <td colspan="5" class="text-end">Grand Total</td>
+                <td class="text-end">—</td>
+                <td class="text-end" style="font-variant-numeric: tabular-nums;">
+                    {{ number_format((float)$day->items->sum('line_total'), 2) }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
 
                 @if($day->status=='draft')
                     <hr class="my-5">

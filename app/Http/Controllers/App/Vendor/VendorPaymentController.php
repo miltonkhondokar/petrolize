@@ -164,7 +164,7 @@ class VendorPaymentController extends Controller
         $breadcrumb = [
             "page_header" => "Vendor Payments",
             "first_item_name" => "Dashboard",
-            "first_item_link" => route('dashboard'), // make sure this route exists
+            "first_item_link" => route('/'), // make sure this route exists
             "first_item_icon" => "fa-home",
             "second_item_name" => "Payments",
             "second_item_link" => "#",
@@ -256,7 +256,7 @@ class VendorPaymentController extends Controller
 
                 $payment = VendorPayment::where('uuid', $uuid)->lockForUpdate()->firstOrFail();
 
-                $sum = collect($request->allocations)->sum(fn($a) => (float)$a['allocated_amount']);
+                $sum = collect($request->allocations)->sum(fn ($a) => (float)$a['allocated_amount']);
                 if ($sum - (float)$payment->amount > 0.01) {
                     abort(422, "Allocated amount exceeds payment amount.");
                 }
@@ -311,7 +311,7 @@ class VendorPaymentController extends Controller
         $purchases = FuelPurchase::where('vendor_uuid', $vendor_uuid)
             ->with('station')
             ->get()
-            ->map(fn($p) => [
+            ->map(fn ($p) => [
                 'uuid'          => $p->uuid,
                 'invoice_no'    => $p->invoice_no ?: $p->uuid,
                 'purchase_date' => $p->purchase_date->toDateString(),
