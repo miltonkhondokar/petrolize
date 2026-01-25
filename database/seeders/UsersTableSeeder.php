@@ -35,9 +35,8 @@ class UsersTableSeeder extends Seeder
 
         foreach ($users as $data) {
             $user = User::updateOrCreate(
-                ['phone' => $data['phone']], // phone is unique
+                ['phone' => $data['phone']],
                 [
-                    'uuid' => Str::uuid(),
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'password' => Hash::make('Master@1234567890!.'),
