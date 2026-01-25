@@ -99,4 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/fuel-sales-days/{uuid}', [FuelSalesDayController::class, 'update'])->name('fuel_sales_days.update');
 
     Route::post('/fuel-sales-days/{uuid}/submit', [FuelSalesDayController::class, 'submit'])->name('fuel_sales_days.submit');
+
+    //ajax
+    Route::get('/fuel-station/{station}/prices', [FuelSalesDayController::class, 'getFuelPrices']);
 });

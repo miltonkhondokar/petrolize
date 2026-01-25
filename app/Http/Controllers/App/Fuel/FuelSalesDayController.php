@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App\Fuel;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\FuelPurchaseItem;
 use App\Models\FuelSalesDay;
 use App\Models\FuelSalesItem;
 use App\Models\FuelStation;
@@ -15,9 +16,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class FuelSalesDayController extends Controller
 {
+    // =========================================================
+    // INDEX
+    // =========================================================
     public function index(Request $request)
     {
         $filters = $request->only(['fuel_station_uuid', 'sale_date', 'status', 'from', 'to']);
@@ -58,31 +63,41 @@ class FuelSalesDayController extends Controller
         return view('application.pages.app.fuel_sales_days.index', compact('days', 'filters', 'stations', 'breadcrumb'));
     }
 
+    // =========================================================
+    // CREATE
+    // =========================================================
     public function create()
     {
         $stations  = FuelStation::orderBy('name')->get(['uuid', 'name']);
-        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid', 'name']);
+
+        $fuelTypes = FuelType::where('is_active', true)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['uuid', 'name']);
 
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
+            "page_header" => "Fuel Sales",
+            "first_item_name" => "Fuel Sales Days",
+            "first_item_link" => route('fuel_sales_days.index'),
+            "first_item_icon" => "fa-gas-pump",
+            "second_item_name" => "Create Sales Day",
             "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "second_item_icon" => "fa-plus",
         ];
 
         return view('application.pages.app.fuel_sales_days.create', compact('stations', 'fuelTypes', 'breadcrumb'));
     }
 
+    // =========================================================
+    // STORE (DRAFT)
+    // =========================================================
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'fuel_station_uuid' => 'required|uuid',
-            'sale_date'         => 'required|date',
-            'note'              => 'nullable|string',
-            'items'             => 'required|array|min:1',
+            'fuel_station_uuid'       => 'required|uuid',
+            'sale_date'               => 'required|date',
+            'note'                    => 'nullable|string',
+            'items'                   => 'required|array|min:1',
             'items.*.fuel_type_uuid'  => 'required|uuid',
             'items.*.nozzle_number'   => 'nullable|integer|min:1',
             'items.*.opening_reading' => 'required|numeric|min:0',
@@ -93,82 +108,66 @@ class FuelSalesDayController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        try {
-            DB::transaction(function () use ($request) {
-                // Check for duplicate day
-                $exists = FuelSalesDay::where('fuel_station_uuid', $request->fuel_station_uuid)
-                    ->where('sale_date', $request->sale_date)
-                    ->exists();
-                if ($exists) {
-                    throw new \Exception('Sales day already exists for this station and date.');
-                }
+        DB::transaction(function () use ($request) {
 
-                $day = FuelSalesDay::create([
-                    'fuel_station_uuid' => $request->fuel_station_uuid,
-                    'user_uuid'         => auth()->user()->uuid ?? null,
-                    'sale_date'         => $request->sale_date,
-                    'status'            => 'draft',
-                    'cash_amount'       => 0,
-                    'bank_amount'       => 0,
-                    'total_amount'      => 0,
-                    'note'              => $request->note,
-                ]);
-
-                foreach ($request->items as $it) {
-                    $price = FuelStationPrice::where('fuel_station_uuid', $request->fuel_station_uuid)
-                        ->where('fuel_type_uuid', $it['fuel_type_uuid'])
-                        ->where('is_active', true)
-                        ->latest('created_at')
-                        ->value('price_per_unit') ?? 0;
-
-                    $sold_qty = $it['closing_reading'] - $it['opening_reading'];
-                    $line_total = $sold_qty * $price;
-
-                    FuelSalesItem::create([
-                        'fuel_sales_day_uuid' => $day->uuid,
-                        'fuel_type_uuid'      => $it['fuel_type_uuid'],
-                        'nozzle_number'       => $it['nozzle_number'] ?? null,
-                        'opening_reading'     => $it['opening_reading'],
-                        'closing_reading'     => $it['closing_reading'],
-                        'sold_qty'            => $sold_qty,
-                        'price_per_unit'      => $price,
-                        'line_total'          => $line_total,
-                        'is_active'           => true,
-                    ]);
-                }
-
-                // Update total
-                $day->refresh();
-                $day->update(['total_amount' => (float) $day->items()->sum('line_total')]);
-
-                // Audit log
-                AuditLog::create([
-                    'user_id'    => Auth::id(),
-                    'action'     => "Created draft fuel sales day {$day->uuid}",
-                    'type'       => 'fuel_sales_day',
-                    'item_id'    => $day->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-            });
-
-            Alert::success('Success', 'Sales day created (Draft).');
-            return redirect()->route('fuel_sales_days.index');
-        } catch (\Throwable $e) {
-            AuditLog::create([
-                'user_id'    => Auth::id(),
-                'action'     => "Failed to create fuel sales day: " . $e->getMessage(),
-                'type'       => 'fuel_sales_day_error',
-                'item_id'    => null,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
+            $day = FuelSalesDay::create([
+                'uuid'              => Str::uuid(),
+                'fuel_station_uuid' => $request->fuel_station_uuid,
+                'sale_date'         => $request->sale_date,
+                'note'              => $request->note,
+                'status'            => 'draft',
+                'user_uuid'         => Auth::user()->uuid,
             ]);
 
-            Alert::error('Error', $e->getMessage());
-            return back()->withInput();
-        }
+            foreach ($request->items as $row) {
+
+                $sold_qty = $row['closing_reading'] - $row['opening_reading'];
+                if ($sold_qty <= 0) {
+                    abort(422, 'Closing reading must be greater than opening reading.');
+                }
+
+                $price = FuelStationPrice::where('fuel_station_uuid', $day->fuel_station_uuid)
+                    ->where('fuel_type_uuid', $row['fuel_type_uuid'])
+                    ->where('is_active', true)
+                    ->latest('created_at')
+                    ->value('price_per_unit') ?? 0;
+
+                $line_total = $sold_qty * $price;
+
+                FuelSalesItem::create([
+                    'fuel_sales_day_uuid' => $day->uuid,
+                    'fuel_type_uuid'      => $row['fuel_type_uuid'],
+                    'nozzle_number'       => $row['nozzle_number'],
+                    'opening_reading'     => $row['opening_reading'],
+                    'closing_reading'     => $row['closing_reading'],
+                    'sold_qty'            => $sold_qty,
+                    'price_per_unit'      => $price,
+                    'line_total'          => $line_total,
+                    'is_active'           => true,
+                ]);
+            }
+
+            $day->update([
+                'total_amount' => $day->items()->sum('line_total'),
+            ]);
+
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => "Created fuel sales day {$day->uuid}",
+                'type'       => 'fuel_sales_day_create',
+                'item_id'    => $day->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        });
+
+        Alert::success('Success', 'Fuel sales day created as draft.');
+        return redirect()->route('fuel_sales_days.index');
     }
 
+    // =========================================================
+    // SHOW
+    // =========================================================
     public function show(string $uuid)
     {
         $day = FuelSalesDay::where('uuid', $uuid)
@@ -188,6 +187,9 @@ class FuelSalesDayController extends Controller
         return view('application.pages.app.fuel_sales_days.show', compact('day', 'breadcrumb'));
     }
 
+    // =========================================================
+    // EDIT
+    // =========================================================
     public function edit(string $uuid)
     {
         $day = FuelSalesDay::where('uuid', $uuid)
@@ -199,31 +201,37 @@ class FuelSalesDayController extends Controller
         }
 
         $stations  = FuelStation::orderBy('name')->get(['uuid', 'name']);
-        $fuelTypes = FuelType::where('is_active', true)->orderBy('name')->get(['uuid', 'name']);
+
+        $fuelTypes = FuelType::where('is_active', true)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['uuid', 'name']);
+
 
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
+            "page_header" => "Fuel Sales",
+            "first_item_name" => "Fuel Sales Days",
+            "first_item_link" => route('fuel_sales_days.index'),
+            "first_item_icon" => "fa-gas-pump",
+            "second_item_name" => "Edit Sales Day",
             "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "second_item_icon" => "fa-edit",
         ];
 
         return view('application.pages.app.fuel_sales_days.edit', compact('day', 'stations', 'fuelTypes', 'breadcrumb'));
     }
 
+    // =========================================================
+    // UPDATE (DRAFT ONLY)
+    // =========================================================
     public function update(Request $request, string $uuid)
     {
         $validator = Validator::make($request->all(), [
-            'fuel_station_uuid' => 'required|uuid',
-            'sale_date'         => 'required|date',
-            'note'              => 'nullable|string',
-            'items'             => 'required|array|min:1',
-            'items.*.item_uuid'       => 'nullable|uuid',
+            'fuel_station_uuid'       => 'required|uuid',
+            'sale_date'               => 'required|date',
+            'note'                    => 'nullable|string',
+            'items'                   => 'required|array|min:1',
             'items.*.fuel_type_uuid'  => 'required|uuid',
-            'items.*.nozzle_number'   => 'nullable|integer|min:1',
             'items.*.opening_reading' => 'required|numeric|min:0',
             'items.*.closing_reading' => 'required|numeric|min:0',
         ]);
@@ -232,90 +240,62 @@ class FuelSalesDayController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        try {
-            DB::transaction(function () use ($request, $uuid) {
-                $day = FuelSalesDay::where('uuid', $uuid)
-                    ->with('items')
-                    ->lockForUpdate()
-                    ->firstOrFail();
+        DB::transaction(function () use ($request, $uuid) {
 
-                if ($day->status !== 'draft') {
-                    throw new \Exception('Only draft sales day can be edited.');
-                }
+            $day = FuelSalesDay::where('uuid', $uuid)->lockForUpdate()->firstOrFail();
 
-                // Check unique station + date
-                $exists = FuelSalesDay::where('fuel_station_uuid', $request->fuel_station_uuid)
-                    ->where('sale_date', $request->sale_date)
-                    ->where('uuid', '!=', $day->uuid)
-                    ->exists();
-                if ($exists) {
-                    throw new \Exception('Another sales day already exists for this station and date.');
-                }
+            if ($day->status !== 'draft') {
+                abort(403, 'Only draft sales day can be edited.');
+            }
 
-                $day->update([
-                    'fuel_station_uuid' => $request->fuel_station_uuid,
-                    'sale_date'         => $request->sale_date,
-                    'note'              => $request->note,
-                ]);
-
-                // Delete & recreate items
-                FuelSalesItem::where('fuel_sales_day_uuid', $day->uuid)->delete();
-
-                foreach ($request->items as $it) {
-                    $price = FuelStationPrice::where('fuel_station_uuid', $request->fuel_station_uuid)
-                        ->where('fuel_type_uuid', $it['fuel_type_uuid'])
-                        ->where('is_active', true)
-                        ->latest('created_at')
-                        ->value('price_per_unit') ?? 0;
-
-                    $sold_qty = $it['closing_reading'] - $it['opening_reading'];
-                    $line_total = $sold_qty * $price;
-
-                    FuelSalesItem::create([
-                        'fuel_sales_day_uuid' => $day->uuid,
-                        'fuel_type_uuid'      => $it['fuel_type_uuid'],
-                        'nozzle_number'       => $it['nozzle_number'] ?? null,
-                        'opening_reading'     => $it['opening_reading'],
-                        'closing_reading'     => $it['closing_reading'],
-                        'sold_qty'            => $sold_qty,
-                        'price_per_unit'      => $price,
-                        'line_total'          => $line_total,
-                        'is_active'           => true,
-                    ]);
-                }
-
-                // Update total
-                $day->refresh();
-                $day->update(['total_amount' => (float) $day->items()->sum('line_total')]);
-
-                // Audit log
-                AuditLog::create([
-                    'user_id'    => Auth::id(),
-                    'action'     => "Updated draft fuel sales day {$day->uuid}",
-                    'type'       => 'fuel_sales_day',
-                    'item_id'    => $day->id,
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
-            });
-
-            Alert::success('Success', 'Sales day updated.');
-            return redirect()->route('fuel_sales_days.show', $uuid);
-        } catch (\Throwable $e) {
-            AuditLog::create([
-                'user_id'    => Auth::id(),
-                'action'     => "Failed to update fuel sales day {$uuid}: " . $e->getMessage(),
-                'type'       => 'fuel_sales_day_error',
-                'item_id'    => null,
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
+            $day->update([
+                'fuel_station_uuid' => $request->fuel_station_uuid,
+                'sale_date'         => $request->sale_date,
+                'note'              => $request->note,
             ]);
 
-            Alert::error('Error', $e->getMessage());
-            return back()->withInput();
-        }
+            FuelSalesItem::where('fuel_sales_day_uuid', $day->uuid)->delete();
+
+            foreach ($request->items as $row) {
+
+                $sold_qty = $row['closing_reading'] - $row['opening_reading'];
+                if ($sold_qty <= 0) {
+                    abort(422, 'Closing reading must be greater than opening reading.');
+                }
+
+                $price = FuelStationPrice::where('fuel_station_uuid', $day->fuel_station_uuid)
+                    ->where('fuel_type_uuid', $row['fuel_type_uuid'])
+                    ->where('is_active', true)
+                    ->latest('created_at')
+                    ->value('price_per_unit') ?? 0;
+
+                $line_total = $sold_qty * $price;
+
+                FuelSalesItem::create([
+                    'fuel_sales_day_uuid' => $day->uuid,
+                    'fuel_type_uuid'      => $row['fuel_type_uuid'],
+                    'nozzle_number'       => $row['nozzle_number'],
+                    'opening_reading'     => $row['opening_reading'],
+                    'closing_reading'     => $row['closing_reading'],
+                    'sold_qty'            => $sold_qty,
+                    'price_per_unit'      => $price,
+                    'line_total'          => $line_total,
+                    'is_active'           => true,
+                ]);
+            }
+
+            $day->update([
+                'total_amount' => $day->items()->sum('line_total'),
+            ]);
+        });
+
+        Alert::success('Success', 'Sales day updated.');
+        return redirect()->route('fuel_sales_days.show', $uuid);
     }
 
+    // =========================================================
+    // SUBMIT (FINAL + STOCK OUT)
+    // =========================================================
     public function submit(Request $request, string $uuid)
     {
         $validator = Validator::make($request->all(), [
@@ -327,85 +307,81 @@ class FuelSalesDayController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        try {
-            DB::transaction(function () use ($request, $uuid) {
-                $day = FuelSalesDay::where('uuid', $uuid)
-                    ->with(['items.fuelType'])
-                    ->lockForUpdate()
-                    ->firstOrFail();
+        DB::transaction(function () use ($request, $uuid) {
 
-                if ($day->status !== 'draft') {
-                    throw new \Exception('Only draft can be submitted.');
+            $day = FuelSalesDay::where('uuid', $uuid)
+                ->with('items.fuelType')
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($day->status !== 'draft') {
+                abort(422, 'Only draft can be submitted.');
+            }
+
+            $total = (float) $day->items->sum('line_total');
+            if (abs(($request->cash_amount + $request->bank_amount) - $total) > 0.01) {
+                abort(422, 'Cash + Bank must equal total amount.');
+            }
+
+            foreach ($day->items as $it) {
+
+                $balance = StockLedgerService::getBalance(
+                    $day->fuel_station_uuid,
+                    $it->fuel_type_uuid
+                );
+
+                if ($balance < $it->sold_qty) {
+                    abort(422, 'Insufficient stock for ' . $it->fuelType->name);
                 }
 
-                // Compute total from items
-                $total = (float) $day->items->sum('line_total');
-                $cash  = (float) $request->cash_amount;
-                $bank  = (float) $request->bank_amount;
-
-                if (abs(($cash + $bank) - $total) > 0.01) {
-                    throw new \Exception("Cash + Bank must equal total. total={$total}, got=" . ($cash + $bank));
-                }
-
-                // Check stock and update ledger
-                foreach ($day->items as $it) {
-                    $sold = (float) $it->sold_qty;
-                    if ($sold <= 0) continue;
-
-                    $balance = StockLedgerService::getBalance($day->fuel_station_uuid, $it->fuel_type_uuid);
-                    if ($balance + 0.0001 < $sold) {
-                        throw new \Exception("Insufficient stock for fuel type {$it->fuel_type_uuid}. balance={$balance}, sold={$sold}");
-                    }
-
-                    $fuelUnitUuid = $it->fuelType->fuel_unit_uuid
-                        ?? FuelType::where('uuid', $it->fuel_type_uuid)->value('fuel_unit_uuid');
-
-                    StockLedgerService::add([
-                        'fuel_station_uuid' => $day->fuel_station_uuid,
-                        'fuel_type_uuid'    => $it->fuel_type_uuid,
-                        'fuel_unit_uuid'    => $fuelUnitUuid,
-                        'txn_type'          => 'sale',
-                        'ref_uuid'          => $day->uuid,
-                        'txn_date'          => $day->sale_date,
-                        'qty_in'            => 0,
-                        'qty_out'           => $sold,
-                        'note'              => 'Day-end sale submission (Web)',
-                    ]);
-                }
-
-                // Update sales day
-                $day->update([
-                    'cash_amount'  => $cash,
-                    'bank_amount'  => $bank,
-                    'total_amount' => $total,
-                    'status'       => 'submitted',
+                StockLedgerService::add([
+                    'fuel_station_uuid' => $day->fuel_station_uuid,
+                    'fuel_type_uuid'    => $it->fuel_type_uuid,
+                    'fuel_unit_uuid'    => $it->fuelType->fuel_unit_uuid,
+                    'txn_type'          => 'sale',
+                    'txn_date'          => $day->sale_date,
+                    'qty_in'            => 0,
+                    'qty_out'           => $it->sold_qty,
+                    'reference_type'    => 'fuel_sales_day',
+                    'reference_uuid'    => $day->uuid,
+                    'note'              => 'Day-end sale submission',
                 ]);
+            }
 
-                // Audit log
-                AuditLog::create([
-                    'user_id'    => Auth::id(),
-                    'action'     => "Submitted fuel sales day {$day->uuid}",
-                    'type'       => 'fuel_sales_day',
-                    'item_id'    => $day->id,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
-                ]);
-            });
-
-            Alert::success('Success', 'Sales day submitted and stock ledger updated.');
-            return back();
-        } catch (\Throwable $e) {
-            AuditLog::create([
-                'user_id'    => Auth::id(),
-                'action'     => "Failed to submit fuel sales day {$uuid}: " . $e->getMessage(),
-                'type'       => 'fuel_sales_day_error',
-                'item_id'    => null,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
+            $day->update([
+                'cash_amount'  => $request->cash_amount,
+                'bank_amount'  => $request->bank_amount,
+                'total_amount' => $total,
+                'status'       => 'submitted',
             ]);
+        });
 
-            Alert::error('Error', $e->getMessage());
-            return back()->withInput();
+        Alert::success('Success', 'Sales day submitted and stock updated.');
+        return back();
+    }
+
+    public function getFuelPrices(FuelStation $station)
+    {
+        // Get all active fuel types
+        $fuelTypes = DB::table('fuel_types')
+            ->where('is_active', true)
+            ->get();
+
+        $prices = [];
+
+        foreach ($fuelTypes as $ft) {
+            $price = DB::table('fuel_purchase_items as fpi')
+                ->join('fuel_purchases as fp', 'fpi.fuel_purchase_uuid', '=', 'fp.uuid')
+                ->where('fp.fuel_station_uuid', $station->uuid)
+                ->where('fp.status', 'received')           // only consider received purchases
+                ->where('fpi.fuel_type_uuid', $ft->uuid)
+                ->where('fpi.is_active', true)
+                ->orderByDesc('fpi.created_at')
+                ->value('fpi.unit_price') ?? 0;
+
+            $prices[$ft->uuid] = (float) $price;
         }
+
+        return response()->json($prices);
     }
 }

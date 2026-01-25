@@ -3,64 +3,107 @@
 namespace App\Services;
 
 use App\Models\FuelStockLedger;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StockLedgerService
 {
+    /**
+     * Get current balance for station + fuel
+     */
     public static function getBalance(string $stationUuid, string $fuelTypeUuid): float
     {
-        $in = (float) FuelStockLedger::where('fuel_station_uuid', $stationUuid)
+        return (float) FuelStockLedger::where('fuel_station_uuid', $stationUuid)
             ->where('fuel_type_uuid', $fuelTypeUuid)
-            ->sum('qty_in');
-
-        $out = (float) FuelStockLedger::where('fuel_station_uuid', $stationUuid)
-            ->where('fuel_type_uuid', $fuelTypeUuid)
-            ->sum('qty_out');
-
-        return $in - $out;
+            ->latest('id')
+            ->value('balance_after') ?? 0;
     }
 
     /**
-     * Stock IN
+     * -----------------------------
+     * STOCK IN (Fuel Purchase)
+     * -----------------------------
+     * USED BY:
+     * - Fuel Purchase Receive
      */
     public static function in(array $data): FuelStockLedger
     {
-        $balance = self::getBalance($data['fuel_station_uuid'], $data['fuel_type_uuid']);
+        return DB::transaction(function () use ($data) {
 
-        $balance += (float) ($data['quantity'] ?? 0);
+            $qty = (float) ($data['quantity'] ?? 0);
+            if ($qty <= 0) {
+                throw new \Exception('Quantity must be greater than zero.');
+            }
 
-        return FuelStockLedger::create([
-            'fuel_station_uuid' => $data['fuel_station_uuid'],
-            'fuel_type_uuid'    => $data['fuel_type_uuid'],
-            'fuel_unit_uuid'    => $data['fuel_unit_uuid'],
-            'qty_in'            => $data['quantity'] ?? 0,
-            'qty_out'           => 0,
-            'txn_type'          => 'IN',
-            'balance_after'     => $balance,
-            'txn_date'          => $data['date'] ?? now(), // ✅ Must set txn_date
-            'reference_type'    => $data['reference_type'] ?? null,
-            'reference_uuid'    => $data['reference_uuid'] ?? null,
-        ]);
-    }
-
-
-    /**
-     * Generic ledger add
-     */
-    public static function add(array $data): FuelStockLedger
-    {
-        if (!array_key_exists('balance_after', $data) || $data['balance_after'] === null) {
-            $balance = self::getBalance(
+            $balanceBefore = self::getBalance(
                 $data['fuel_station_uuid'],
                 $data['fuel_type_uuid']
             );
 
-            $balance = $balance
-                + (float)($data['qty_in'] ?? 0)
-                - (float)($data['qty_out'] ?? 0);
+            $balanceAfter = $balanceBefore + $qty;
 
-            $data['balance_after'] = $balance;
-        }
+            return FuelStockLedger::create([
+                'uuid'               => (string) Str::uuid(),
+                'fuel_station_uuid'  => $data['fuel_station_uuid'],
+                'fuel_type_uuid'     => $data['fuel_type_uuid'],
+                'fuel_unit_uuid'     => $data['fuel_unit_uuid'],
+                'txn_type'           => 'purchase',
+                'txn_date'           => $data['date'] ?? now(),
+                'qty_in'             => $qty,
+                'qty_out'            => 0,
+                'balance_after'      => $balanceAfter,
+                'reference_type'     => $data['reference_type'] ?? null,
+                'reference_uuid'     => $data['reference_uuid'] ?? null,
+                'note'               => $data['note'] ?? null,
+            ]);
+        });
+    }
 
-        return FuelStockLedger::create($data);
+    /**
+     * ---------------------------------
+     * GENERIC LEDGER ADD (IN / OUT)
+     * ---------------------------------
+     * USED BY:
+     * - Sales submit
+     * - Adjustments
+     * - Any future transaction
+     */
+    public static function add(array $data): FuelStockLedger
+    {
+        return DB::transaction(function () use ($data) {
+
+            $qtyIn  = (float) ($data['qty_in']  ?? 0);
+            $qtyOut = (float) ($data['qty_out'] ?? 0);
+
+            if ($qtyIn <= 0 && $qtyOut <= 0) {
+                throw new \Exception('Either qty_in or qty_out must be greater than zero.');
+            }
+
+            $balanceBefore = self::getBalance(
+                $data['fuel_station_uuid'],
+                $data['fuel_type_uuid']
+            );
+
+            $balanceAfter = $balanceBefore + $qtyIn - $qtyOut;
+
+            if ($balanceAfter < 0) {
+                throw new \Exception('Insufficient stock. Operation would result in negative balance.');
+            }
+
+            return FuelStockLedger::create([
+                'uuid'               => $data['uuid'] ?? (string) Str::uuid(),
+                'fuel_station_uuid'  => $data['fuel_station_uuid'],
+                'fuel_type_uuid'     => $data['fuel_type_uuid'],
+                'fuel_unit_uuid'     => $data['fuel_unit_uuid'],
+                'txn_type'           => $data['txn_type'],     // sale | purchase | adjustment
+                'txn_date'           => $data['txn_date'] ?? now(),
+                'qty_in'             => $qtyIn,
+                'qty_out'            => $qtyOut,
+                'balance_after'      => $balanceAfter,
+                'reference_type'     => $data['reference_type'] ?? null,
+                'reference_uuid'     => $data['reference_uuid'] ?? null,
+                'note'               => $data['note'] ?? null,
+            ]);
+        });
     }
 }

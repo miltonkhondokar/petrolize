@@ -127,7 +127,12 @@ class VendorPaymentController extends Controller
     public function show(string $uuid)
     {
         $payment = VendorPayment::where('uuid', $uuid)
-            ->with(['vendor', 'allocations.purchase.vendor', 'allocations.purchase.station'])
+            ->with([
+                'vendor',
+                'allocations.purchase.vendor',
+                'allocations.purchase.station',
+                'allocations.purchase.items',
+            ])
             ->firstOrFail();
 
         $openPurchases = FuelPurchase::where('vendor_uuid', $payment->vendor_uuid)
@@ -304,17 +309,16 @@ class VendorPaymentController extends Controller
     {
         // Get unpaid fuel purchases for the vendor
         $purchases = FuelPurchase::where('vendor_uuid', $vendor_uuid)
-            ->where('status', '!=', 'received_full') // or any status meaning fully paid
             ->with('station')
             ->get()
             ->map(fn($p) => [
-                'uuid' => $p->uuid,
-                'invoice_no' => $p->invoice_no ?: $p->uuid,
+                'uuid'          => $p->uuid,
+                'invoice_no'    => $p->invoice_no ?: $p->uuid,
                 'purchase_date' => $p->purchase_date->toDateString(),
-                'total_amount' => $p->total_amount,
-                'paid_amount'  => $p->payments()->sum('allocated_amount') ?? 0,
-                'balance'      => $p->total_amount - ($p->payments()->sum('allocated_amount') ?? 0),
-                'station_name' => $p->station->name ?? '-',
+                'total_amount'  => $p->total_amount,
+                'paid_amount'   => $p->paid_amount,
+                'balance'       => $p->balance_amount,
+                'station_name'  => $p->station->name ?? '-',
             ]);
 
         return response()->json($purchases);

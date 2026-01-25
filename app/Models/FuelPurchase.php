@@ -44,4 +44,26 @@ class FuelPurchase extends Model
     {
         return $this->hasMany(VendorPaymentAllocation::class, 'fuel_purchase_uuid', 'uuid');
     }
+
+    public function paymentAllocations()
+    {
+        return $this->hasMany(
+            VendorPaymentAllocation::class,
+            'fuel_purchase_uuid',
+            'uuid'
+        );
+    }
+
+    /**
+     * Convenience accessor (optional but VERY useful)
+     */
+    public function getPaidAmountAttribute(): float
+    {
+        return (float) $this->paymentAllocations()->sum('allocated_amount');
+    }
+
+    public function getBalanceAmountAttribute(): float
+    {
+        return (float) ($this->total_amount - $this->paid_amount);
+    }
 }

@@ -195,7 +195,7 @@
                                             <td>{{ $purchase->purchase_date->format('d M Y') }}</td>
                                             <td>{{ $purchase->reference_no ?? 'N/A' }}</td>
                                             <td>{{ $purchase->station->name ?? 'N/A' }}</td>
-                                            <td>{{ number_format($purchase->quantity, 2) }} L</td>
+                                            <td>{{ number_format($purchase->items->sum('quantity'), 2) }} L</td>
                                             <td>${{ number_format($purchase->total_amount, 2) }}</td>
                                             <td>
                                                 <span class="badge badge-light-success">
