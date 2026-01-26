@@ -5,6 +5,7 @@ use App\Http\Controllers\App\Fuel\FuelPurchaseController;
 use App\Http\Controllers\App\Vendor\VendorPaymentController;
 use App\Http\Controllers\App\Fuel\FuelSalesDayController;
 use App\Http\Controllers\App\Stock\StockController;
+use App\Http\Controllers\ReferenceData\Fuel\FuelStationCapacityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,9 +50,6 @@ require __DIR__.'/application/vendor/vendor.php';
 
 // Geo Location Management Routes
 require __DIR__.'/application/geo-locations/geo_location.php';
-
-//Fuel Station Fuel Type Management Routes
-require __DIR__.'/application/fuel-station-fuel-type/fuel_station_fuel_type.php';
 
 //Cost Entry Management Routes
 require __DIR__. '/application/cost-entry/cost_entry.php';
@@ -121,4 +119,43 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/stock/ledger', [StockController::class, 'ledger'])->name('stock.ledger');
 
 
+});
+
+
+
+
+
+Route::middleware(['auth', 'auth.check'])->group(function () {
+
+    // IMPORTANT: Specific routes MUST come BEFORE parameterized routes
+
+    // API endpoint for dynamic loading (MUST be before {uuid} routes)
+    Route::get('/fuel-capacity/station-fuel-types', [FuelStationCapacityController::class, 'stationFuelTypes'])
+        ->name('fuel-capacity.station-fuel-types');
+
+    // Standard CRUD routes
+    Route::get('/fuel-capacity', [FuelStationCapacityController::class, 'index'])
+        ->name('fuel-capacity.index');
+
+    Route::get('/fuel-capacity/create', [FuelStationCapacityController::class, 'create'])
+        ->name('fuel-capacity.create');
+
+    Route::post('/fuel-capacity', [FuelStationCapacityController::class, 'store'])
+        ->name('fuel-capacity.store');
+
+    // These must come AFTER specific routes like 'create' and 'station-fuel-types'
+    Route::get('/fuel-capacity/{uuid}', [FuelStationCapacityController::class, 'show'])
+        ->name('fuel-capacity.show');
+
+    Route::get('/fuel-capacity/{uuid}/edit', [FuelStationCapacityController::class, 'edit'])
+        ->name('fuel-capacity.edit');
+
+    Route::put('/fuel-capacity/{uuid}', [FuelStationCapacityController::class, 'update'])
+        ->name('fuel-capacity.update');
+
+    Route::patch('/fuel-capacity/{uuid}/status', [FuelStationCapacityController::class, 'fuelCapacityStatusUpdate'])
+        ->name('fuel-capacity-status-update');
+
+    Route::delete('/fuel-capacity/{uuid}', [FuelStationCapacityController::class, 'destroy'])
+        ->name('fuel-capacity.destroy');
 });

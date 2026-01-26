@@ -34,26 +34,20 @@ class DatabaseSeeder extends Seeder
             FuelStationSeeder::class,
 
             //Fuel Station fuel prices
-            FuelStationPriceSeeder::class,
+            // FuelStationPriceSeeder::class,
 
             // Vendors
             VendorSeeder::class,
-
-            //Fuel Station fuel stocks
-            FuelStationStockSeeder::class,
 
             //Cost categories
             CostCategorySeeder::class,
 
             //Cost entries
-            CostEntrySeeder::class,
+            // CostEntrySeeder::class,
 
             //Fuel Station complaints
             ComplaintCategorySeeder::class,
-            FuelStationComplaintSeeder::class,
-
-            //Fuel Station fuel readings
-            FuelStationReadingSeeder::class,
+            // FuelStationComplaintSeeder::class,
         ]);
     }
 }

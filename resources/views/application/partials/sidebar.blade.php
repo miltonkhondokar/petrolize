@@ -291,7 +291,7 @@
                     </div>
 
                     <!-- REFERENCE DATA -->
-                    <div class="menu-item menu-accordion {{ active_menu(['fuel.*', 'fuel-station-fuel-type.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel.*', 'fuel-station-fuel-type.*', 'fuel-station.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*', 'fuel-capacity.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -301,7 +301,7 @@
                             <span class="menu-arrow"></span>
                         </span>
                         <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-station-fuel-type.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*'], null, 'menu') }}">
+                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel.*', 'fuel-station.*', 'fuel-station-fuel-type.*', 'fuel-unit.*', 'fuel-unit-price.*', 'cost-category.*', 'complaint-category.*', 'fuel-capacity.*'], null, 'menu') }}">
 
                             <!-- Fuel Units -->
                             <div class="menu-item">
@@ -330,12 +330,12 @@
                                 </a>
                             </div>
 
-                            <!-- Station Wise Fuel Types -->
+                            <!-- Fuel Station Capacity -->
                             <div class="menu-item">
-                                <a class="menu-link {{ active_menu('fuel-station-fuel-type.*', null, 'link') }}"
-                                    href="{{ route('fuel-station-fuel-type.index') }}">
+                                <a class="menu-link {{ active_menu('fuel-capacity.*', null, 'link') }}"
+                                    href="{{ route('fuel-capacity.index') }}">
                                     <span class="menu-bullet"><span class="bullet bullet-dot"></span></span>
-                                    <span class="menu-title">Station Wise Fuel</span>
+                                    <span class="menu-title">Fuel Station Capacity</span>
                                 </a>
                             </div>
 
