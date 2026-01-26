@@ -20,18 +20,18 @@ class FuelSalesDayController extends Controller
 {
     // =========================================================
     // PRICE SOURCE (Single Truth)
-    // Latest received purchase price for station+fuel
+    // Sale price should come from FuelStationPrice (FuelUnitPriceController)
     // =========================================================
-    private function latestPurchasePrice(string $stationUuid, string $fuelTypeUuid): float
+    private function stationSalePrice(string $stationUuid, string $fuelTypeUuid): float
     {
-        return (float) (DB::table('fuel_purchase_items as fpi')
-            ->join('fuel_purchases as fp', 'fpi.fuel_purchase_uuid', '=', 'fp.uuid')
-            ->where('fp.fuel_station_uuid', $stationUuid)
-            ->where('fp.status', 'received')           // only consider received purchases
-            ->where('fpi.fuel_type_uuid', $fuelTypeUuid)
-            ->where('fpi.is_active', true)
-            ->orderByDesc('fpi.created_at')
-            ->value('fpi.unit_price')) ?? 0;
+        // One row per (station,fuel_type) because FuelUnitPriceController uses updateOrCreate,
+        // but orderByDesc keeps it safe if duplicates ever exist.
+        return (float) (DB::table('fuel_station_prices')
+            ->where('fuel_station_uuid', $stationUuid)
+            ->where('fuel_type_uuid', $fuelTypeUuid)
+            ->where('is_active', true)
+            ->orderByDesc('updated_at')
+            ->value('price_per_unit')) ?? 0;
     }
 
     // =========================================================
@@ -103,6 +103,9 @@ class FuelSalesDayController extends Controller
 
     // =========================================================
     // STORE (DRAFT)
+    // - Keeps existing logic (create day, create items, total sum, audit)
+    // - Only changes price source to fuel_station_prices
+    // - No existing data is modified here (this creates new rows)
     // =========================================================
     public function store(Request $request)
     {
@@ -141,12 +144,16 @@ class FuelSalesDayController extends Controller
                     abort(422, 'Closing reading must be greater than opening reading.');
                 }
 
-                // ✅ Consistent price source (same as AJAX)
-                $price = $this->latestPurchasePrice($day->fuel_station_uuid, $row['fuel_type_uuid']);
+                // ✅ Sale price from Fuel Station Unit Price (FuelStationPrice)
+                $price = $this->stationSalePrice($day->fuel_station_uuid, $row['fuel_type_uuid']);
+                if ($price <= 0) {
+                    abort(422, 'Fuel unit price not set (or inactive) for this station & fuel type.');
+                }
+
                 $line_total = $sold_qty * $price;
 
                 FuelSalesItem::create([
-                    'uuid'              => (string) Str::uuid(),
+                    'uuid'                => (string) Str::uuid(),
                     'fuel_sales_day_uuid' => $day->uuid,
                     'fuel_type_uuid'      => $row['fuel_type_uuid'],
                     'nozzle_number'       => $row['nozzle_number'] ?? null,
@@ -232,9 +239,10 @@ class FuelSalesDayController extends Controller
     }
 
     // =========================================================
-    // UPDATE (DRAFT ONLY) - NO DATA LOSS
-    // We update header + delete/recreate items (same as your logic),
-    // but now we store correct price_per_unit and line_total.
+    // UPDATE (DRAFT ONLY) - WITHOUT LOSING DATA (LOGICAL)
+    // Existing logic: delete & recreate items for this day (as you requested)
+    // - Does NOT affect other days, stock, purchases, or station prices
+    // - Recomputes sold_qty/price/line_total with station unit price
     // =========================================================
     public function update(Request $request, string $uuid)
     {
@@ -267,7 +275,7 @@ class FuelSalesDayController extends Controller
                 'note'              => $request->note,
             ]);
 
-            // delete and recreate items (your current approach)
+            // Your existing approach: delete & recreate items for this draft day
             FuelSalesItem::where('fuel_sales_day_uuid', $day->uuid)->delete();
 
             foreach ($request->items as $row) {
@@ -279,12 +287,16 @@ class FuelSalesDayController extends Controller
                     abort(422, 'Closing reading must be greater than opening reading.');
                 }
 
-                // ✅ consistent price source
-                $price = $this->latestPurchasePrice($day->fuel_station_uuid, $row['fuel_type_uuid']);
+                // ✅ Sale price from FuelStationPrice
+                $price = $this->stationSalePrice($day->fuel_station_uuid, $row['fuel_type_uuid']);
+                if ($price <= 0) {
+                    abort(422, 'Fuel unit price not set (or inactive) for this station & fuel type.');
+                }
+
                 $line_total = $sold_qty * $price;
 
                 FuelSalesItem::create([
-                    'uuid'              => (string) Str::uuid(),
+                    'uuid'                => (string) Str::uuid(),
                     'fuel_sales_day_uuid' => $day->uuid,
                     'fuel_type_uuid'      => $row['fuel_type_uuid'],
                     'nozzle_number'       => $row['nozzle_number'] ?? null,
@@ -308,6 +320,7 @@ class FuelSalesDayController extends Controller
 
     // =========================================================
     // SUBMIT (FINAL + STOCK OUT)
+    // Keeps your existing logic: validate amounts = total, check stock, ledger out, mark submitted
     // =========================================================
     public function submit(Request $request, string $uuid)
     {
@@ -331,7 +344,9 @@ class FuelSalesDayController extends Controller
                 abort(422, 'Only draft can be submitted.');
             }
 
+            // Important: submit uses stored line_total (created during store/update)
             $total = (float) $day->items->sum('line_total');
+
             if (abs(((float)$request->cash_amount + (float)$request->bank_amount) - $total) > 0.01) {
                 abort(422, 'Cash + Bank must equal total amount.');
             }
@@ -373,7 +388,7 @@ class FuelSalesDayController extends Controller
     }
 
     // =========================================================
-    // AJAX: Station fuel prices (same truth source)
+    // AJAX: Station fuel prices (Sale prices from FuelStationPrice)
     // =========================================================
     public function getFuelPrices(FuelStation $station)
     {
@@ -383,7 +398,7 @@ class FuelSalesDayController extends Controller
 
         $prices = [];
         foreach ($fuelTypes as $ft) {
-            $prices[$ft->uuid] = $this->latestPurchasePrice($station->uuid, $ft->uuid);
+            $prices[$ft->uuid] = $this->stationSalePrice($station->uuid, $ft->uuid);
         }
 
         return response()->json($prices);

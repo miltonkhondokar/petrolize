@@ -49,16 +49,16 @@ class DashboardController extends Controller
             ->count();
 
         // =========================
-        // CHARTS (existing)
+        // CHARTS
         // =========================
-        $monthlyExpensesChart      = $this->getMonthlyExpensesChart();      // last 6 months
-        $stockValueChart           = $this->getStockValueByPumpChart();     // top 10 stations by stock value
-        $monthlyExpensesByCategory = $this->getMonthlyExpensesByCategory(); // current month category summary
-        $fuelTypeStocks            = $this->getFuelTypeStocks();            // stock distribution by fuel type
-        $pumpPerformance           = $this->getPumpPerformance();           // top 5 stations by stock value
+        $monthlyExpensesChart      = $this->getMonthlyExpensesChart();   // last 6 months
+        $stockValueChart           = $this->getStockValueByPumpChart();  // top 10 stations by CURRENT stock value (LEDGER balance * latest cost)
+        $monthlyExpensesByCategory = $this->getMonthlyExpensesByCategory();
+        $fuelTypeStocks            = $this->getFuelTypeStocks();         // CURRENT stock distribution by fuel type (LEDGER balance)
+        $pumpPerformance           = $this->getPumpPerformance();        // top 5 stations by CURRENT stock value + complaints
 
         // =========================
-        // RECENT LISTS
+        // RECENT LISTS (keep as-is, these are latest stock-in records)
         // =========================
         $recentStocks = FuelStationStock::with(['fuelStation', 'fuelType', 'fuelUnit'])
             ->where('is_active', true)
@@ -78,10 +78,11 @@ class DashboardController extends Controller
             ->select('name', 'code', 'uuid')
             ->get();
 
-        $totalStockValue = (float) FuelStationStock::where('is_active', true)->sum('total_cost');
+        // ✅ Total CURRENT stock value from ledger balance * latest known cost (does not modify any data)
+        $totalStockValue = (float) $this->getCurrentTotalStockValue();
 
         // =========================
-        // NEW: SALES + STOCK INTELLIGENCE
+        // SALES + STOCK INTELLIGENCE
         // =========================
         [$todaySalesAmount, $todaySoldLiters] = $this->getTodaySalesKpis();
         [$mtdSalesAmount, $mtdSoldLiters]     = $this->getMonthToDateSalesKpis();
@@ -95,10 +96,7 @@ class DashboardController extends Controller
         $vendorPayables    = $this->getVendorPayablesSummary();   // total_purchases, paid, due
         $lowStockAlerts    = $this->getLowStockAlerts(5);         // threshold liters
 
-        // =========================
-        // OPTIONAL: Profit snapshot (very simple)
-        // Profit = Sales - Purchases - Expenses (MTD)
-        // =========================
+        // OPTIONAL: Profit snapshot (simple)
         $profitSnapshot = $this->getMtdProfitSnapshot();
 
         return view('application.pages.app.dashboard.dashboard', compact(
@@ -138,6 +136,57 @@ class DashboardController extends Controller
     }
 
     // =========================================================
+    // LEDGER HELPERS (read-only)
+    // =========================================================
+
+    /**
+     * Latest ledger row per (station,fuel) -> gives us current balance_after.
+     * Uses MAX(id) which is reliable if id is auto-increment and increases per insert.
+     */
+    private function latestLedgerIdsSubquery()
+    {
+        return DB::table('fuel_stock_ledgers')
+            ->selectRaw('MAX(id) as id')
+            ->groupBy('fuel_station_uuid', 'fuel_type_uuid');
+    }
+
+    /**
+     * Latest stock-in row per (station,fuel) -> to get latest purchase_price as "cost" for valuation.
+     * This does NOT change stock; it only reads the latest known cost.
+     */
+    private function latestStockIdsSubquery()
+    {
+        return DB::table('fuel_station_stocks')
+            ->where('is_active', true)
+            ->selectRaw('fuel_station_uuid, fuel_type_uuid, MAX(id) as id')
+            ->groupBy('fuel_station_uuid', 'fuel_type_uuid');
+    }
+
+    /**
+     * Total CURRENT stock value = SUM(ledger.balance_after * latest_stock.purchase_price)
+     * If there is no stock record for a pair, cost will be NULL => treated as 0.
+     */
+    private function getCurrentTotalStockValue(): float
+    {
+        $latestLedgerIds = $this->latestLedgerIdsSubquery();
+        $latestStockIds  = $this->latestStockIdsSubquery();
+
+        $row = DB::table('fuel_stock_ledgers as l')
+            ->joinSub($latestLedgerIds, 'lx', fn ($j) => $j->on('l.id', '=', 'lx.id'))
+            ->leftJoinSub($latestStockIds, 'sx', function ($j) {
+                $j->on('l.fuel_station_uuid', '=', 'sx.fuel_station_uuid')
+                  ->on('l.fuel_type_uuid', '=', 'sx.fuel_type_uuid');
+            })
+            ->leftJoin('fuel_station_stocks as st', 'st.id', '=', 'sx.id')
+            ->join('fuel_stations as s', 'l.fuel_station_uuid', '=', 's.uuid')
+            ->where('s.is_active', true)
+            ->selectRaw('SUM( (l.balance_after) * COALESCE(st.purchase_price, 0) ) as total_value')
+            ->first();
+
+        return (float) ($row->total_value ?? 0);
+    }
+
+    // =========================================================
     // Existing chart: last 6 months expenses
     // =========================================================
     private function getMonthlyExpensesChart()
@@ -168,23 +217,33 @@ class DashboardController extends Controller
     }
 
     // =========================================================
-    // Existing chart: top 10 stations by stock value
+    // UPDATED: top 10 stations by CURRENT stock value
+    // Uses ledger balance_after as truth, and latest FuelStationStock.purchase_price as cost.
+    // (Read-only; no data changes)
     // =========================================================
     private function getStockValueByPumpChart()
     {
-        $stockValues = DB::table('fuel_station_stocks as pfs')
-            ->join('fuel_stations as p', 'pfs.fuel_station_uuid', '=', 'p.uuid')
-            ->where('pfs.is_active', true)
+        $latestLedgerIds = $this->latestLedgerIdsSubquery();
+        $latestStockIds  = $this->latestStockIdsSubquery();
+
+        $rows = DB::table('fuel_stock_ledgers as l')
+            ->joinSub($latestLedgerIds, 'lx', fn ($j) => $j->on('l.id', '=', 'lx.id'))
+            ->join('fuel_stations as p', 'l.fuel_station_uuid', '=', 'p.uuid')
+            ->leftJoinSub($latestStockIds, 'sx', function ($j) {
+                $j->on('l.fuel_station_uuid', '=', 'sx.fuel_station_uuid')
+                  ->on('l.fuel_type_uuid', '=', 'sx.fuel_type_uuid');
+            })
+            ->leftJoin('fuel_station_stocks as st', 'st.id', '=', 'sx.id')
             ->where('p.is_active', true)
-            ->selectRaw('p.name as pump_name, SUM(pfs.total_cost) as total_value')
+            ->selectRaw('p.name as pump_name, SUM( (l.balance_after) * COALESCE(st.purchase_price, 0) ) as total_value')
             ->groupBy('p.uuid', 'p.name')
-            ->orderBy('total_value', 'desc')
+            ->orderByDesc('total_value')
             ->limit(10)
             ->get();
 
         return [
-            'labels' => $stockValues->pluck('pump_name')->toArray(),
-            'data'   => $stockValues->pluck('total_value')->map(fn ($v) => (float)$v)->toArray(),
+            'labels' => $rows->pluck('pump_name')->toArray(),
+            'data'   => $rows->pluck('total_value')->map(fn ($v) => (float)$v)->toArray(),
         ];
     }
 
@@ -207,39 +266,68 @@ class DashboardController extends Controller
     }
 
     // =========================================================
-    // Existing: stock distribution by fuel type
+    // UPDATED: CURRENT stock distribution by fuel type (ledger truth)
+    // - total_quantity = SUM(current balance per station)
+    // - total_value = SUM(balance * latest cost)
     // =========================================================
     private function getFuelTypeStocks()
     {
-        return DB::table('fuel_station_stocks as pfs')
-            ->join('fuel_types as ft', 'pfs.fuel_type_uuid', '=', 'ft.uuid')
-            ->where('pfs.is_active', true)
+        $latestLedgerIds = $this->latestLedgerIdsSubquery();
+        $latestStockIds  = $this->latestStockIdsSubquery();
+
+        return DB::table('fuel_stock_ledgers as l')
+            ->joinSub($latestLedgerIds, 'lx', fn ($j) => $j->on('l.id', '=', 'lx.id'))
+            ->join('fuel_types as ft', 'l.fuel_type_uuid', '=', 'ft.uuid')
+            ->join('fuel_stations as s', 'l.fuel_station_uuid', '=', 's.uuid')
+            ->leftJoinSub($latestStockIds, 'sx', function ($j) {
+                $j->on('l.fuel_station_uuid', '=', 'sx.fuel_station_uuid')
+                  ->on('l.fuel_type_uuid', '=', 'sx.fuel_type_uuid');
+            })
+            ->leftJoin('fuel_station_stocks as st', 'st.id', '=', 'sx.id')
+            ->where('s.is_active', true)
+            ->where('ft.is_active', true)
             ->selectRaw('
                 ft.name as fuel_name,
                 ft.code as fuel_code,
-                SUM(pfs.quantity) as total_quantity,
-                SUM(pfs.total_cost) as total_value
+                SUM(l.balance_after) as total_quantity,
+                SUM( (l.balance_after) * COALESCE(st.purchase_price, 0) ) as total_value
             ')
             ->groupBy('ft.uuid', 'ft.name', 'ft.code')
-            ->orderBy('total_quantity', 'desc')
+            ->orderByDesc('total_quantity')
             ->get();
     }
 
     // =========================================================
-    // Existing: top 5 stations by stock value + complaints
+    // UPDATED: top 5 stations by CURRENT stock value + complaints
     // =========================================================
     private function getPumpPerformance()
     {
+        $latestLedgerIds = $this->latestLedgerIdsSubquery();
+        $latestStockIds  = $this->latestStockIdsSubquery();
+
+        // Pre-calc stock value per station in ONE query (fast)
+        $stationValues = DB::table('fuel_stock_ledgers as l')
+            ->joinSub($latestLedgerIds, 'lx', fn ($j) => $j->on('l.id', '=', 'lx.id'))
+            ->leftJoinSub($latestStockIds, 'sx', function ($j) {
+                $j->on('l.fuel_station_uuid', '=', 'sx.fuel_station_uuid')
+                  ->on('l.fuel_type_uuid', '=', 'sx.fuel_type_uuid');
+            })
+            ->leftJoin('fuel_station_stocks as st', 'st.id', '=', 'sx.id')
+            ->join('fuel_stations as s', 'l.fuel_station_uuid', '=', 's.uuid')
+            ->where('s.is_active', true)
+            ->selectRaw('s.uuid as station_uuid, SUM( (l.balance_after) * COALESCE(st.purchase_price, 0) ) as stock_value')
+            ->groupBy('s.uuid')
+            ->pluck('stock_value', 'station_uuid')
+            ->toArray();
+
         $fuelStations = FuelStation::where('is_active', true)
             ->select('uuid', 'name', 'location', 'is_active')
             ->withCount(['complaints' => function ($query) {
                 $query->where('is_active', true);
             }])
             ->get()
-            ->map(function ($fuelStation) {
-                $stockValue = (float) FuelStationStock::where('fuel_station_uuid', $fuelStation->uuid)
-                    ->where('is_active', true)
-                    ->sum('total_cost');
+            ->map(function ($fuelStation) use ($stationValues) {
+                $stockValue = (float) ($stationValues[$fuelStation->uuid] ?? 0);
 
                 return (object)[
                     'uuid'            => $fuelStation->uuid,
@@ -440,8 +528,9 @@ class DashboardController extends Controller
                 $j->on('l.id', '=', 'x.id');
             })
             ->join('fuel_stations as s', 'l.fuel_station_uuid', '=', 's.uuid')
-            ->join('fuel_types as ft', 'l.fuel_type_uuid', '=', 'ft.uuid') // ✅ fixed
+            ->join('fuel_types as ft', 'l.fuel_type_uuid', '=', 'ft.uuid')
             ->where('s.is_active', true)
+            ->where('ft.is_active', true)
             ->where('l.balance_after', '<=', $thresholdLiters)
             ->orderBy('l.balance_after', 'asc')
             ->limit(10)
@@ -452,7 +541,6 @@ class DashboardController extends Controller
                 'l.balance_after',
             ]);
     }
-
 
     // =========================================================
     // NEW: Simple MTD profit snapshot
@@ -484,7 +572,7 @@ class DashboardController extends Controller
     }
 
     // =========================================================
-    // If you still want the JSON endpoint (optional)
+    // JSON endpoint (kept, but totalStockValue now uses CURRENT valuation)
     // =========================================================
     public function getDashboardStats()
     {
@@ -519,7 +607,7 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->count();
 
-        $totalStockValue = (float) FuelStationStock::where('is_active', true)->sum('total_cost');
+        $totalStockValue = (float) $this->getCurrentTotalStockValue();
 
         return response()->json([
             'success' => true,

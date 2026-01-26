@@ -68,21 +68,21 @@
                         {{-- Items Table --}}
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h4 class="mb-0">Items</h4>
-                            <button type="button" class="btn btn-sm btn-light-primary" onclick="addRow()">+ Add
-                                Row</button>
+                            <button type="button" class="btn btn-sm btn-light-primary" onclick="addRow()">+ Add Row</button>
                         </div>
 
                         <div class="table-responsive">
                             <table class="table table-bordered align-middle" id="itemsTable">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th style="width: 25%">Fuel Type</th>
-                                        <th style="width: 10%">Nozzle</th>
-                                        <th style="width: 15%">Opening</th>
-                                        <th style="width: 15%">Closing</th>
-                                        <th style="width: 15%">Sold Qty</th>
-                                        <th style="width: 15%">Line Total</th>
-                                        <th style="width: 5%">Remove</th>
+                                        <th style="width: 22%">Fuel Type</th>
+                                        <th style="width: 9%">Nozzle</th>
+                                        <th style="width: 14%">Opening</th>
+                                        <th style="width: 14%">Closing</th>
+                                        <th style="width: 13%">Sold Qty</th>
+                                        <th style="width: 13%">Unit Price</th>
+                                        <th style="width: 13%">Line Total</th>
+                                        <th style="width: 2%">Remove</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -92,7 +92,8 @@
                                                 <td>
                                                     <select name="items[{{ $i }}][fuel_type_uuid]"
                                                         class="form-select form-select-solid fuel-type"
-                                                        data-price="{{ $it->price_per_unit }}" required>
+                                                        data-price="{{ (float)$it->price_per_unit }}"
+                                                        required>
                                                         <option value="">Select</option>
                                                         @foreach ($fuelTypes as $ft)
                                                             <option value="{{ $ft->uuid }}"
@@ -102,23 +103,38 @@
                                                         @endforeach
                                                     </select>
                                                 </td>
-                                                <td><input type="number" name="items[{{ $i }}][nozzle_number]"
+                                                <td>
+                                                    <input type="number" name="items[{{ $i }}][nozzle_number]"
                                                         class="form-control form-control-solid" min="1"
-                                                        value="{{ $it->nozzle_number }}"></td>
-                                                <td><input type="number" step="0.001"
+                                                        value="{{ $it->nozzle_number }}">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.001"
                                                         name="items[{{ $i }}][opening_reading]"
-                                                        class="form-control form-control-solid opening" min="0"
-                                                        required value="{{ $it->opening_reading }}"></td>
-                                                <td><input type="number" step="0.001"
+                                                        class="form-control form-control-solid opening" min="0" required
+                                                        value="{{ $it->opening_reading }}">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.001"
                                                         name="items[{{ $i }}][closing_reading]"
-                                                        class="form-control form-control-solid closing" min="0"
-                                                        required value="{{ $it->closing_reading }}"></td>
-                                                <td><input type="number" step="0.001"
+                                                        class="form-control form-control-solid closing" min="0" required
+                                                        value="{{ $it->closing_reading }}">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.001"
                                                         class="form-control form-control-solid sold-qty" readonly
-                                                        value="{{ $it->sold_qty }}"></td>
-                                                <td><input type="number" step="0.01"
+                                                        value="{{ $it->sold_qty }}">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01"
+                                                        class="form-control form-control-solid unit-price" readonly
+                                                        value="{{ (float)$it->price_per_unit }}">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01"
                                                         class="form-control form-control-solid line-total" readonly
-                                                        value="{{ $it->line_total }}"></td>
+                                                        value="{{ (float)$it->line_total }}">
+                                                </td>
                                                 <td class="text-center">
                                                     <button type="button" class="btn btn-sm btn-light-danger"
                                                         onclick="removeRow(this)">X</button>
@@ -133,23 +149,34 @@
                                                     class="form-select form-select-solid fuel-type" data-price="0" required>
                                                     <option value="">Select</option>
                                                     @foreach ($fuelTypes as $ft)
-                                                        <option value="{{ $ft->uuid }}" data-price="0">
-                                                            {{ $ft->name }}</option>
+                                                        <option value="{{ $ft->uuid }}" data-price="0">{{ $ft->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </td>
-                                            <td><input type="number" name="items[0][nozzle_number]"
-                                                    class="form-control form-control-solid" min="1"></td>
-                                            <td><input type="number" step="0.001" name="items[0][opening_reading]"
+                                            <td>
+                                                <input type="number" name="items[0][nozzle_number]"
+                                                    class="form-control form-control-solid" min="1">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.001" name="items[0][opening_reading]"
                                                     class="form-control form-control-solid opening" min="0" required>
                                             </td>
-                                            <td><input type="number" step="0.001" name="items[0][closing_reading]"
-                                                    class="form-control form-control-solid closing" min="0"
-                                                    required></td>
-                                            <td><input type="number" step="0.001"
-                                                    class="form-control form-control-solid sold-qty" readonly></td>
-                                            <td><input type="number" step="0.01"
-                                                    class="form-control form-control-solid line-total" readonly></td>
+                                            <td>
+                                                <input type="number" step="0.001" name="items[0][closing_reading]"
+                                                    class="form-control form-control-solid closing" min="0" required>
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.001"
+                                                    class="form-control form-control-solid sold-qty" readonly value="0.000">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01"
+                                                    class="form-control form-control-solid unit-price" readonly value="0.00">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01"
+                                                    class="form-control form-control-solid line-total" readonly value="0.00">
+                                            </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-sm btn-light-danger"
                                                     onclick="removeRow(this)">X</button>
@@ -175,35 +202,52 @@
 <script>
   // ==========================
   // Fuel Sales Day - Items JS
-  // (No data loss + no duplicate listeners)
+  // Uses:
+  //   GET /fuel-station/{station}/prices  -> returns { fuelTypeUuid: price, ... }
   // ==========================
+
+  // IMPORTANT: your route is not named, so we build the URL using origin + known path.
+  // Your route: Route::get('/fuel-station/{station}/prices', ...)
+  function pricesUrl(stationId) {
+    return `${window.location.origin}/fuel-station/${stationId}/prices`;
+  }
 
   let rowIndex = {{ isset($day) ? $day->items->count() : 1 }};
 
-  // --- Helpers ---
   function getStationSelect() {
     return document.querySelector('select[name="fuel_station_uuid"]');
+  }
+
+  function getSelectedPrice(selectEl) {
+    const opt = selectEl?.selectedOptions?.[0];
+    // prefer option price (set by AJAX), fallback to select data-price (edit initial value)
+    const priceFromOption = parseFloat(opt?.dataset?.price || 0);
+    if (priceFromOption > 0) return priceFromOption;
+
+    const priceFromSelect = parseFloat(selectEl?.dataset?.price || 0);
+    if (priceFromSelect > 0) return priceFromSelect;
+
+    return 0;
   }
 
   function recalcRow(tr) {
     const opening = tr.querySelector('.opening');
     const closing = tr.querySelector('.closing');
     const soldQty  = tr.querySelector('.sold-qty');
+    const unitPriceInput = tr.querySelector('.unit-price');
     const lineTotal = tr.querySelector('.line-total');
     const fuelType = tr.querySelector('.fuel-type');
 
     const sold = parseFloat(closing?.value || 0) - parseFloat(opening?.value || 0);
     soldQty.value = sold > 0 ? sold.toFixed(3) : "0.000";
 
-    // ✅ price is stored on selected OPTION (dataset.price)
-    const selectedOpt = fuelType?.selectedOptions?.[0];
-    const price = parseFloat((selectedOpt && selectedOpt.dataset.price) || 0);
+    const price = getSelectedPrice(fuelType);
+    if (unitPriceInput) unitPriceInput.value = price.toFixed(2);
 
     lineTotal.value = sold > 0 ? (sold * price).toFixed(2) : "0.00";
   }
 
   function bindRowEvents(tr) {
-    // ✅ prevent duplicate bindings (important!)
     if (tr.dataset.bound === "1") return;
     tr.dataset.bound = "1";
 
@@ -213,14 +257,11 @@
 
     const handler = () => recalcRow(tr);
 
-    opening.addEventListener('input', handler);
-    closing.addEventListener('input', handler);
-    fuelType.addEventListener('change', handler);
+    opening?.addEventListener('input', handler);
+    closing?.addEventListener('input', handler);
+    fuelType?.addEventListener('change', handler);
 
-    // store handler so we can recalc later without rebinding
     tr._recalc = handler;
-
-    // initial calc (won’t lose any existing values)
     handler();
   }
 
@@ -238,21 +279,25 @@
   function applyPricesToAllFuelSelects(prices) {
     document.querySelectorAll('.fuel-type').forEach(select => {
       select.querySelectorAll('option').forEach(opt => {
-        if (!opt.value) return; // skip "Select"
+        if (!opt.value) return;
         opt.dataset.price = prices[opt.value] ?? 0;
       });
+
+      // ALSO set select data-price for currently selected option (for safety)
+      const selected = select.selectedOptions?.[0];
+      if (selected?.value) {
+        select.dataset.price = selected.dataset.price || 0;
+      }
     });
   }
 
-  // --- Row add/remove ---
   function addRow() {
     const tbody = document.querySelector('#itemsTable tbody');
     const tr = document.createElement('tr');
 
-    // NOTE: we keep data-price on OPTIONs (will be updated by station fetch)
     tr.innerHTML = `
       <td>
-        <select name="items[${rowIndex}][fuel_type_uuid]" class="form-select form-select-solid fuel-type" required>
+        <select name="items[${rowIndex}][fuel_type_uuid]" class="form-select form-select-solid fuel-type" data-price="0" required>
           <option value="">Select</option>
           @foreach ($fuelTypes as $ft)
             <option value="{{ $ft->uuid }}" data-price="0">{{ $ft->name }}</option>
@@ -263,6 +308,7 @@
       <td><input type="number" step="0.001" name="items[${rowIndex}][opening_reading]" class="form-control form-control-solid opening" min="0" required></td>
       <td><input type="number" step="0.001" name="items[${rowIndex}][closing_reading]" class="form-control form-control-solid closing" min="0" required></td>
       <td><input type="number" step="0.001" class="form-control form-control-solid sold-qty" readonly value="0.000"></td>
+      <td><input type="number" step="0.01" class="form-control form-control-solid unit-price" readonly value="0.00"></td>
       <td><input type="number" step="0.01" class="form-control form-control-solid line-total" readonly value="0.00"></td>
       <td class="text-center">
         <button type="button" class="btn btn-sm btn-light-danger" onclick="removeRow(this)">X</button>
@@ -270,20 +316,18 @@
     `;
 
     tbody.appendChild(tr);
-
-    // bind listeners once
     bindRowEvents(tr);
 
-    // if a station is selected, fetch prices and apply to this new row too
+    // if a station is selected, fetch prices and apply
     const stationId = getStationSelect()?.value;
     if (stationId) {
-      fetch(`/fuel-station/${stationId}/prices`)
+      fetch(pricesUrl(stationId))
         .then(res => res.json())
         .then(prices => {
           applyPricesToAllFuelSelects(prices);
           recalcRow(tr);
         })
-        .catch(() => {});
+        .catch(err => console.error('Price fetch failed', err));
     }
 
     rowIndex++;
@@ -292,39 +336,38 @@
   function removeRow(btn) {
     const tr = btn.closest('tr');
     const tbody = tr.parentElement;
-    if (tbody.children.length === 1) return; // prevent removing all rows
+    if (tbody.children.length === 1) return;
     tr.remove();
   }
 
-  // expose for inline onclick
   window.addRow = addRow;
   window.removeRow = removeRow;
 
-  // --- Station change: fetch prices, update options, recalc (NO rebinding) ---
+  // Station change -> load prices -> update selects -> recalc
   getStationSelect()?.addEventListener('change', function () {
     const stationId = this.value;
     if (!stationId) return;
 
-    fetch(`/fuel-station/${stationId}/prices`)
+    fetch(pricesUrl(stationId))
       .then(res => res.json())
       .then(prices => {
         applyPricesToAllFuelSelects(prices);
-        recalcAllRows(); // ✅ recalc only, no data loss, no duplicate listeners
+        recalcAllRows();
       })
       .catch(err => console.error('Price fetch failed', err));
   });
 
-  // --- On page load ---
+  // On load: bind + auto load prices if station selected (edit or old input)
   document.addEventListener('DOMContentLoaded', () => {
-    // bind all existing rows once
     bindAllRows();
 
-    // if station already selected (edit/old input), auto-load prices + recalc
     const st = getStationSelect();
     if (st && st.value) {
       st.dispatchEvent(new Event('change'));
+    } else {
+      // still recalc once so sold qty updates if user prefilled
+      recalcAllRows();
     }
   });
 </script>
 @endpush
-

@@ -1,27 +1,22 @@
 <div id="kt_app_sidebar" class="app-sidebar flex-column" data-kt-drawer="true" data-kt-drawer-name="app-sidebar"
     data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px"
     data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
-
     <!--begin::Logo-->
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
         <a href="{{ route('/') }}" class="d-flex align-items-center gap-2">
             <!-- Main Logo (Default View) -->
-            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}" class="app-sidebar-logo-default"
-                style="height: 40px;" />
-
-            <!-- App Name -->
-            <span class="app-sidebar-logo-default" style="font-size: 1.25rem; color: white; font-weight: 600;">
-                {{ config('app.name') }}
-            </span>
+            <img alt="Logo" src="{{ asset('assets/media/logos/logo-1.png') }}" class="app-sidebar-logo-default"
+                style="width: auto; max-width: 160px;" />
 
             <!-- Minimized Logo (When sidebar is collapsed) -->
-            <img alt="Logo" src="{{ asset('assets/media/logos/gas-station.png') }}"
-                class="app-sidebar-logo-minimize" style="height: 30px;" />
+            <img alt="Logo" src="{{ asset('assets/media/logos/logo-1.png') }}" class="app-sidebar-logo-minimize"
+                style="height: 28px; width: auto; max-width: 40px;" />
         </a>
 
         <!-- Sidebar Toggle Button -->
         <div id="kt_app_sidebar_toggle"
-            class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"
+            class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary
+               h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"
             data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body"
             data-kt-toggle-name="app-sidebar-minimize">
             <i class="ki-duotone ki-black-left-line fs-3 rotate-180">
@@ -30,6 +25,7 @@
         </div>
     </div>
     <!--end::Logo-->
+
 
     <!--begin::Sidebar menu-->
     <div class="app-sidebar-menu overflow-hidden flex-column-fluid">

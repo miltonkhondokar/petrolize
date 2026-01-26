@@ -105,7 +105,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/fuel-sales-days/{uuid}/submit', [FuelSalesDayController::class, 'submit'])->name('fuel_sales_days.submit');
 
     //ajax
-    Route::get('/fuel-station/{station}/prices', [FuelSalesDayController::class, 'getFuelPrices']);
+
+    Route::get('/fuel-station/{station:uuid}/prices', [FuelSalesDayController::class, 'getFuelPrices'])
+        ->name('fuel_sales_days.station_prices');
+
 });
 
 

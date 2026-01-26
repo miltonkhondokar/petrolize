@@ -104,14 +104,7 @@
             <!--end::Body-->
             <!--begin::Aside-->
             <div class="d-flex flex-lg-row-fluid w-lg-50 position-relative order-1 order-lg-1 bgi-size-cover bgi-position-center"
-                style="background-image: url(assets/media/images/barrels.jpg)">
-
-                <!-- App Logo and Name (Top-Left) -->
-                <div class="position-absolute top-0 start-0 m-10 d-flex align-items-center gap-3">
-                    <img src="{{ asset('assets/media/logos/gas-station.png') }}" alt="Logo" style="height: 40px;">
-                    <span class="text-white fs-2 fw-bold">{{ config('app.name') }}</span>
-                </div>
-
+                style="background-image: url(assets/media/images/image-1.png)">
 
                 <!-- Random Quote (Bottom-Left) -->
                 <div class="position-absolute bottom-0 start-0 m-10">
