@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\App\Fuel\FuelPurchaseController;
 use App\Http\Controllers\App\Vendor\VendorPaymentController;
 use App\Http\Controllers\App\Fuel\FuelSalesDayController;
+use App\Http\Controllers\App\Stock\StockController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +56,9 @@ require __DIR__.'/application/fuel-station-fuel-type/fuel_station_fuel_type.php'
 //Cost Entry Management Routes
 require __DIR__. '/application/cost-entry/cost_entry.php';
 
+//ajax Routes
+require __DIR__.'/ajax.php';
+
 
 
 Route::middleware(['auth'])->group(function () {
@@ -102,4 +106,16 @@ Route::middleware(['auth'])->group(function () {
 
     //ajax
     Route::get('/fuel-station/{station}/prices', [FuelSalesDayController::class, 'getFuelPrices']);
+});
+
+
+
+Route::middleware(['auth'])->group(function () {
+
+
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+
+    Route::get('/stock/ledger', [StockController::class, 'ledger'])->name('stock.ledger');
+
+
 });

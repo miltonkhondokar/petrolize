@@ -11,35 +11,31 @@ class GovernorateSeeder extends Seeder
 {
     public function run()
     {
-        // Map of Region codes to Governorates
+        // Only governorates that are used by CenterSeeder
         $data = [
-            'RYD' => ['Riyadh', 'Al-Kharj', 'Al-Majma', 'Al-Muzahimiyah', 'Diriyah', 'Al-Ghat', 'Riyadh East'],
-            'MAK' => ['Jeddah', 'Makkah', 'Taif', 'Al-Qunfudhah', 'Ranyah'],
-            'MDN' => ['Al-Madinah', 'Yanbu', 'Badr', 'Ula', 'Al-Hijrah'],
-            'EPR' => ['Dammam', 'Dhahran', 'Al-Khobar', 'Hofuf', 'Qatif'],
-            'QSM' => ['Buraidah', 'Unaizah', 'Al-Rass'],
-            'HIL' => ['Ha’il', 'Sakaka', 'Baish', 'Shinan'],
-            'TBK' => ['Tabuk', 'Duba', 'Haql', 'Al-Wajh'],
-            'NBR' => ['Arar', 'Rafha', 'Turaif'],
-            'JZN' => ['Jizan', 'Sabya', 'Abu Arish'],
-            'NJR' => ['Najran', 'Yadamah', 'Badr Al-Janoub'],
-            'BHH' => ['Al-Bahah', 'Baljurashi', 'Al-Mikhwah'],
-            'ASR' => ['Abha', 'Khamis Mushait', 'Bisha'],
-            'ALJ' => ['Sakaka', 'Dumat Al-Jandal', 'Al-Qurayyat'],
+            'RYD' => ['Riyadh'],
+            'MAK' => ['Jeddah'],
+            'MDN' => ['Al-Madinah'], // IMPORTANT: matches your old list + CitySeeder center name "Al-Madinah Center"
         ];
 
         foreach ($data as $regionCode => $governorates) {
             $region = Region::where('code', $regionCode)->first();
-            if (!$region) continue;
+            if (!$region) {
+                continue;
+            }
 
             foreach ($governorates as $name) {
-                Governorate::create([
-                    'uuid' => (string) Str::uuid(),
-                    'region_uuid' => $region->uuid,
-                    'name' => $name,
-                    'code' => null,
-                    'is_active' => true,
-                ]);
+                Governorate::updateOrCreate(
+                    [
+                        'region_uuid' => $region->uuid,
+                        'name' => $name,
+                    ],
+                    [
+                        'uuid' => (string) Str::uuid(),
+                        'code' => null,
+                        'is_active' => true,
+                    ]
+                );
             }
         }
     }

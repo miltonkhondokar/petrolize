@@ -13,20 +13,16 @@ class FuelStation extends Model
     protected $table = 'fuel_stations';
 
     protected $fillable = [
-        'uuid',
-        'user_uuid',
-        'name',
-        'location',
-        'is_active',
-        'region_uuid',
-        'governorate_uuid',
-        'center_uuid',
-        'city_uuid',
+        'uuid', 'user_uuid', 'name',
+        'region_uuid', 'governorate_uuid',
+        'center_uuid', 'city_uuid',
+        'location', 'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
 
     protected static function boot()
     {
@@ -110,4 +106,10 @@ class FuelStation extends Model
             'uuid'
         )->withTimestamps();
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

@@ -38,10 +38,13 @@
                                 Back to List
                             </a>
                         </div>
+
                         <div class="card-body">
-                            <form id="fuel_station_form" method="POST" action="{{ route('fuel-station.update', $fuelStation->uuid) }}">
+                            <form id="fuel_station_form" method="POST"
+                                action="{{ route('fuel-station.update', $fuelStation->uuid) }}">
                                 @csrf
                                 @method('PUT')
+
                                 <div class="row">
                                     <!-- Left column -->
                                     <div class="col-md-6">
@@ -55,36 +58,97 @@
                                                 Station Name
                                             </label>
                                             <input type="text" name="name" class="form-control form-control-solid"
-                                                placeholder="Enter fuel station name" 
+                                                placeholder="Enter fuel station name"
                                                 value="{{ old('name', $fuelStation->name) }}"
-                                                data-kt-validate="true" 
+                                                data-kt-validate="true"
                                                 data-kt-validate-required="Station name is required"
                                                 data-kt-validate-pattern="^[a-zA-Z0-9\s\-&]{3,100}$"
                                                 data-kt-validate-pattern-msg="Only letters, numbers, spaces, hyphens and ampersands, 3 to 100 characters" />
                                             <div class="form-text">Unique fuel station name</div>
                                         </div>
 
-                                        <!-- Location -->
+                                        <!-- Location Text (Optional) -->
                                         <div class="mb-5">
                                             <label class="form-label">
                                                 <i class="ki-duotone ki-location fs-2 me-2 text-info">
                                                     <span class="path1"></span>
                                                     <span class="path2"></span>
                                                 </i>
-                                                Location
+                                                Location (Optional)
                                             </label>
                                             <input type="text" name="location" class="form-control form-control-solid"
-                                                placeholder="Enter location (e.g., City, Street)" 
+                                                placeholder="Enter location (e.g., Street, Landmark)"
                                                 value="{{ old('location', $fuelStation->location) }}"
-                                                data-kt-validate="true" 
+                                                data-kt-validate="true"
                                                 data-kt-validate-pattern="^[a-zA-Z0-9\s\-,\.]{0,255}$"
                                                 data-kt-validate-pattern-msg="Only letters, numbers, spaces, commas, dots and hyphens, max 255 characters" />
-                                            <div class="form-text">Station physical location</div>
+                                            <div class="form-text">Free text address (optional)</div>
+                                        </div>
+
+                                        <!-- Region -->
+                                        <div class="mb-5">
+                                            <label class="form-label">
+                                                <i class="ki-duotone ki-geolocation fs-2 me-2 text-danger">
+                                                    <span class="path1"></span><span class="path2"></span>
+                                                </i>
+                                                Region
+                                            </label>
+                                            <select id="region_uuid" name="region_uuid" class="form-select form-select-solid">
+                                                <option value="">Select Region</option>
+                                                @foreach ($regions as $r)
+                                                    <option value="{{ $r->uuid }}"
+                                                        {{ old('region_uuid', $fuelStation->region_uuid) == $r->uuid ? 'selected' : '' }}>
+                                                        {{ $r->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <!-- Governorate -->
+                                        <div class="mb-5">
+                                            <label class="form-label">
+                                                <i class="ki-duotone ki-map fs-2 me-2 text-warning">
+                                                    <span class="path1"></span><span class="path2"></span>
+                                                </i>
+                                                Governorate
+                                            </label>
+                                            <select id="governorate_uuid" name="governorate_uuid" class="form-select form-select-solid">
+                                                <option value="">Select Governorate</option>
+                                                {{-- options filled by JS --}}
+                                            </select>
                                         </div>
                                     </div>
 
                                     <!-- Right column -->
                                     <div class="col-md-6">
+                                        <!-- Center -->
+                                        <div class="mb-5">
+                                            <label class="form-label">
+                                                <i class="ki-duotone ki-flag fs-2 me-2 text-primary">
+                                                    <span class="path1"></span><span class="path2"></span>
+                                                </i>
+                                                Center
+                                            </label>
+                                            <select id="center_uuid" name="center_uuid" class="form-select form-select-solid">
+                                                <option value="">Select Center</option>
+                                                {{-- options filled by JS --}}
+                                            </select>
+                                        </div>
+
+                                        <!-- City -->
+                                        <div class="mb-5">
+                                            <label class="form-label">
+                                                <i class="ki-duotone ki-building fs-2 me-2 text-info">
+                                                    <span class="path1"></span><span class="path2"></span>
+                                                </i>
+                                                City
+                                            </label>
+                                            <select id="city_uuid" name="city_uuid" class="form-select form-select-solid">
+                                                <option value="">Select City</option>
+                                                {{-- options filled by JS --}}
+                                            </select>
+                                        </div>
+
                                         <!-- Manager -->
                                         <div class="mb-5">
                                             <label class="form-label">
@@ -116,8 +180,7 @@
                                                 Status
                                             </label>
                                             <select name="is_active" class="form-select form-select-solid"
-                                                data-kt-validate="true"
-                                                data-kt-validate-required="Status is required">
+                                                data-kt-validate="true" data-kt-validate-required="Status is required">
                                                 <option value="1" {{ old('is_active', $fuelStation->is_active) == '1' ? 'selected' : '' }}>
                                                     Active
                                                 </option>
@@ -143,6 +206,7 @@
                             </form>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -151,14 +215,117 @@
 
 @push('scripts')
     <script>
-        // Validate a single input field live or on submit
+        // Preloaded geo data (fast, no requests)
+        const GOVERNORATES = @json($governorates);
+        const CENTERS = @json($centers);
+        const CITIES = @json($cities);
+
+        const regionSelect = document.getElementById('region_uuid');
+        const governorateSelect = document.getElementById('governorate_uuid');
+        const centerSelect = document.getElementById('center_uuid');
+        const citySelect = document.getElementById('city_uuid');
+
+        const preSelected = {
+            governorate_uuid: @json(old('governorate_uuid', $fuelStation->governorate_uuid)),
+            center_uuid: @json(old('center_uuid', $fuelStation->center_uuid)),
+            city_uuid: @json(old('city_uuid', $fuelStation->city_uuid)),
+        };
+
+        function clearOptions(select, placeholder) {
+            select.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = placeholder;
+            select.appendChild(opt);
+        }
+
+        function fillGovernorates(regionUuid) {
+            clearOptions(governorateSelect, 'Select Governorate');
+            clearOptions(centerSelect, 'Select Center');
+            clearOptions(citySelect, 'Select City');
+
+            if (!regionUuid) return;
+
+            const list = GOVERNORATES.filter(g => g.region_uuid === regionUuid);
+            list.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g.uuid;
+                opt.textContent = g.name;
+                if (preSelected.governorate_uuid && preSelected.governorate_uuid === g.uuid) opt.selected = true;
+                governorateSelect.appendChild(opt);
+            });
+
+            if (preSelected.governorate_uuid) {
+                fillCenters(preSelected.governorate_uuid);
+            }
+        }
+
+        function fillCenters(governorateUuid) {
+            clearOptions(centerSelect, 'Select Center');
+            clearOptions(citySelect, 'Select City');
+
+            if (!governorateUuid) return;
+
+            const list = CENTERS.filter(c => c.governorate_uuid === governorateUuid);
+            list.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.uuid;
+                opt.textContent = c.name;
+                if (preSelected.center_uuid && preSelected.center_uuid === c.uuid) opt.selected = true;
+                centerSelect.appendChild(opt);
+            });
+
+            if (preSelected.center_uuid) {
+                fillCities(preSelected.center_uuid);
+            }
+        }
+
+        function fillCities(centerUuid) {
+            clearOptions(citySelect, 'Select City');
+
+            if (!centerUuid) return;
+
+            const list = CITIES.filter(ci => ci.center_uuid === centerUuid);
+            list.forEach(ci => {
+                const opt = document.createElement('option');
+                opt.value = ci.uuid;
+                opt.textContent = ci.name;
+                if (preSelected.city_uuid && preSelected.city_uuid === ci.uuid) opt.selected = true;
+                citySelect.appendChild(opt);
+            });
+        }
+
+        // Change handlers
+        regionSelect.addEventListener('change', function() {
+            preSelected.governorate_uuid = null;
+            preSelected.center_uuid = null;
+            preSelected.city_uuid = null;
+            fillGovernorates(this.value);
+        });
+
+        governorateSelect.addEventListener('change', function() {
+            preSelected.center_uuid = null;
+            preSelected.city_uuid = null;
+            fillCenters(this.value);
+        });
+
+        centerSelect.addEventListener('change', function() {
+            preSelected.city_uuid = null;
+            fillCities(this.value);
+        });
+
+        // Init on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const regionUuid = regionSelect.value;
+            fillGovernorates(regionUuid);
+        });
+
+        // ================= Existing validation + Swal (kept) =================
+
         function validateInput(input) {
-            // Clear previous error
             input.classList.remove('is-invalid');
             let next = input.nextElementSibling;
-            if (next && next.classList.contains('invalid-feedback')) {
-                next.remove();
-            }
+            if (next && next.classList.contains('invalid-feedback')) next.remove();
 
             const value = input.value.trim();
             const requiredMsg = input.getAttribute('data-kt-validate-required');
@@ -167,11 +334,8 @@
 
             let errorMsg = null;
 
-            if (!value && requiredMsg) {
-                errorMsg = requiredMsg;
-            } else if (pattern && value && !new RegExp(pattern).test(value)) {
-                errorMsg = patternMsg;
-            }
+            if (!value && requiredMsg) errorMsg = requiredMsg;
+            else if (pattern && value && !new RegExp(pattern).test(value)) errorMsg = patternMsg;
 
             if (errorMsg) {
                 input.classList.add('is-invalid');
@@ -184,14 +348,10 @@
             return true;
         }
 
-        // Validate select fields
         function validateSelect(select) {
-            // Clear previous error
             select.classList.remove('is-invalid');
             let next = select.nextElementSibling;
-            if (next && next.classList.contains('invalid-feedback')) {
-                next.remove();
-            }
+            if (next && next.classList.contains('invalid-feedback')) next.remove();
 
             const value = select.value;
             const requiredMsg = select.getAttribute('data-kt-validate-required');
@@ -207,20 +367,11 @@
             return true;
         }
 
-        // Attach live validation handlers
         document.querySelectorAll('#fuel_station_form [data-kt-validate="true"]').forEach(input => {
-            if (input.tagName === 'SELECT') {
-                input.addEventListener('change', () => {
-                    validateSelect(input);
-                });
-            } else {
-                input.addEventListener('input', () => {
-                    validateInput(input);
-                });
-            }
+            if (input.tagName === 'SELECT') input.addEventListener('change', () => validateSelect(input));
+            else input.addEventListener('input', () => validateInput(input));
         });
 
-        // Submit handler with validation + Swal
         document.getElementById('fuel_station_form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -229,57 +380,108 @@
             let valid = true;
             let firstInvalid = null;
 
-            // Clear all previous errors first
             inputs.forEach(input => {
-                if (input.tagName === 'SELECT') {
-                    input.classList.remove('is-invalid');
-                    let next = input.nextElementSibling;
-                    if (next && next.classList.contains('invalid-feedback')) {
-                        next.remove();
-                    }
-                } else {
-                    input.classList.remove('is-invalid');
-                    let next = input.nextElementSibling;
-                    if (next && next.classList.contains('invalid-feedback')) {
-                        next.remove();
-                    }
-                }
+                input.classList.remove('is-invalid');
+                let next = input.nextElementSibling;
+                if (next && next.classList.contains('invalid-feedback')) next.remove();
             });
 
-            // Validate all inputs and selects
             for (const input of inputs) {
-                let isValid;
-                if (input.tagName === 'SELECT') {
-                    isValid = validateSelect(input);
-                } else {
-                    isValid = validateInput(input);
-                }
-
+                const isValid = (input.tagName === 'SELECT') ? validateSelect(input) : validateInput(input);
                 if (!isValid) {
                     valid = false;
-                    if (!firstInvalid) firstInvalid = input;
+                    firstInvalid = firstInvalid || input;
                     await Swal.fire('Validation Error', input.nextElementSibling.innerText, 'warning');
                     break;
                 }
             }
 
-            if (valid) {
-                // Confirm before submit
-                const result = await Swal.fire({
-                    title: 'Confirm Update',
-                    text: 'Are you sure you want to update this fuel station?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, update fuel station',
-                    cancelButtonText: 'Cancel'
-                });
-
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            } else if (firstInvalid) {
-                firstInvalid.focus();
+            if (!valid) {
+                if (firstInvalid) firstInvalid.focus();
+                return;
             }
+
+            const result = await Swal.fire({
+                title: 'Confirm Update',
+                text: 'Are you sure you want to update this fuel station?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update fuel station',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) form.submit();
         });
     </script>
 @endpush
+
+@push('scripts')
+<script>
+    const regionEl = document.getElementById('region_uuid');
+    const govEl    = document.getElementById('governorate_uuid');
+    const centerEl = document.getElementById('center_uuid');
+    const cityEl   = document.getElementById('city_uuid');
+
+    function reset(select, label) {
+        select.innerHTML = `<option value="">${label}</option>`;
+    }
+
+    async function fetchAndFill(url, select, label, selected = null) {
+        reset(select, label);
+        const res = await fetch(url);
+        const data = await res.json();
+        data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.uuid;
+            opt.textContent = item.name;
+            if (selected && selected === item.uuid) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    regionEl.addEventListener('change', async () => {
+        reset(govEl, 'Select Governorate');
+        reset(centerEl, 'Select Center');
+        reset(cityEl, 'Select City');
+        if (regionEl.value) {
+            await fetchAndFill(`/ajax/geo/governorates/${regionEl.value}`, govEl, 'Select Governorate');
+        }
+    });
+
+    govEl.addEventListener('change', async () => {
+        reset(centerEl, 'Select Center');
+        reset(cityEl, 'Select City');
+        if (govEl.value) {
+            await fetchAndFill(`/ajax/geo/centers/${govEl.value}`, centerEl, 'Select Center');
+        }
+    });
+
+    centerEl.addEventListener('change', async () => {
+        reset(cityEl, 'Select City');
+        if (centerEl.value) {
+            await fetchAndFill(`/ajax/geo/cities/${centerEl.value}`, cityEl, 'Select City');
+        }
+    });
+
+    // 🔁 Preload existing values (EDIT PAGE)
+    document.addEventListener('DOMContentLoaded', async () => {
+        const pre = {
+            region: "{{ $fuelStation->region_uuid }}",
+            gov: "{{ $fuelStation->governorate_uuid }}",
+            center: "{{ $fuelStation->center_uuid }}",
+            city: "{{ $fuelStation->city_uuid }}"
+        };
+
+        if (pre.region) {
+            await fetchAndFill(`/ajax/geo/governorates/${pre.region}`, govEl, 'Select Governorate', pre.gov);
+        }
+        if (pre.gov) {
+            await fetchAndFill(`/ajax/geo/centers/${pre.gov}`, centerEl, 'Select Center', pre.center);
+        }
+        if (pre.center) {
+            await fetchAndFill(`/ajax/geo/cities/${pre.center}`, cityEl, 'Select City', pre.city);
+        }
+    });
+</script>
+@endpush
+

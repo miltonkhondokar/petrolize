@@ -60,10 +60,16 @@ class FuelStationFuelType extends Model
     /**
      * Optional helper: get the current stock of this fuel for this fuel station
      */
-    public function currentStock()
+    public function latestStock()
     {
-        return $this->hasOne(FuelStationPrice::class, 'fuel_station_uuid', 'fuel_station_uuid')
-            ->where('fuel_type_uuid', $this->fuel_type_uuid)
-            ->latest('created_at');
+        return $this->hasOne(FuelStationStock::class, 'fuel_type_uuid', 'fuel_type_uuid')
+            ->whereColumn('fuel_station_uuid', 'fuel_station_fuel_type.fuel_station_uuid')
+            ->latest('stock_date'); // or ->latest('id')
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

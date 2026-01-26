@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\ReferenceData\Fuel;
 
+use App\Constants\UserType;
 use App\Http\Controllers\Controller;
 use App\Models\FuelStation;
 use App\Models\User;
@@ -20,19 +21,39 @@ class FuelStationController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['name', 'location', 'is_active']);
+        $filters = $request->only([
+            'name',
+            'location',
+            'is_active',
+            'region_uuid',
+            'governorate_uuid',
+            'center_uuid',
+            'city_uuid',
+            'user_uuid',
+        ]);
 
-        $fuelStations = FuelStation::with('manager')
-            ->when($filters['name'] ?? null, fn ($query, $name) => $query->where('name', 'like', "%{$name}%"))
-            ->when($filters['location'] ?? null, fn ($query, $location) => $query->where('location', 'like', "%{$location}%"))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($query) => $query->where('is_active', $filters['is_active'] == '1'))
+        $fuelStations = FuelStation::with(['manager', 'region', 'governorate', 'center', 'city'])
+            ->when($filters['name'] ?? null, fn ($q, $name) => $q->where('name', 'like', "%{$name}%"))
+            ->when($filters['location'] ?? null, fn ($q, $location) => $q->where('location', 'like', "%{$location}%"))
+            ->when($filters['region_uuid'] ?? null, fn ($q, $v) => $q->where('region_uuid', $v))
+            ->when($filters['governorate_uuid'] ?? null, fn ($q, $v) => $q->where('governorate_uuid', $v))
+            ->when($filters['center_uuid'] ?? null, fn ($q, $v) => $q->where('center_uuid', $v))
+            ->when($filters['city_uuid'] ?? null, fn ($q, $v) => $q->where('city_uuid', $v))
+            ->when($filters['user_uuid'] ?? null, fn ($q, $v) => $q->where('user_uuid', $v))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active'] == '1'))
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
         $managers = User::active()
-            ->whereHas('roles', fn ($query) => $query->where('name', 'manager'))
+            ->whereHas('roles', fn ($q) => $q->where('name', UserType::FUEL_STATION_MANAGER))
             ->get();
+
+        // Geo dropdown data (active only)
+        $regions      = DB::table('regions')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name']);
+        $governorates = DB::table('governorates')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'region_uuid']);
+        $centers      = DB::table('centers')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'governorate_uuid']);
+        $cities       = DB::table('cities')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'center_uuid']);
 
         $breadcrumb = [
             "page_header" => "Fuel Stations",
@@ -47,7 +68,16 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-list",
         ];
 
-        return view('application.pages.reference-data.fuel.stations.index', compact('breadcrumb', 'fuelStations', 'managers', 'filters'));
+        return view('application.pages.reference-data.fuel.stations.index', compact(
+            'breadcrumb',
+            'fuelStations',
+            'managers',
+            'filters',
+            'regions',
+            'governorates',
+            'centers',
+            'cities',
+        ));
     }
 
     /**
@@ -56,8 +86,13 @@ class FuelStationController extends Controller
     public function create()
     {
         $managers = User::active()
-            ->whereHas('roles', fn ($query) => $query->where('name', 'manager'))
+            ->whereHas('roles', fn ($q) => $q->where('name', UserType::FUEL_STATION_MANAGER))
             ->get();
+
+        $regions      = DB::table('regions')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name']);
+        $governorates = DB::table('governorates')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'region_uuid']);
+        $centers      = DB::table('centers')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'governorate_uuid']);
+        $cities       = DB::table('cities')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'center_uuid']);
 
         $breadcrumb = [
             "page_header" => "Create Fuel Station",
@@ -72,7 +107,14 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-plus",
         ];
 
-        return view('application.pages.reference-data.fuel.stations.create', compact('managers', 'breadcrumb'));
+        return view('application.pages.reference-data.fuel.stations.create', compact(
+            'managers',
+            'breadcrumb',
+            'regions',
+            'governorates',
+            'centers',
+            'cities',
+        ));
     }
 
     /**
@@ -81,10 +123,17 @@ class FuelStationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => 'required|string|max:100|unique:pumps,name',
+            // FIX: your table is fuel_stations, not pumps
+            'name'      => 'required|string|max:100|unique:fuel_stations,name',
             'location'  => 'nullable|string|max:255',
             'user_uuid' => 'nullable|exists:users,uuid',
             'is_active' => 'required|boolean',
+
+            // ✅ geo (nullable)
+            'region_uuid'      => 'nullable|exists:regions,uuid',
+            'governorate_uuid' => 'nullable|exists:governorates,uuid',
+            'center_uuid'      => 'nullable|exists:centers,uuid',
+            'city_uuid'        => 'nullable|exists:cities,uuid',
         ]);
 
         try {
@@ -92,9 +141,14 @@ class FuelStationController extends Controller
                 $fuelStation = FuelStation::create([
                     'uuid'      => Str::uuid(),
                     'name'      => $validated['name'],
-                    'location'  => $validated['location'],
-                    'user_uuid' => $validated['user_uuid'],
+                    'location'  => $validated['location'] ?? null,
+                    'user_uuid' => $validated['user_uuid'] ?? null,
                     'is_active' => $validated['is_active'],
+
+                    'region_uuid'      => $validated['region_uuid'] ?? null,
+                    'governorate_uuid' => $validated['governorate_uuid'] ?? null,
+                    'center_uuid'      => $validated['center_uuid'] ?? null,
+                    'city_uuid'        => $validated['city_uuid'] ?? null,
                 ]);
 
                 AuditLog::create([
@@ -109,7 +163,6 @@ class FuelStationController extends Controller
 
             Alert::success('Success', 'Fuel station created successfully.');
             return redirect()->route('fuel-station.index');
-
         } catch (\Exception $e) {
             Log::error('FuelStation create failed', [
                 'error' => $e->getMessage(),
@@ -126,7 +179,9 @@ class FuelStationController extends Controller
      */
     public function show($uuid)
     {
-        $fuelStation = FuelStation::with('manager')->where('uuid', $uuid)->firstOrFail();
+        $fuelStation = FuelStation::with(['manager', 'region', 'governorate', 'center', 'city'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
 
         $breadcrumb = [
             "page_header" => "Fuel Station Details",
@@ -149,11 +204,18 @@ class FuelStationController extends Controller
      */
     public function edit($uuid)
     {
-        $fuelStation = FuelStation::with('manager')->where('uuid', $uuid)->firstOrFail();
+        $fuelStation = FuelStation::with(['manager', 'region', 'governorate', 'center', 'city'])
+            ->where('uuid', $uuid)
+            ->firstOrFail();
 
         $managers = User::active()
-            ->whereHas('roles', fn ($query) => $query->where('name', 'manager'))
+            ->whereHas('roles', fn ($q) => $q->where('name', UserType::FUEL_STATION_MANAGER))
             ->get();
+
+        $regions      = DB::table('regions')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name']);
+        $governorates = DB::table('governorates')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'region_uuid']);
+        $centers      = DB::table('centers')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'governorate_uuid']);
+        $cities       = DB::table('cities')->where('is_active', 1)->orderBy('name')->get(['uuid', 'name', 'center_uuid']);
 
         $breadcrumb = [
             "page_header" => "Edit Fuel Station",
@@ -168,7 +230,15 @@ class FuelStationController extends Controller
             "third_item_icon" => "fa-edit",
         ];
 
-        return view('application.pages.reference-data.fuel.stations.edit', compact('fuelStation', 'managers', 'breadcrumb'));
+        return view('application.pages.reference-data.fuel.stations.edit', compact(
+            'fuelStation',
+            'managers',
+            'breadcrumb',
+            'regions',
+            'governorates',
+            'centers',
+            'cities'
+        ));
     }
 
     /**
@@ -176,24 +246,32 @@ class FuelStationController extends Controller
      */
     public function update(Request $request, $uuid)
     {
-
         $fuel_station = FuelStation::where('uuid', $uuid)->firstOrFail();
-
 
         $validated = $request->validate([
             'name'      => 'required|string|max:100|unique:fuel_stations,name,' . $fuel_station->id,
             'location'  => 'nullable|string|max:255',
             'user_uuid' => 'nullable|exists:users,uuid',
             'is_active' => 'required|boolean',
+
+            'region_uuid'      => 'nullable|exists:regions,uuid',
+            'governorate_uuid' => 'nullable|exists:governorates,uuid',
+            'center_uuid'      => 'nullable|exists:centers,uuid',
+            'city_uuid'        => 'nullable|exists:cities,uuid',
         ]);
 
         try {
             DB::transaction(function () use ($fuel_station, $validated, $request) {
                 $fuel_station->update([
                     'name'      => $validated['name'],
-                    'location'  => $validated['location'],
-                    'user_uuid' => $validated['user_uuid'],
+                    'location'  => $validated['location'] ?? null,
+                    'user_uuid' => $validated['user_uuid'] ?? null,
                     'is_active' => $validated['is_active'],
+
+                    'region_uuid'      => $validated['region_uuid'] ?? null,
+                    'governorate_uuid' => $validated['governorate_uuid'] ?? null,
+                    'center_uuid'      => $validated['center_uuid'] ?? null,
+                    'city_uuid'        => $validated['city_uuid'] ?? null,
                 ]);
 
                 AuditLog::create([
@@ -208,7 +286,6 @@ class FuelStationController extends Controller
 
             Alert::success('Success', 'Fuel station updated successfully.');
             return redirect()->route('fuel-station.index');
-
         } catch (\Exception $e) {
             Log::error('FuelStation update failed', [
                 'fuel_station_id' => $fuel_station->id,
@@ -222,6 +299,7 @@ class FuelStationController extends Controller
 
     /**
      * Delete a fuel station safely.
+     * (kept your logic as-is)
      */
     public function destroy(FuelStation $fuel_station)
     {
@@ -252,7 +330,6 @@ class FuelStationController extends Controller
 
             Alert::success('Success', 'Fuel station deleted successfully.');
             return redirect()->route('fuel-station.index');
-
         } catch (\Exception $e) {
             Log::error('FuelStation delete failed', [
                 'fuel_station_id' => $fuel_station->id,
@@ -291,7 +368,6 @@ class FuelStationController extends Controller
 
             Alert::success('Success', 'Fuel station status updated successfully.');
             return back();
-
         } catch (\Exception $e) {
             Log::error('Fuel station status update failed', [
                 'uuid'  => $uuid,

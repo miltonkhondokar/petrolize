@@ -62,7 +62,7 @@
                     </div>
 
                     <!-- Fuel Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['fuel_purchases.*','fuel_sales_days.*'],null,'menu') }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['fuel_purchases.*', 'fuel_sales_days.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -73,7 +73,7 @@
                         </span>
 
                         <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel_purchases.*','fuel_sales_days.*'],null,'menu') }}">
+                            class="menu-sub menu-sub-accordion {{ active_menu(['fuel_purchases.*', 'fuel_sales_days.*'], null, 'menu') }}">
 
                             {{-- Purchase --}}
                             <div class="menu-item">
@@ -96,8 +96,19 @@
                         </div>
                     </div>
 
+                    <!-- Stock / Ledger -->
+                    <div class="menu-item">
+                        <a class="menu-link {{ active_menu(['stock.*'], null, 'link') }}"
+                            href="{{ route('stock.index') }}">
+                            <span class="menu-icon">
+                                <i class="fa-solid fa-boxes-stacked fs-1 text-info"></i>
+                            </span>
+                            <span class="menu-title">Stock / Ledger</span>
+                        </a>
+                    </div>
+
                     <!-- Vendor Payments Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['vendor_payments.*'], null,'menu',) }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['vendor_payments.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -134,7 +145,7 @@
                     </div>
 
                     <!-- Cost Entry Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['cost-entries.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -144,8 +155,7 @@
                             <span class="menu-arrow"></span>
                         </span>
 
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['cost-entries.*'],null,'menu',) }}">
+                        <div class="menu-sub menu-sub-accordion {{ active_menu(['cost-entries.*'], null, 'menu') }}">
                             <!-- Fuel Station Complaints -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('cost-entries.*', null, 'link') }}"
@@ -158,7 +168,7 @@
                     </div>
 
                     <!-- Complaint Management -->
-                    <div class="menu-item menu-accordion {{ active_menu(['complaints.*'],null,'menu',) }}"
+                    <div class="menu-item menu-accordion {{ active_menu(['complaints.*'], null, 'menu') }}"
                         data-kt-menu-trigger="click">
                         <span class="menu-link">
                             <span class="menu-icon">
@@ -168,8 +178,7 @@
                             <span class="menu-arrow"></span>
                         </span>
 
-                        <div
-                            class="menu-sub menu-sub-accordion {{ active_menu(['complaints.*'],null,'menu',) }}">
+                        <div class="menu-sub menu-sub-accordion {{ active_menu(['complaints.*'], null, 'menu') }}">
                             <!-- Fuel Station Complaints -->
                             <div class="menu-item">
                                 <a class="menu-link {{ active_menu('complaints.*', null, 'link') }}"
@@ -252,8 +261,6 @@
 
                         </div>
                     </div>
-
-
 
                     <!-- Vendor Management -->
                     <div class="menu-item menu-accordion {{ active_menu(['vendors.*'], null, 'menu') }}"

@@ -17,6 +17,7 @@ class FuelStationStock extends Model
         'fuel_station_uuid',
         'fuel_type_uuid',
         'fuel_unit_uuid',
+        'vendor_uuid',
         'quantity',
         'purchase_price',
         'total_cost',
@@ -65,4 +66,10 @@ class FuelStationStock extends Model
     {
         return $this->belongsTo(Vendor::class, 'vendor_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

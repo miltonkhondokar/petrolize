@@ -20,6 +20,7 @@
                         Back to List
                     </a>
                 </div>
+
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-8">
@@ -28,6 +29,17 @@
                                 <div class="d-flex align-items-center mb-7">
                                     <span class="fw-bold text-gray-600 fs-5 me-2">Station Name:</span>
                                     <span class="fw-bold fs-5 text-dark">{{ $fuelStation->name }}</span>
+                                </div>
+
+                                <!-- Geo -->
+                                <div class="d-flex align-items-center mb-7">
+                                    <span class="fw-bold text-gray-600 fs-5 me-2">Region / Governorate / Center / City:</span>
+                                    <span class="fw-bold fs-5 text-dark">
+                                        {{ $fuelStation->region->name ?? '-' }}
+                                        @if($fuelStation->governorate) / {{ $fuelStation->governorate->name }} @endif
+                                        @if($fuelStation->center) / {{ $fuelStation->center->name }} @endif
+                                        @if($fuelStation->city) / {{ $fuelStation->city->name }} @endif
+                                    </span>
                                 </div>
 
                                 <!-- Location -->
@@ -77,7 +89,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-4">
                             <div class="card card-flush bg-light-info">
                                 <div class="card-header">
@@ -90,13 +102,14 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="d-flex flex-column gap-3">
-                                        <a href="{{ route('fuel-station.edit', $fuelStation->uuid) }}" class="btn btn-warning btn-sm">
+                                        <a href="{{ route('fuel-station.edit', $fuelStation->uuid) }}"
+                                            class="btn btn-warning btn-sm">
                                             <i class="ki-duotone ki-pencil fs-3 me-2">
                                                 <i class="path1"></i><i class="path2"></i>
                                             </i>
                                             Edit Station
                                         </a>
-                                        
+
                                         @if($fuelStation->is_active)
                                             <a href="javascript:void(0)"
                                                 onclick="changeStatus('{{ route('fuel-station-status-update', $fuelStation->uuid) }}', 'inactive')"
@@ -120,6 +133,7 @@
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

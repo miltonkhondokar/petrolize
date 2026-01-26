@@ -46,4 +46,10 @@ class FuelPurchaseItem extends Model
     {
         return $this->belongsTo(FuelUnit::class, 'fuel_unit_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

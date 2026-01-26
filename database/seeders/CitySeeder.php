@@ -12,19 +12,20 @@ class CitySeeder extends Seeder
     public function run()
     {
         $data = [
-            'Riyadh City' => ['Olaya', 'Al-Malaz', 'Al-Rawdhah'],
-            'Jeddah Center' => ['Corniche', 'Al-Balad', 'Ash-Shati'],
-            'Al-Madinah Center' => ['Al-Hijrah', 'Quba', 'Al-Masjid'],
-            // add more center => cities mapping here
+            'Riyadh City'        => ['Olaya', 'Al-Malaz', 'Al-Rawdhah'],
+            'Jeddah Center'      => ['Corniche', 'Al-Balad', 'Ash-Shati'],
+            'Al-Madinah Center'  => ['Al-Hijrah', 'Quba', 'Al-Masjid'],
         ];
 
         foreach ($data as $centerName => $cities) {
             $center = Center::where('name', $centerName)->first();
-            if (!$center) continue;
+            if (!$center) {
+                continue;
+            }
 
             foreach ($cities as $name) {
                 City::create([
-                    'uuid' => Str::uuid(),
+                    'uuid' => (string) Str::uuid(), // ✅ make string
                     'center_uuid' => $center->uuid,
                     'name' => $name,
                     'is_active' => true,

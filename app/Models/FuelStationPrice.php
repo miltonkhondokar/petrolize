@@ -46,4 +46,10 @@ class FuelStationPrice extends Model
     {
         return $this->belongsTo(FuelType::class, 'fuel_type_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

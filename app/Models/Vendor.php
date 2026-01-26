@@ -43,4 +43,11 @@ class Vendor extends Model
     {
         return $this->hasMany(\App\Models\FuelStationStock::class, 'vendor_uuid', 'uuid');
     }
+
+
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
 }

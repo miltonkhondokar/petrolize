@@ -10,7 +10,11 @@ class Center extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['uuid', 'governorate_uuid', 'name'];
+    protected $fillable = ['uuid', 'governorate_uuid', 'name', 'is_active'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     protected static function boot()
     {
@@ -31,4 +35,10 @@ class Center extends Model
     {
         return $this->hasMany(City::class, 'center_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

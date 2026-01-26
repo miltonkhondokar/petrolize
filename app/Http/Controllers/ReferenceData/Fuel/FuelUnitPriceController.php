@@ -15,23 +15,20 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class FuelUnitPriceController extends Controller
 {
-    /**
-     * Display a listing of fuel unit prices
-     */
     public function index(Request $request)
     {
         $filters = $request->only(['fuel_station_uuid', 'fuel_type_uuid', 'is_active']);
 
         $prices = FuelStationPrice::with(['fuelStation', 'fuelType'])
-            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $fuelStation) => $q->where('fuel_station_uuid', $fuelStation))
-            ->when($filters['fuel_type_uuid'] ?? null, fn ($q, $fuelType) => $q->where('fuel_type_uuid', $fuelType))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
+            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $v) => $q->where('fuel_station_uuid', $v))
+            ->when($filters['fuel_type_uuid'] ?? null, fn ($q, $v) => $q->where('fuel_type_uuid', $v))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', (int)$filters['is_active']))
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        $fuelStations = FuelStation::where('is_active', true)->get();
-        $fuelTypes = FuelType::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->orderBy('name')->get();
+        $fuelTypes    = FuelType::where('is_active', true)->orderBy('name')->get();
 
         $breadcrumb = [
             "page_header" => "Fuel Unit Prices",
@@ -46,16 +43,19 @@ class FuelUnitPriceController extends Controller
             "third_item_icon" => "fa-list",
         ];
 
-        return view('application.pages.reference-data.fuel.fuel-unit-price.index', compact('prices', 'filters', 'fuelStations', 'fuelTypes', 'breadcrumb'));
+        return view('application.pages.reference-data.fuel.fuel-unit-price.index', compact(
+            'prices',
+            'filters',
+            'fuelStations',
+            'fuelTypes',
+            'breadcrumb'
+        ));
     }
 
-    /**
-     * Show the form for creating a new fuel unit price
-     */
     public function create()
     {
-        $fuelStations = FuelStation::where('is_active', true)->get();
-        $fuelTypes = FuelType::where('is_active', true)->get();
+        $fuelStations = FuelStation::where('is_active', true)->orderBy('name')->get();
+        $fuelTypes    = FuelType::where('is_active', true)->orderBy('name')->get();
 
         $breadcrumb = [
             "page_header" => "Create Fuel Unit Price",
@@ -70,12 +70,13 @@ class FuelUnitPriceController extends Controller
             "third_item_icon" => "fa-plus",
         ];
 
-        return view('application.pages.reference-data.fuel.fuel-unit-price.create', compact('fuelStations', 'fuelTypes', 'breadcrumb'));
+        return view('application.pages.reference-data.fuel.fuel-unit-price.create', compact(
+            'fuelStations',
+            'fuelTypes',
+            'breadcrumb'
+        ));
     }
 
-    /**
-     * Store a newly created fuel unit price
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -88,14 +89,18 @@ class FuelUnitPriceController extends Controller
         DB::beginTransaction();
         try {
             foreach ($validated['prices'] as $fuelTypeUuid => $row) {
+
+                // ✅ default active TRUE if checkbox not provided
+                $isActive = array_key_exists('is_active', $row) ? (bool)$row['is_active'] : true;
+
                 FuelStationPrice::updateOrCreate(
                     [
                         'fuel_station_uuid' => $validated['fuel_station_uuid'],
-                        'fuel_type_uuid' => $fuelTypeUuid,
+                        'fuel_type_uuid'    => $fuelTypeUuid,
                     ],
                     [
                         'price_per_unit' => $row['price_per_unit'],
-                        'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : false,
+                        'is_active'      => $isActive,
                     ]
                 );
             }
@@ -120,16 +125,83 @@ class FuelUnitPriceController extends Controller
                 'data' => $request->all(),
             ]);
 
+            Alert::error('Error', 'Failed to save fuel unit prices.');
+            return back()->withInput();
+        }
+    }
+
+    public function edit($stationUuid)
+    {
+        $fuelStations = FuelStation::where('is_active', true)->orderBy('name')->get();
+
+        $breadcrumb = [
+            "page_header" => "Edit Fuel Unit Prices",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route('/'),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Fuel Unit Prices",
+            "second_item_link" => route('fuel-unit-price.index'),
+            "second_item_icon" => "fa-gas-pump",
+            "third_item_name" => "Edit",
+            "third_item_link" => "#",
+            "third_item_icon" => "fa-edit",
+        ];
+
+        return view('application.pages.reference-data.fuel.fuel-unit-price.edit', compact(
+            'fuelStations',
+            'breadcrumb',
+            'stationUuid'
+        ));
+    }
+
+    public function update(Request $request, $stationUuid)
+    {
+        $validated = $request->validate([
+            'fuel_station_uuid' => 'required|exists:fuel_stations,uuid',
+            'prices' => 'required|array|min:1',
+            'prices.*.price_per_unit' => 'required|numeric|min:0',
+            'prices.*.is_active' => 'nullable|boolean',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            foreach ($validated['prices'] as $fuelTypeUuid => $row) {
+
+                // ✅ default active TRUE if checkbox not provided
+                $isActive = array_key_exists('is_active', $row) ? (bool)$row['is_active'] : true;
+
+                FuelStationPrice::updateOrCreate(
+                    [
+                        'fuel_station_uuid' => $validated['fuel_station_uuid'],
+                        'fuel_type_uuid'    => $fuelTypeUuid,
+                    ],
+                    [
+                        'price_per_unit' => $row['price_per_unit'],
+                        'is_active'      => $isActive,
+                    ]
+                );
+            }
+
             AuditLog::create([
                 'user_id' => Auth::id(),
-                'action' => 'Failed to save Fuel Unit Prices (Bulk)',
-                'type' => 'error',
+                'action' => 'Updated Fuel Unit Prices (Bulk)',
+                'type' => 'update',
                 'item_id' => null,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
 
-            Alert::error('Error', 'Failed to save fuel unit prices.');
+            DB::commit();
+            Alert::success('Success', 'Fuel unit prices updated successfully.');
+            return redirect()->route('fuel-unit-price.index');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('FuelStationPrice bulk update failed', [
+                'stationUuid' => $stationUuid,
+                'error' => $e->getMessage(),
+            ]);
+
+            Alert::error('Error', 'Failed to update fuel unit prices.');
             return back()->withInput();
         }
     }
@@ -155,86 +227,6 @@ class FuelUnitPriceController extends Controller
         ];
 
         return view('application.pages.reference-data.fuel.fuel-unit-price.show', compact('price', 'breadcrumb'));
-    }
-
-    /**
-     * Show the form for editing the specified fuel unit price
-     */
-    public function edit($stationUuid)
-    {
-        $fuelStations = FuelStation::where('is_active', true)->get();
-
-        $breadcrumb = [
-            "page_header" => "Edit Fuel Unit Prices",
-            "first_item_name" => "Dashboard",
-            "first_item_link" => route('/'),
-            "first_item_icon" => "fa-home",
-            "second_item_name" => "Fuel Unit Prices",
-            "second_item_link" => route('fuel-unit-price.index'),
-            "second_item_icon" => "fa-gas-pump",
-            "third_item_name" => "Edit",
-            "third_item_link" => "#",
-            "third_item_icon" => "fa-edit",
-        ];
-
-        return view('application.pages.reference-data.fuel.fuel-unit-price.edit',
-            compact('fuelStations', 'breadcrumb', 'stationUuid')
-        );
-    }
-
-    /**
-     * Update the specified fuel unit price
-     */
-    public function update(Request $request, $stationUuid)
-    {
-        $request->validate([
-            'fuel_station_uuid' => 'required|exists:fuel_stations,uuid',
-            'prices' => 'required|array|min:1',
-            'prices.*.price_per_unit' => 'required|numeric|min:0',
-            'prices.*.is_active' => 'nullable|boolean',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $fuelStationUuid = $request->fuel_station_uuid;
-
-            foreach ($request->prices as $fuelTypeUuid => $row) {
-                FuelStationPrice::updateOrCreate(
-                    [
-                        'fuel_station_uuid' => $fuelStationUuid,
-                        'fuel_type_uuid' => $fuelTypeUuid,
-                    ],
-                    [
-                        'price_per_unit' => $row['price_per_unit'],
-                        'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : false,
-                    ]
-                );
-            }
-
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'Updated Fuel Unit Prices (Bulk)',
-                'type' => 'update',
-                'item_id' => null,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            DB::commit();
-            Alert::success('Success', 'Fuel unit prices updated successfully.');
-            return redirect()->route('fuel-unit-price.index');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('FuelStationPrice bulk update failed', [
-                'stationUuid' => $stationUuid,
-                'error' => $e->getMessage(),
-            ]);
-
-            Alert::error('Error', 'Failed to update fuel unit prices.');
-            return back()->withInput();
-        }
     }
 
     /**

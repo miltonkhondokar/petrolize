@@ -14,6 +14,7 @@ class FuelStationComplaint extends Model
 
     protected $fillable = [
         'uuid',
+        'user_uuid',
         'fuel_station_uuid',
         'complaint_category_uuid',
         'title',
@@ -34,7 +35,9 @@ class FuelStationComplaint extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->uuid) $model->uuid = (string) Str::uuid();
+            if (!$model->uuid) {
+                $model->uuid = (string) Str::uuid();
+            }
         });
     }
 
@@ -52,4 +55,10 @@ class FuelStationComplaint extends Model
             'uuid'
         );
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

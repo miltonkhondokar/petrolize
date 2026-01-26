@@ -32,7 +32,9 @@ class FuelStationReading extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->uuid) $model->uuid = (string) Str::uuid();
+            if (!$model->uuid) {
+                $model->uuid = (string) Str::uuid();
+            }
         });
     }
 
@@ -46,4 +48,10 @@ class FuelStationReading extends Model
     {
         return $this->belongsTo(FuelType::class, 'fuel_type_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

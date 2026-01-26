@@ -27,7 +27,9 @@ class CostCategory extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if (!$model->uuid) $model->uuid = (string) Str::uuid();
+            if (!$model->uuid) {
+                $model->uuid = (string) Str::uuid();
+            }
         });
     }
 
@@ -36,4 +38,10 @@ class CostCategory extends Model
     {
         return $this->hasMany(CostEntry::class, 'cost_category_uuid', 'uuid');
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }

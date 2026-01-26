@@ -13,8 +13,9 @@ return new class () extends Migration {
         Schema::create('fuel_station_complaints', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->uuid('uuid')->unique();
+            $table->uuid('user_uuid')->index();
             $table->uuid('fuel_station_uuid')->index();
-            $table->string('complaint_category_uuid')->index()->nullable(); // e.g., fuel_shortage, nozzle_issue, power_failure
+            $table->uuid('complaint_category_uuid')->nullable()->index();// e.g., fuel_shortage, nozzle_issue, power_failure
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('status')->index()->default('open'); // open, in_progress, resolved

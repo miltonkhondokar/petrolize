@@ -75,6 +75,12 @@ class FuelType extends Model
             'uuid'
         )->withTimestamps();
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
 }
 
 // usages

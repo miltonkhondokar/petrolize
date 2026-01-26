@@ -10,7 +10,11 @@ class Governorate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['uuid', 'region_uuid', 'name', 'code'];
+    protected $fillable = ['uuid', 'region_uuid', 'name', 'code', 'is_active'];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 
     protected static function boot()
     {
@@ -30,5 +34,11 @@ class Governorate extends Model
     public function centers()
     {
         return $this->hasMany(Center::class, 'governorate_uuid', 'uuid');
+    }
+
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }

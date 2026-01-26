@@ -12,19 +12,20 @@ class CenterSeeder extends Seeder
     public function run()
     {
         $data = [
-            'Riyadh' => ['Riyadh City', 'Al-Kharj Center', 'Diriyah Center'],
-            'Jeddah' => ['Jeddah Center', 'Taif Center'],
-            'Madinah' => ['Al-Madinah Center', 'Yanbu Center'],
-            // add more governorate => centers mapping here
+            'Riyadh'     => ['Riyadh City', 'Al-Kharj Center', 'Diriyah Center'],
+            'Jeddah'     => ['Jeddah Center'],
+            'Al-Madinah' => ['Al-Madinah Center', 'Yanbu Center'], // ✅ FIXED
         ];
 
         foreach ($data as $govName => $centers) {
             $gov = Governorate::where('name', $govName)->first();
-            if (!$gov) continue;
+            if (!$gov) {
+                continue;
+            }
 
             foreach ($centers as $name) {
                 Center::create([
-                    'uuid' => Str::uuid(),
+                    'uuid' => (string) Str::uuid(), // ✅ make string
                     'governorate_uuid' => $gov->uuid,
                     'name' => $name,
                     'is_active' => true,
