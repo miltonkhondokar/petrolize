@@ -67,7 +67,7 @@ class DashboardController extends Controller
         // You deleted fuel_station_stocks table, so we can't use FuelStationStock model anymore.
         // We'll show recent "received" purchases instead (still meaningful for dashboard).
         // =========================
-        $recentStocks = FuelPurchase::with(['fuelStation', 'vendor'])
+        $recentStocks = FuelPurchase::with(['station', 'vendor'])
             ->whereIn('status', ['received', 'received_full', 'received_partial'])
             ->orderBy('purchase_date', 'desc')
             ->orderBy('created_at', 'desc')

@@ -168,7 +168,7 @@
                                 action="{{ route('fuel_purchases.receive', $purchase->uuid) }}">
                                 @csrf
 
-                                {{-- ✅ REQUIRED FIELD (FIX) --}}
+                                {{-- REQUIRED FIELD --}}
                                 <div class="row mb-5">
                                     <div class="col-md-4">
                                         <label class="fw-bold required mb-2">Receive Date</label>
@@ -188,6 +188,7 @@
                                             <tr class="fw-bold text-gray-700">
                                                 <th>Fuel Type</th>
                                                 <th class="text-end">Remaining</th>
+                                                <th class="text-center">Receive Type</th>
                                                 <th class="text-end">Receive Now</th>
                                             </tr>
                                         </thead>
@@ -198,15 +199,42 @@
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $it->fuelType->name ?? '-' }}</td>
-                                                    <td class="text-end">{{ number_format($remaining, 3) }}</td>
+
                                                     <td class="text-end">
-                                                        <input type="hidden" name="items[{{ $idx }}][item_uuid]"
+                                                        <span class="remaining-value" data-index="{{ $idx }}"
+                                                            data-remaining="{{ $remaining }}">
+                                                            {{ number_format($remaining, 3) }}
+                                                        </span>
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        <input type="hidden"
+                                                            name="items[{{ $idx }}][item_uuid]"
                                                             value="{{ $it->uuid }}">
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input receive-type" type="radio"
+                                                                name="items[{{ $idx }}][receive_type]"
+                                                                value="full" data-index="{{ $idx }}"
+                                                                {{ $remaining <= 0 ? 'disabled' : '' }}>
+                                                            <label class="form-check-label">Full</label>
+                                                        </div>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input receive-type" type="radio"
+                                                                name="items[{{ $idx }}][receive_type]"
+                                                                value="partial" data-index="{{ $idx }}"
+                                                                {{ $remaining <= 0 ? 'disabled' : '' }}>
+                                                            <label class="form-check-label">Partial</label>
+                                                        </div>
+                                                    </td>
+
+                                                    <td class="text-end">
                                                         <input type="number" step="0.001" min="0"
                                                             max="{{ $remaining }}"
                                                             name="items[{{ $idx }}][received_qty]"
-                                                            class="form-control form-control-solid text-end"
-                                                            value="0" {{ $remaining <= 0 ? 'readonly' : '' }}>
+                                                            class="form-control form-control-solid text-end receive-qty"
+                                                            data-index="{{ $idx }}" value="0" readonly>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -217,8 +245,9 @@
                                 @if ($canReceive)
                                     <div class="text-end">
                                         <button type="submit" class="btn btn-info btn-sm">
-                                            <i class="ki-duotone ki-check fs-3 me-2"><i class="path1"></i><i
-                                                    class="path2"></i></i>
+                                            <i class="ki-duotone ki-check fs-3 me-2">
+                                                <i class="path1"></i><i class="path2"></i>
+                                            </i>
                                             Receive
                                         </button>
                                     </div>
@@ -226,6 +255,7 @@
 
                             </form>
                         </div>
+
                     </div>
 
                 </div>
@@ -266,6 +296,32 @@
                 });
 
                 if (result.isConfirmed) e.target.submit();
+            });
+        })();
+
+        (function() {
+            const typeRadios = document.querySelectorAll('.receive-type');
+
+            typeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const idx = this.dataset.index;
+                    const qtyInput = document.querySelector(`.receive-qty[data-index="${idx}"]`);
+
+                    if (!qtyInput) return;
+
+                    const remaining = parseFloat(qtyInput.getAttribute('max') || 0);
+
+                    if (this.value === 'full') {
+                        qtyInput.value = remaining.toFixed(3);
+                        qtyInput.setAttribute('readonly', true);
+                    }
+
+                    if (this.value === 'partial') {
+                        qtyInput.value = '';
+                        qtyInput.removeAttribute('readonly');
+                        qtyInput.focus();
+                    }
+                });
             });
         })();
     </script>

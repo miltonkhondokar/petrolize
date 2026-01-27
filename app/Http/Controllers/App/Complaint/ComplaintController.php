@@ -88,6 +88,7 @@ class ComplaintController extends Controller
 
         DB::beginTransaction();
         try {
+            $validated['user_uuid'] = Auth::user()->uuid;
             $complaint = FuelStationComplaint::create($validated);
 
             AuditLog::create([
@@ -182,6 +183,7 @@ class ComplaintController extends Controller
 
         DB::beginTransaction();
         try {
+            $validated['user_uuid'] = Auth::user()->uuid;
             $complaint->update($validated);
 
             AuditLog::create([
