@@ -327,25 +327,5 @@
             await fetchAndFill(`/ajax/geo/cities/${centerEl.value}`, cityEl, 'Select City');
         }
     });
-
-    // 🔁 Preload existing values (EDIT PAGE)
-    document.addEventListener('DOMContentLoaded', async () => {
-        const pre = {
-            region: "{{ $fuelStation->region_uuid }}",
-            gov: "{{ $fuelStation->governorate_uuid }}",
-            center: "{{ $fuelStation->center_uuid }}",
-            city: "{{ $fuelStation->city_uuid }}"
-        };
-
-        if (pre.region) {
-            await fetchAndFill(`/ajax/geo/governorates/${pre.region}`, govEl, 'Select Governorate', pre.gov);
-        }
-        if (pre.gov) {
-            await fetchAndFill(`/ajax/geo/centers/${pre.gov}`, centerEl, 'Select Center', pre.center);
-        }
-        if (pre.center) {
-            await fetchAndFill(`/ajax/geo/cities/${pre.center}`, cityEl, 'Select City', pre.city);
-        }
-    });
 </script>
 @endpush

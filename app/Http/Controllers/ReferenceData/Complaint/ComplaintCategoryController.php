@@ -16,24 +16,41 @@ class ComplaintCategoryController extends Controller
     /**
      * List complaint categories
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = ComplaintCategory::latest()->paginate(20);
+        $filters = $request->only(['code', 'name', 'is_active']);
+
+        $categories = ComplaintCategory::query()
+            ->when($request->filled('code'), function ($q) use ($request) {
+                $q->where('code', 'like', '%' . trim($request->code) . '%');
+            })
+            ->when($request->filled('name'), function ($q) use ($request) {
+                $q->where('name', 'like', '%' . trim($request->name) . '%');
+            })
+            ->when($request->has('is_active') && $request->is_active !== '', function ($q) use ($request) {
+                $q->where('is_active', (bool) $request->is_active);
+            })
+            ->latest()
+            ->paginate(20)
+            ->appends($filters);
 
         $breadcrumb = [
             "page_header" => "Complaint Categories",
             "first_item_name" => "Dashboard",
-            "first_item_link" => route('/'),
+            "first_item_link" => url('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Complaint Categories",
             "second_item_link" => "#",
             "second_item_icon" => "fa-list",
         ];
 
-        return view('application.pages.reference-data.complaint-category.index',
-            compact('categories', 'breadcrumb')
-        );
+        return view('application.pages.reference-data.complaint-category.index', compact(
+            'categories',
+            'breadcrumb',
+            'filters'
+        ));
     }
+
 
     /**
      * Create form
@@ -46,14 +63,15 @@ class ComplaintCategoryController extends Controller
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Complaint Categories",
-            "second_item_link" => route('complaint-categories.index'),
+            "second_item_link" => route('complaint-category.index'),
             "second_item_icon" => "fa-list",
             "third_item_name" => "Create",
             "third_item_link" => "#",
             "third_item_icon" => "fa-plus",
         ];
 
-        return view('application.pages.reference-data.complaint-category.create',
+        return view(
+            'application.pages.reference-data.complaint-category.create',
             compact('breadcrumb')
         );
     }
@@ -86,7 +104,7 @@ class ComplaintCategoryController extends Controller
             });
 
             Alert::success('Success', 'Complaint category created successfully.');
-            return redirect()->route('complaint-categories.index');
+            return redirect()->route('complaint-category.index');
         } catch (\Exception $e) {
 
             Log::error('ComplaintCategory create failed', [
@@ -121,7 +139,8 @@ class ComplaintCategoryController extends Controller
             "third_item_icon" => "fa-eye",
         ];
 
-        return view('application.pages.reference-data.complaint-category.show',
+        return view(
+            'application.pages.reference-data.complaint-category.show',
             compact('category', 'breadcrumb')
         );
     }
@@ -139,14 +158,15 @@ class ComplaintCategoryController extends Controller
             "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
             "second_item_name" => "Complaint Categories",
-            "second_item_link" => route('complaint-categories.index'),
+            "second_item_link" => route('complaint-category.index'),
             "second_item_icon" => "fa-list",
             "third_item_name" => "Edit",
             "third_item_link" => "#",
             "third_item_icon" => "fa-edit",
         ];
 
-        return view('application.pages.reference-data.complaint-category.edit',
+        return view(
+            'application.pages.reference-data.complaint-category.edit',
             compact('category', 'breadcrumb')
         );
     }
@@ -180,7 +200,7 @@ class ComplaintCategoryController extends Controller
             });
 
             Alert::success('Success', 'Complaint category updated successfully.');
-            return redirect()->route('complaint-categories.index');
+            return redirect()->route('complaint-category.index');
         } catch (\Exception $e) {
 
             Log::error('ComplaintCategory update failed', [
@@ -228,4 +248,48 @@ class ComplaintCategoryController extends Controller
             return back();
         }
     }
+
+    /**
+ * Update status (active/inactive) of a complaint category
+ */
+    public function statusUpdate(Request $request, string $uuid)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $category = ComplaintCategory::where('uuid', $uuid)->firstOrFail();
+
+        try {
+            DB::transaction(function () use ($category, $validated, $request) {
+
+                $category->update([
+                    'is_active' => $validated['status'] === 'active',
+                ]);
+
+                AuditLog::create([
+                    'user_id'    => Auth::id(),
+                    'action'     => 'Updated Complaint Category Status',
+                    'type'       => 'update',
+                    'item_id'    => $category->id,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            });
+
+            Alert::success('Success', 'Complaint category status updated successfully.');
+            return back();
+
+        } catch (\Exception $e) {
+
+            Log::error('ComplaintCategory status update failed', [
+                'uuid'  => $uuid,
+                'error' => $e->getMessage(),
+            ]);
+
+            Alert::error('Error', 'Failed to update complaint category status.');
+            return back();
+        }
+    }
+
 }

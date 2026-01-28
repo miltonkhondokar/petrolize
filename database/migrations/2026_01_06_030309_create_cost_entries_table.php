@@ -1,5 +1,6 @@
 <?php
 
+use Dom\Comment;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,6 +17,7 @@ return new class () extends Migration {
             $table->uuid('fuel_station_uuid')->index();
             $table->uuid('cost_category_uuid')->index();
             $table->decimal('amount', 12, 2);
+            $table->string('payer')->nullable()->comment('Person who paid the expense. owner or station');
             $table->date('expense_date')->index();
             $table->string('reference_no')->nullable();
             $table->text('note')->nullable();

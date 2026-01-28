@@ -8,6 +8,60 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
 
+            {{-- Filter Section --}}
+            <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
+                <div class="card-header bg-light-primary">
+                    <div class="card-title">
+                        <h3 class="card-label">
+                            <i class="fas fa-filter"></i> Filter
+                            <small>filter complaint categories</small>
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form method="GET" action="{{ route('complaint-category.index') }}">
+                        <div class="row g-3 align-items-end">
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Code</label>
+                                <input type="text" name="code" class="form-control form-control-solid"
+                                    placeholder="e.g. CAT-001" value="{{ request('code') }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Name</label>
+                                <input type="text" name="name" class="form-control form-control-solid"
+                                    placeholder="Category name" value="{{ request('name') }}">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Status</label>
+                                <select name="is_active" class="form-select form-select-solid">
+                                    <option value="">All</option>
+                                    <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Active
+                                    </option>
+                                    <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Inactive
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 d-flex gap-2">
+                                <button type="submit" class="btn btn-info w-100">
+                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
+                                </button>
+                                <a href="{{ route('complaint-category.index') }}" class="btn btn-warning w-100">
+                                    <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
             <!-- Complaint Categories Table -->
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
@@ -93,8 +147,10 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-{{ $category->is_active ? 'success' : 'danger' }}">
-                                                <i class="ki-duotone {{ $category->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
+                                            <span
+                                                class="badge badge-light-{{ $category->is_active ? 'success' : 'danger' }}">
+                                                <i
+                                                    class="ki-duotone {{ $category->is_active ? 'ki-check-circle' : 'ki-cross' }} fs-5 me-1"></i>
                                                 {{ $category->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
@@ -112,7 +168,8 @@
                                                 </a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="{{ route('complaint-category.show', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('complaint-category.show', $category->uuid) }}"
+                                                            class="dropdown-item">
                                                             <i class="ki-duotone ki-eye fs-2 me-2 text-info">
                                                                 <span class="path1"></span>
                                                                 <span class="path2"></span>
@@ -122,7 +179,8 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('complaint-category.edit', $category->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('complaint-category.edit', $category->uuid) }}"
+                                                            class="dropdown-item">
                                                             <i class="ki-duotone ki-pencil fs-2 me-2 text-warning">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>
@@ -134,7 +192,8 @@
                                                             <a href="javascript:void(0)"
                                                                 onclick="changeStatus('{{ route('complaint-category-status-update', $category->uuid) }}', 'inactive')"
                                                                 class="dropdown-item">
-                                                                <i class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
+                                                                <i
+                                                                    class="ki-duotone ki-cross-circle fs-2 me-2 text-danger">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Deactivate
@@ -143,7 +202,8 @@
                                                             <a href="javascript:void(0)"
                                                                 onclick="changeStatus('{{ route('complaint-category-status-update', $category->uuid) }}', 'active')"
                                                                 class="dropdown-item">
-                                                                <i class="ki-duotone ki-check-circle fs-2 me-2 text-success">
+                                                                <i
+                                                                    class="ki-duotone ki-check-circle fs-2 me-2 text-success">
                                                                     <i class="path1"></i><i class="path2"></i>
                                                                 </i>
                                                                 Activate

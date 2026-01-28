@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use RealRashid\SweetAlert\Facades\Alert;
+use App\Models\FuelStationFinanceLedger;
 
 class FuelSalesDayController extends Controller
 {
@@ -347,10 +348,14 @@ class FuelSalesDayController extends Controller
             // Important: submit uses stored line_total (created during store/update)
             $total = (float) $day->items->sum('line_total');
 
-            if (abs(((float)$request->cash_amount + (float)$request->bank_amount) - $total) > 0.01) {
+            $received = (float)$request->cash_amount + (float)$request->bank_amount;
+
+            // Keep your existing rule
+            if (abs($received - $total) > 0.01) {
                 abort(422, 'Cash + Bank must equal total amount.');
             }
 
+            // ===================== STOCK OUT (UNCHANGED) =====================
             foreach ($day->items as $it) {
                 $balance = StockLedgerService::getBalance(
                     $day->fuel_station_uuid,
@@ -375,6 +380,47 @@ class FuelSalesDayController extends Controller
                 ]);
             }
 
+            // ===================== FINANCE LEDGER (NEW, SAFE) =====================
+            // NOTE: Add at top of controller:
+            // use App\Models\FuelStationFinanceLedger;
+
+            // Avoid duplicates (idempotent)
+            $alreadyLogged = FuelStationFinanceLedger::where('ref_table', 'fuel_sales_days')
+                ->where('ref_uuid', $day->uuid)
+                ->whereIn('txn_type', ['fuel_issue', 'cash_received'])
+                ->exists();
+
+            if (!$alreadyLogged) {
+                // 1) DEBIT: fuel value issued/sold today (owner charges station)
+                FuelStationFinanceLedger::create([
+                    'fuel_station_uuid' => $day->fuel_station_uuid,
+                    'txn_type'          => 'fuel_issue',
+                    'txn_date'          => $day->sale_date,
+                    'debit_amount'      => $total,
+                    'credit_amount'     => 0,
+                    'ref_table'         => 'fuel_sales_days',
+                    'ref_uuid'          => $day->uuid,
+                    'note'              => 'Sales day submitted (fuel value)',
+                    'created_by'        => Auth::id(),
+                ]);
+
+                // 2) CREDIT: cash + bank received by owner on submit (settlement)
+                if ($received > 0) {
+                    FuelStationFinanceLedger::create([
+                        'fuel_station_uuid' => $day->fuel_station_uuid,
+                        'txn_type'          => 'cash_received',
+                        'txn_date'          => $day->sale_date,
+                        'debit_amount'      => 0,
+                        'credit_amount'     => $received,
+                        'ref_table'         => 'fuel_sales_days',
+                        'ref_uuid'          => $day->uuid,
+                        'note'              => 'Sales day submitted (cash+bank received)',
+                        'created_by'        => Auth::id(),
+                    ]);
+                }
+            }
+
+            // ===================== UPDATE DAY (UNCHANGED) =====================
             $day->update([
                 'cash_amount'  => (float) $request->cash_amount,
                 'bank_amount'  => (float) $request->bank_amount,
@@ -386,6 +432,7 @@ class FuelSalesDayController extends Controller
         Alert::success('Success', 'Sales day submitted and stock updated.');
         return back();
     }
+
 
     // =========================================================
     // AJAX: Station fuel prices (Sale prices from FuelStationPrice)

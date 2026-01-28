@@ -68,16 +68,6 @@ class FuelStation extends Model
         return $this->hasMany(FuelStationPrice::class, 'fuel_station_uuid', 'uuid');
     }
 
-    public function fuelStocks()
-    {
-        return $this->hasMany(FuelStationStock::class, 'fuel_station_uuid', 'uuid');
-    }
-
-    public function fuelReadings()
-    {
-        return $this->hasMany(FuelStationReading::class, 'fuel_station_uuid', 'uuid');
-    }
-
     public function costs()
     {
         return $this->hasMany(CostEntry::class, 'fuel_station_uuid', 'uuid');

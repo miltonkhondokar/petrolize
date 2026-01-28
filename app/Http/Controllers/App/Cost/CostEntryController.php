@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RealRashid\SweetAlert\Facades\Alert;
+use App\Models\FuelStationFinanceLedger;
 
 class CostEntryController extends Controller
 {
@@ -23,10 +24,10 @@ class CostEntryController extends Controller
         $filters = $request->only(['fuel_station_uuid', 'cost_category_uuid', 'is_active', 'expense_date']);
 
         $costEntries = CostEntry::with(['fuelStation', 'category'])
-            ->when($filters['fuel_station_uuid'] ?? null, fn($q, $fs) => $q->where('fuel_station_uuid', $fs))
-            ->when($filters['cost_category_uuid'] ?? null, fn($q, $cat) => $q->where('cost_category_uuid', $cat))
-            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn($q) => $q->where('is_active', $filters['is_active']))
-            ->when($filters['expense_date'] ?? null, fn($q, $date) => $q->whereDate('expense_date', $date))
+            ->when($filters['fuel_station_uuid'] ?? null, fn ($q, $fs) => $q->where('fuel_station_uuid', $fs))
+            ->when($filters['cost_category_uuid'] ?? null, fn ($q, $cat) => $q->where('cost_category_uuid', $cat))
+            ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn ($q) => $q->where('is_active', $filters['is_active']))
+            ->when($filters['expense_date'] ?? null, fn ($q, $date) => $q->whereDate('expense_date', $date))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -89,6 +90,23 @@ class CostEntryController extends Controller
         DB::beginTransaction();
         try {
             $costEntry = CostEntry::create($validated);
+
+            /**
+             * ✅ ONLY if owner paid the cost
+             * Station-paid costs must NOT affect finance ledger
+             */
+            if (($validated['payer'] ?? 'station') === 'owner') {
+                FuelStationFinanceLedger::create([
+                    'fuel_station_uuid' => $costEntry->fuel_station_uuid,
+                    'txn_type' => 'owner_expense',
+                    'txn_date' => $costEntry->expense_date,
+                    'debit_amount' => $costEntry->amount,
+                    'ref_table' => 'cost_entries',
+                    'ref_uuid' => $costEntry->uuid,
+                    'note' => $costEntry->note,
+                    'created_by' => Auth::id(),
+                ]);
+            }
 
             AuditLog::create([
                 'user_id' => Auth::id(),
@@ -183,6 +201,38 @@ class CostEntryController extends Controller
         try {
             $costEntry->update($validated);
 
+
+            // Find existing ledger entry (if any)
+            $ledger = FuelStationFinanceLedger::where('ref_table', 'cost_entries')
+                ->where('ref_uuid', $costEntry->uuid)
+                ->first();
+
+
+            if (($validated['payer'] ?? 'station') === 'owner') {
+
+                if ($ledger) {
+                    // Update existing ledger
+                    $ledger->update([
+                        'fuel_station_uuid' => $costEntry->fuel_station_uuid,
+                        'txn_date' => $costEntry->expense_date,
+                        'debit_amount' => $costEntry->amount,
+                        'note' => $costEntry->note,
+                    ]);
+                } else {
+                    // Create new ledger
+                    FuelStationFinanceLedger::create([
+                        'fuel_station_uuid' => $costEntry->fuel_station_uuid,
+                        'txn_type' => 'owner_expense',
+                        'txn_date' => $costEntry->expense_date,
+                        'debit_amount' => $costEntry->amount,
+                        'ref_table' => 'cost_entries',
+                        'ref_uuid' => $costEntry->uuid,
+                        'note' => $costEntry->note,
+                        'created_by' => Auth::id(),
+                    ]);
+                }
+            }
+
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'Updated Cost Entry',
@@ -212,6 +262,9 @@ class CostEntryController extends Controller
      */
     public function destroy($uuid)
     {
+
+        abort(403, 'Cost entry deletion is disabled in this application.');
+
         $costEntry = CostEntry::where('uuid', $uuid)->firstOrFail();
 
         try {
