@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('vendor_payments.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="vendor_uuid" class="form-select form-select-solid">
                                     <option value="">Select Vendor</option>
                                     @foreach($vendors as $vendor)
@@ -53,15 +53,14 @@
                                 <input type="date" name="to" class="form-control form-control-solid"
                                     placeholder="To Date" value="{{ $filters['to'] ?? '' }}">
                             </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-info">
+                            <div class="col-md-2 text-end">
+                                <button type="submit" class="btn btn-info w-80">
                                     <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
                                 </button>
-                                <a href="{{ route('vendor_payments.index') }}" class="btn btn-warning ms-2">
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ route('vendor_payments.index') }}" class="btn btn-warning w-50 ms-2">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
-                                </a>
-                                <a href="{{ route('vendor_payments.create') }}" class="btn btn-primary ms-2">
-                                    <i class="ki-outline ki-plus fs-3 me-2"></i>Add Payment
                                 </a>
                             </div>
                         </div>

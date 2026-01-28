@@ -65,16 +65,15 @@
                                 <input type="date" name="to" class="form-control form-control-solid"
                                     value="{{ $filters['to'] ?? '' }}" />
                             </div>
-
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
-                                <a href="{{ route('fuel_purchases.index') }}" class="btn btn-warning ms-2">
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ route('fuel_purchases.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
-
                         </div>
                     </form>
                 </div>

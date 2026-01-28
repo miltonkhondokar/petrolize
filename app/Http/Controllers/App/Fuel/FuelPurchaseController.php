@@ -49,11 +49,14 @@ class FuelPurchaseController extends Controller
         $breadcrumb = [
             "page_header" => "Fuel Purchases",
             "first_item_name" => "Dashboard",
-            "first_item_link" => route(('/')),
+            "first_item_link" => route('/'),
             "first_item_icon" => "fa-home",
-            "second_item_name" => "Fuel Purchases",
-            "second_item_link" => "#",
-            "second_item_icon" => "fa-boxes",
+            "second_item_name" => "Lists",
+            "second_item_link" => route('fuel_purchases.index'),
+            "second_item_icon" => "fa-gas-pump",
+            "third_item_name" => "List",
+            "third_item_link" => "#",
+            "third_item_icon" => "fa-list",
         ];
 
         return view('application.pages.app.fuel_purchases.index', compact('purchases', 'filters', 'stations', 'vendors', 'breadcrumb'));

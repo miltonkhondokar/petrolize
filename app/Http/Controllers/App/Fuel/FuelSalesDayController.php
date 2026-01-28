@@ -66,13 +66,16 @@ class FuelSalesDayController extends Controller
         $stations = FuelStation::orderBy('name')->get(['uuid', 'name']);
 
         $breadcrumb = [
-            "page_header" => "Audit Logs",
-            "first_item_name" => "Users",
-            "first_item_link" => route('audit.user.index'),
-            "first_item_icon" => "fa-user-shield",
-            "second_item_name" => "Activity Log",
-            "second_item_link" => "#",
-            "second_item_icon" => "fa-list-check",
+            "page_header" => "Fuel Sales",
+            "first_item_name" => "Dashboard",
+            "first_item_link" => route('/'),
+            "first_item_icon" => "fa-home",
+            "second_item_name" => "Lists",
+            "second_item_link" => route('fuel_sales_days.index'),
+            "second_item_icon" => "fa-money-bill-wave",
+            "third_item_name" => "List",
+            "third_item_link" => "#",
+            "third_item_icon" => "fa-list",
         ];
 
         return view('application.pages.app.fuel_sales_days.index', compact('days', 'filters', 'stations', 'breadcrumb'));
