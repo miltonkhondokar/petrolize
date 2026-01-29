@@ -8,7 +8,7 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
             <div class="card shadow-sm">
-                <div class="card-header bg-light-primary d-flex justify-content-between align-items-center">
+                <div class="card-header bg-light-danger d-flex justify-content-between align-items-center">
                     <h3 class="card-title">
                         <i class="ki-duotone ki-ruler fs-2 text-primary me-2">
                             <i class="path1"></i><i class="path2"></i>

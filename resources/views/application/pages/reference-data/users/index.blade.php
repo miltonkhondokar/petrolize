@@ -34,17 +34,6 @@
                                     placeholder="Phone" value="{{ $filters['phone'] ?? '' }}">
                             </div>
                             <div class="col-md-2">
-                                <select name="gender" class="form-select form-select-solid">
-                                    <option value="">Gender</option>
-                                    <option value="1"
-                                        {{ isset($filters['gender']) && $filters['gender'] == 1 ? 'selected' : '' }}>Male
-                                    </option>
-                                    <option value="2"
-                                        {{ isset($filters['gender']) && $filters['gender'] == 2 ? 'selected' : '' }}>
-                                        Female</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
                                 <select name="user_status" class="form-select form-select-solid">
                                     <option value="">Status</option>
                                     <option value="1"
@@ -55,9 +44,14 @@
                                         Inactive</option>
                                 </select>
                             </div>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-info">Filter</button>
-                                <a href="{{ route('user-master-data') }}" class="btn btn-warning ms-2">Reset</a>
+                                <a href="{{ route('user-master-data') }}" class="btn btn-warning w-100">
+                                    <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
+                                </a>
                             </div>
                         </div>
                     </form>

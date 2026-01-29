@@ -24,7 +24,7 @@
                             <div class="col-md-2">
                                 <select name="vendor_uuid" class="form-select form-select-solid">
                                     <option value="">Select Vendor</option>
-                                    @foreach($vendors as $vendor)
+                                    @foreach ($vendors as $vendor)
                                         <option value="{{ $vendor->uuid }}"
                                             {{ isset($filters['vendor_uuid']) && $filters['vendor_uuid'] == $vendor->uuid ? 'selected' : '' }}>
                                             {{ $vendor->name }}
@@ -54,12 +54,11 @@
                                     placeholder="To Date" value="{{ $filters['to'] ?? '' }}">
                             </div>
                             <div class="col-md-2 text-end">
-                                <button type="submit" class="btn btn-info w-80">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
                             </div>
                             <div class="col-md-2">
-                                <a href="{{ route('vendor_payments.index') }}" class="btn btn-warning w-50 ms-2">
+                                <a href="{{ route('vendor_payments.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
@@ -75,7 +74,9 @@
                     <div class="d-flex">
                         <span class="badge badge-light-success fs-6 me-3">
                             Total: {{ $payments->total() }} Payments
-                        </span>
+                        </span><a href="{{ route('vendor_payments.create') }}" class="btn btn-sm btn-primary">
+                            <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add Payment
+                        </a>
                     </div>
                 </div>
                 <div class="card-body py-3">
@@ -155,13 +156,15 @@
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold text-gray-800">{{ $payment->vendor->name ?? 'N/A' }}</div>
+                                                    <div class="fw-bold text-gray-800">
+                                                        {{ $payment->vendor->name ?? 'N/A' }}</div>
                                                     <div class="text-muted fs-7">{{ $payment->vendor->email ?? '' }}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="fw-semibold text-dark">{{ $payment->payment_date->format('d M Y') }}</span>
+                                            <span
+                                                class="fw-semibold text-dark">{{ $payment->payment_date->format('d M Y') }}</span>
                                         </td>
                                         <td>
                                             <span class="badge badge-light-success fs-6 fw-bold">
@@ -169,8 +172,10 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-{{ $payment->method == 'bank' ? 'info' : 'warning' }}">
-                                                <i class="ki-duotone ki-{{ $payment->method == 'bank' ? 'bank' : 'money' }} fs-5 me-1"></i>
+                                            <span
+                                                class="badge badge-light-{{ $payment->method == 'bank' ? 'info' : 'warning' }}">
+                                                <i
+                                                    class="ki-duotone ki-{{ $payment->method == 'bank' ? 'bank' : 'money' }} fs-5 me-1"></i>
                                                 {{ ucfirst($payment->method) }}
                                             </span>
                                         </td>
@@ -191,7 +196,8 @@
                                                 </a>
                                                 <ul class="dropdown-menu">
                                                     <li>
-                                                        <a href="{{ route('vendor_payments.show', $payment->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('vendor_payments.show', $payment->uuid) }}"
+                                                            class="dropdown-item">
                                                             <i class="ki-duotone ki-eye fs-2 me-2 text-info">
                                                                 <span class="path1"></span>
                                                                 <span class="path2"></span>
@@ -201,7 +207,8 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="{{ route('vendor_payments.edit', $payment->uuid) }}" class="dropdown-item">
+                                                        <a href="{{ route('vendor_payments.edit', $payment->uuid) }}"
+                                                            class="dropdown-item">
                                                             <i class="ki-duotone ki-pencil fs-2 me-2 text-warning">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>
@@ -209,8 +216,9 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="javascript:void(0)" onclick="showAllocations('{{ $payment->uuid }}')" 
-                                                           class="dropdown-item">
+                                                        <a href="javascript:void(0)"
+                                                            onclick="showAllocations('{{ $payment->uuid }}')"
+                                                            class="dropdown-item">
                                                             <i class="ki-duotone ki-copy fs-2 me-2 text-primary">
                                                                 <i class="path1"></i><i class="path2"></i>
                                                             </i>

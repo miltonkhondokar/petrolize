@@ -26,4 +26,11 @@ class FuelStockLedger extends Model
         parent::boot();
         static::creating(function ($m) { if (!$m->uuid) { $m->uuid = (string) Str::uuid(); } });
     }
+
+    public function totalSuppliedQty(): float
+    {
+        return FuelStockLedger::where('txn_type', 'purchase_receive')
+            ->whereIn('ref_uuid', $this->purchases()->pluck('uuid'))
+            ->sum('qty_in');
+    }
 }

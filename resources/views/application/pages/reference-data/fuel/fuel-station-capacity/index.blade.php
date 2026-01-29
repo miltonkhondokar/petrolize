@@ -51,7 +51,7 @@
 
             {{-- Filter Section --}}
             <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
-                <div class="card-header bg-light-primary">
+                <div class="card-header bg-light-danger">
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
@@ -62,7 +62,7 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('fuel-capacity.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="fuel_station_uuid" class="form-select form-select-solid">
                                     <option value="">Select Fuel Station</option>
                                     @foreach ($stations as $station)
@@ -76,7 +76,7 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="fuel_type_uuid" class="form-select form-select-solid">
                                     <option value="">Select Fuel Type</option>
                                     @foreach ($fuelTypes as $fuelType)
@@ -121,13 +121,13 @@
                                     value="{{ $filters['to'] ?? '' }}"
                                 >
                             </div>
-
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i> Filter
-                                </button>
-                                <a href="{{ route('fuel-capacity.index') }}" class="btn btn-warning ms-2">
-                                    <i class="ki-duotone ki-reload fs-3 me-2"></i> Reset
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ route('fuel-capacity.index') }}" class="btn btn-warning w-100">
+                                    <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
 
             {{-- List Table --}}
             <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                     <h3 class="card-title fw-bold fs-3 mb-1">Fuel Station Capacity List</h3>
                     <a href="{{ route('fuel-capacity.create') }}" class="btn btn-sm btn-primary">
                         <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Capacity

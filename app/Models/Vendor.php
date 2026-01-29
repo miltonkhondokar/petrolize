@@ -38,16 +38,30 @@ class Vendor extends Model
 
     // Relations
 
-    // If vendors supply fuel stock
-    public function fuelStocks()
+    public function purchases()
     {
-        return $this->hasMany(\App\Models\FuelStationStock::class, 'vendor_uuid', 'uuid');
+        return $this->hasMany(FuelPurchase::class, 'vendor_uuid', 'uuid');
     }
-
-
 
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function purchaseItems()
+    {
+        return $this->hasManyThrough(
+            FuelPurchaseItem::class,
+            FuelPurchase::class,
+            'vendor_uuid',        // FK on fuel_purchases
+            'fuel_purchase_uuid', // FK on fuel_purchase_items
+            'uuid',
+            'uuid'
+        );
+    }
+
+    public function totalFuelSupplied()
+    {
+        return $this->purchaseItems()->sum('quantity_ltr');
     }
 }

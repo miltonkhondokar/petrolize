@@ -36,9 +36,6 @@ class UserMasterDataController extends Controller
             ->when($filters['phone'] ?? null, function ($query, $phone) {
                 $query->where('phone', 'like', "%{$phone}%");
             })
-            ->when(isset($filters['gender']) && $filters['gender'] !== '', function ($query) use ($filters) {
-                $query->where('gender', $filters['gender']);
-            })
             ->latest()
             ->paginate(20)
             ->withQueryString();

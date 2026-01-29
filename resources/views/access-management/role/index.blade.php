@@ -8,34 +8,55 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
 
-            {{-- Filter Section --}}
-            <div class="card card-custom gutter-b mb-5 mb-xl-8">
-                <div class="card-header">
-                    <div class="card-title">
-                        <h3 class="card-label">
-                            <i class="fas fa-filter"></i> Filter
-                            <small>filter roles</small>
-                        </h3>
-                    </div>
+{{-- Filter Section --}}
+<div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
+    <div class="card-header bg-light-danger">
+        <div class="card-title">
+            <h3 class="card-label">
+                <i class="fas fa-filter"></i> Filter
+                <small>filter roles</small>
+            </h3>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form method="GET" action="{{ route('roles.index') }}">
+            @php
+                $filters = request()->only(['name']);
+            @endphp
+
+            <div class="row g-3 align-items-end">
+                {{-- Role Name --}}
+                <div class="col-md-4">
+                    <input
+                        type="text"
+                        name="name"
+                        class="form-control form-control-solid"
+                        placeholder="Role Name"
+                        value="{{ $filters['name'] ?? '' }}"
+                    >
                 </div>
-                <div class="card-body">
-                    <form method="GET" action="{{ route('roles.index') }}" class="mb-5">
-                        @php
-                            $filters = request()->only(['name']);
-                        @endphp
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <input type="text" name="name" value="{{ $filters['name'] ?? '' }}"
-                                    class="form-control" placeholder="Role Name">
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary">Filter</button>
-                                <a href="{{ route('roles.index') }}" class="btn btn-secondary ms-2">Reset</a>
-                            </div>
-                        </div>
-                    </form>
+
+                {{-- Filter Button --}}
+                <div class="col-md-2">
+                    <button class="btn btn-info w-100">
+                        <i class="ki-duotone ki-filter fs-3 me-2"></i>
+                        Filter
+                    </button>
+                </div>
+
+                {{-- Reset Button --}}
+                <div class="col-md-2">
+                    <a href="{{ route('roles.index') }}" class="btn btn-warning w-100">
+                        <i class="ki-duotone ki-reload fs-3 me-2"></i>
+                        Reset
+                    </a>
                 </div>
             </div>
+        </form>
+    </div>
+</div>
+
 
             {{-- Roles Table --}}
             <div class="card mb-5 mb-xl-8">

@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('cost-entries.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="fuel_station_uuid" class="form-select form-select-solid">
                                     <option value="">All Stations</option>
                                     @foreach($fuelStations as $station)
@@ -32,7 +32,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="cost_category_uuid" class="form-select form-select-solid">
                                     <option value="">All Categories</option>
                                     @foreach($categories as $category)
@@ -60,11 +60,12 @@
                                 <input type="date" name="expense_date" class="form-control form-control-solid"
                                     value="{{ $filters['expense_date'] ?? '' }}">
                             </div>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
-                                <a href="{{ route('cost-entries.index') }}" class="btn btn-warning ms-2">
+                                <a href="{{ route('cost-entries.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>

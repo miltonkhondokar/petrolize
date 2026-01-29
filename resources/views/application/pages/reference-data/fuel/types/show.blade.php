@@ -10,7 +10,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="card card-flush shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                             <h3 class="card-title">
                                 <i class="ki-duotone ki-gas-station fs-2 text-primary me-2">
                                     <i class="path1"></i><i class="path2"></i>
@@ -123,7 +123,7 @@
                                     </h4>
                                     <div class="row g-5">
                                         <div class="col-md-4">
-                                            <div class="card card-flush bg-light-primary">
+                                            <div class="card card-flush bg-light-danger">
                                                 <div class="card-body text-center">
                                                     <i class="fa-solid fa-gas-pump fs-4x text-info mb-3"></i>
                                                     <h4 class="text-gray-800 mb-1">{{ $fuel->pumps->count() }}</h4>

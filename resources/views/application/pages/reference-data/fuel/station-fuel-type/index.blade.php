@@ -10,7 +10,7 @@
 
             {{-- Filter Section --}}
             <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
-                <div class="card-header bg-light-primary">
+                <div class="card-header bg-light-danger">
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
@@ -74,7 +74,7 @@
 
             <!-- Fuel Station Fuel Types Table -->
             <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                     <h3 class="card-title fw-bold fs-3 mb-1">Fuel Station Fuel Type Assignments</h3>
                     <a href="{{ route('fuel-station-fuel-type.create') }}" class="btn btn-sm btn-primary">
                         <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Assign Fuel Types
@@ -146,7 +146,7 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="symbol symbol-35px symbol-circle me-3">
-                                                    <span class="symbol-label bg-light-primary text-primary fs-6">
+                                                    <span class="symbol-label bg-light-danger text-primary fs-6">
                                                         {{ substr($assignment->fuelType->name ?? 'FT', 0, 2) }}
                                                     </span>
                                                 </div>

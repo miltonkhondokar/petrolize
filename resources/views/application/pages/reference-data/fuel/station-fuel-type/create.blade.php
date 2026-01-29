@@ -50,7 +50,7 @@
                     @endif
 
                     <div class="card card-flush shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                             <h3 class="card-title">
                                 <i class="ki-duotone ki-link fs-2 text-primary me-2">
                                     <i class="path1"></i><i class="path2"></i>

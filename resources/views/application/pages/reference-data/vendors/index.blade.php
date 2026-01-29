@@ -10,7 +10,7 @@
 
             {{-- Filter Section --}}
             <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
-                <div class="card-header bg-light-primary">
+                <div class="card-header bg-light-danger">
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
@@ -21,11 +21,11 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('vendors.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="text" name="name" class="form-control form-control-solid"
                                     placeholder="Vendor Name" value="{{ $filters['name'] ?? '' }}">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="text" name="email" class="form-control form-control-solid"
                                     placeholder="Email" value="{{ $filters['email'] ?? '' }}">
                             </div>
@@ -46,11 +46,12 @@
                                     </option>
                                 </select>
                             </div>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
-                                <a href="{{ route('vendors.index') }}" class="btn btn-warning ms-2">
+                                <a href="{{ route('vendors.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
@@ -61,7 +62,7 @@
 
             <!-- Vendors Table -->
             <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                     <h3 class="card-title fw-bold fs-3 mb-1">Vendors List</h3>
                     <a href="{{ route('vendors.create') }}" class="btn btn-sm btn-primary">
                         <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Vendor
@@ -173,7 +174,7 @@
                                             <span class="text-muted">{{ Str::limit($vendor->address, 30) ?? '-' }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge badge-light-info">{{ $vendor->fuelStocks()->count() }}</span>
+                                            <span class="badge badge-light-info">{{ $vendor->purchases_count }}</span>
                                         </td>
                                         <td>
                                             <span class="badge badge-light-{{ $vendor->is_active ? 'success' : 'danger' }}">

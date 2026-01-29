@@ -1,15 +1,75 @@
 @extends('application.layouts.app')
 
-{{-- @section('page-title')
+@section('page-title')
     @include('application.partials.page-title', ['breadcrumb' => $breadcrumb])
-@endsection --}}
+@endsection
 
 
 @section('content')
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
+
+
+            {{-- Filter Section --}}
+            <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
+                <div class="card-header bg-light-danger">
+                    <div class="card-title">
+                        <h3 class="card-label">
+                            <i class="fas fa-filter"></i> Filter
+                            <small>filter users</small>
+                        </h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ route('user-role.index') }}">
+                        @php
+                            $filters = request()->only(['name', 'email', 'role']);
+                        @endphp
+                        <div class="row g-3 align-items-end">
+
+                            {{-- Name --}}
+                            <div class="col-md-2">
+                                <input type="text" name="name" class="form-control form-control-solid"
+                                    placeholder="Name" value="{{ $filters['name'] ?? '' }}">
+                            </div>
+
+                            {{-- Email --}}
+                            <div class="col-md-2">
+                                <input type="email" name="email" class="form-control form-control-solid"
+                                    placeholder="Email" value="{{ $filters['email'] ?? '' }}">
+                            </div>
+
+                            {{-- Role --}}
+                            <div class="col-md-2">
+                                <select name="role" class="form-select form-select-solid">
+                                    <option value="">All Roles</option>
+                                    @foreach (\Spatie\Permission\Models\Role::pluck('name') as $role)
+                                        <option value="{{ $role }}"
+                                            {{ isset($filters['role']) && $filters['role'] == $role ? 'selected' : '' }}>
+                                            {{ $role }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Buttons --}}
+                            <div class="col-md-2">
+                                <button class="btn btn-info w-100">
+                                    <i class="ki-duotone ki-filter fs-3 me-2"></i> Filter
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ route('user-role.index') }}" class="btn btn-warning w-100">
+                                    <i class="ki-duotone ki-reload fs-3 me-2"></i> Reset
+                                </a>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
             <div class="card card-flush mt-6">
-                <div class="card-header">
+                <div class="card-header bg-light-danger">
                     <div class="card-title">
                         <h2>All Users</h2>
                     </div>

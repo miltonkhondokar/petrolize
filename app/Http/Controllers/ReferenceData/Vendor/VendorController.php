@@ -23,6 +23,7 @@ class VendorController extends Controller
             ->when($filters['email'] ?? null, fn($q, $v) => $q->where('email', 'like', "%{$v}%"))
             ->when($filters['phone'] ?? null, fn($q, $v) => $q->where('phone', 'like', "%{$v}%"))
             ->when(isset($filters['is_active']) && $filters['is_active'] !== '', fn($q) => $q->where('is_active', $filters['is_active']))
+            ->withCount('purchases')
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -120,7 +121,13 @@ class VendorController extends Controller
 
     public function show($uuid)
     {
-        $vendor = Vendor::where('uuid', $uuid)->firstOrFail();
+        $vendor = Vendor::where('uuid', $uuid)
+            ->with([
+                'purchases.items',          // purchase lines
+                'purchases.paymentAllocations'
+            ])
+            ->withCount('purchases')
+            ->firstOrFail();
 
         $breadcrumb = [
             "page_header" => "Vendor Details",
@@ -135,8 +142,11 @@ class VendorController extends Controller
             "third_item_icon" => "fa-eye",
         ];
 
-        return view('application.pages.reference-data.vendors.show', compact('vendor', 'breadcrumb'));
+        return view('application.pages.reference-data.vendors.show',
+            compact('vendor', 'breadcrumb')
+        );
     }
+
 
     public function edit($uuid)
     {
@@ -211,7 +221,7 @@ class VendorController extends Controller
     public function destroy(Vendor $vendor)
     {
         try {
-            if ($vendor->pumpFuelStocks()->exists()) {
+            if ($vendor->purchases()->exists()) {
                 Alert::error('Error', 'Vendor is in use and cannot be deleted.');
                 return back();
             }
@@ -241,6 +251,7 @@ class VendorController extends Controller
             return back();
         }
     }
+
 
     public function vendorStatusUpdate(Request $request, $uuid)
     {

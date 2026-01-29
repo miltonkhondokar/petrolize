@@ -52,7 +52,7 @@
                     @endif
 
                     <div class="card card-flush shadow-sm">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                             <h3 class="card-title">
                                 <i class="ki-duotone ki-eye fs-2 text-primary me-2">
                                     <i class="path1"></i><i class="path2"></i>
@@ -191,7 +191,7 @@
                                         
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <div class="bg-light-primary rounded p-6">
+                                                <div class="bg-light-danger rounded p-6">
                                                     <div class="d-flex align-items-center justify-content-between mb-3">
                                                         <span class="text-muted">Capacity (Liters)</span>
                                                         <i class="ki-duotone ki-water fs-2x text-primary">

@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('complaints.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="fuel_station_uuid" class="form-select form-select-solid">
                                     <option value="">Select Fuel Station</option>
                                     @foreach ($fuelStations as $fuelStation)
@@ -73,11 +73,12 @@
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-info">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
-                                <a href="{{ route('complaints.index') }}" class="btn btn-warning ms-2">
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ route('complaints.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>

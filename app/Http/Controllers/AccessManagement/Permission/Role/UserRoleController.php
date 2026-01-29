@@ -17,7 +17,19 @@ class UserRoleController extends Controller
 
         try {
             $users = User::paginate(10);
-            return view('access-management.permission.user-permission.index', ['users' => $users]);
+            $breadcrumb = [
+                "page_header" => "User Roles",
+                "first_item_name" => "Dashboard",
+                "first_item_link" => route('/'),
+                "first_item_icon" => "fa-home",
+                "second_item_name" => "Access Management",
+                "second_item_link" => "#",
+                "second_item_icon" => "fa-lock",
+                "third_item_name" => "User Roles",
+                "third_item_link" => "#",
+                "third_item_icon" => "fa-users",
+            ];
+            return view('access-management.permission.user-permission.index', ['users' => $users, 'breadcrumb' => $breadcrumb]);
         } catch (\Exception $e) {
             Log::error('Failed to load user list: ' . $e->getMessage());
             Alert::error('Error', 'Failed to load user list. Please try again.')->persistent('OK');

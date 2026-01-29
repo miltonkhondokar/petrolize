@@ -10,7 +10,7 @@
 
             {{-- Filter Section --}}
             <div class="card card-custom gutter-b mb-5 mb-xl-8 shadow-sm">
-                <div class="card-header bg-light-primary">
+                <div class="card-header bg-light-danger">
                     <div class="card-title">
                         <h3 class="card-label">
                             <i class="fas fa-filter"></i> Filter
@@ -29,13 +29,13 @@
                                     placeholder="e.g. CAT-001" value="{{ request('code') }}">
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold">Name</label>
                                 <input type="text" name="name" class="form-control form-control-solid"
                                     placeholder="Category name" value="{{ request('name') }}">
                             </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="form-label fw-semibold">Status</label>
                                 <select name="is_active" class="form-select form-select-solid">
                                     <option value="">All</option>
@@ -45,16 +45,15 @@
                                     </option>
                                 </select>
                             </div>
-
-                            <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-info w-100">
-                                    <i class="ki-duotone ki-filter fs-3 me-2"></i>Filter
-                                </button>
+                            <div class="col-md-2 text-end">
+                                <button class="btn btn-info w-100"><i
+                                        class="ki-duotone ki-filter fs-3 me-2"></i>Filter</button>
+                            </div>
+                            <div class="col-md-2">
                                 <a href="{{ route('complaint-category.index') }}" class="btn btn-warning w-100">
                                     <i class="ki-duotone ki-reload fs-3 me-2"></i>Reset
                                 </a>
                             </div>
-
                         </div>
                     </form>
                 </div>
@@ -64,7 +63,7 @@
 
             <!-- Complaint Categories Table -->
             <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center bg-light-primary">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light-danger">
                     <h3 class="card-title fw-bold fs-3 mb-1">Complaint Categories</h3>
                     <a href="{{ route('complaint-category.create') }}" class="btn btn-sm btn-primary">
                         <i class="ki-outline ki-plus-circle fs-3 me-1"></i> Add New Category
